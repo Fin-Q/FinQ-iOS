@@ -14,6 +14,8 @@
 		444822B3303B17E100ABA8A4 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B2303B17E100ABA8A4 /* FirebaseCore */; };
 		444822B5303B17E100ABA8A4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B4303B17E100ABA8A4 /* FirebaseCrashlytics */; };
 		444822B7303B17E100ABA8A4 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B6303B17E100ABA8A4 /* FirebaseMessaging */; };
+		4450A8D23040607E000808D2 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4450A8D13040607E000808D2 /* ComposableArchitecture */; };
+		4450A8D530406098000808D2 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4450A8D430406098000808D2 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +66,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				444822B7303B17E100ABA8A4 /* FirebaseMessaging in Frameworks */,
+				4450A8D530406098000808D2 /* Alamofire in Frameworks */,
 				444822AD303B17E100ABA8A4 /* FirebaseAnalytics in Frameworks */,
+				4450A8D23040607E000808D2 /* ComposableArchitecture in Frameworks */,
 				444822AF303B17E100ABA8A4 /* FirebaseAnalyticsCore in Frameworks */,
 				444822B5303B17E100ABA8A4 /* FirebaseCrashlytics in Frameworks */,
 				444822B3303B17E100ABA8A4 /* FirebaseCore in Frameworks */,
@@ -136,6 +140,8 @@
 				444822B2303B17E100ABA8A4 /* FirebaseCore */,
 				444822B4303B17E100ABA8A4 /* FirebaseCrashlytics */,
 				444822B6303B17E100ABA8A4 /* FirebaseMessaging */,
+				4450A8D13040607E000808D2 /* ComposableArchitecture */,
+				4450A8D430406098000808D2 /* Alamofire */,
 			);
 			productName = FinQ;
 			productReference = 444821CC303B038500ABA8A4 /* FinQ.app */;
@@ -221,6 +227,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				444822AB303B17E100ABA8A4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 444821CD303B038500ABA8A4 /* Products */;
@@ -622,6 +630,24 @@
 				minimumVersion = 12.18.0;
 			};
 		};
+		4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.26.1;
+			};
+			traits = (
+			);
+		};
+		4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.12.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -654,6 +680,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 444822AB303B17E100ABA8A4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		4450A8D13040607E000808D2 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		4450A8D430406098000808D2 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
