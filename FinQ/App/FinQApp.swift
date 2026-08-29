@@ -6,14 +6,19 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 @main
 struct FinQApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
+    static let store = Store(initialState: TabBarFeature.State()) {
+        TabBarFeature()
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TabBarView(store: Self.store)
         }
     }
 }

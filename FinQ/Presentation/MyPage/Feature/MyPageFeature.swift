@@ -1,5 +1,5 @@
 //
-//  HomeFeature.swift
+//  MyPageFeature.swift
 //  FinQ
 //
 //  Created by 권대윤 on 8/29/26.
@@ -9,7 +9,7 @@ import Foundation
 import ComposableArchitecture
 
 @Reducer
-struct HomeFeature {
+struct MyPageFeature {
     @ObservableState
     struct State: Equatable {
         
