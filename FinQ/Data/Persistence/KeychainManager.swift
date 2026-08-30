@@ -8,20 +8,20 @@
 import Foundation
 import Security
 
-protocol KeychainManagerProtocol {
+protocol KeychainManagerProtocol: Sendable {
     func saveItem(item: String, forKey key: KeyType) -> Bool
     func getItem(forKey key: KeyType) -> String?
     func deleteItem(forKey key: KeyType) -> Bool
 }
 
-enum KeyType: String {
+enum KeyType: String, Sendable {
     case accessToken
     case refreshToken
     case userFullName
     case userEmail
 }
 
-final class KeychainManager: KeychainManagerProtocol {
+final class KeychainManager: KeychainManagerProtocol, Sendable {
     
     static let shared = KeychainManager()
     private init() {}
