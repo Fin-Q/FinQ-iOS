@@ -12,13 +12,13 @@ import ComposableArchitecture
 struct FinQApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    static let store = Store(initialState: TabBarFeature.State()) {
-        TabBarFeature()
+    private static let store = Store(initialState: AppFeature.State()) {
+        AppFeature()
     }
     
     var body: some Scene {
         WindowGroup {
-            TabBarView(store: Self.store)
+            AppView(store: Self.store)
         }
     }
 }

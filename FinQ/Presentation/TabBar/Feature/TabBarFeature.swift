@@ -30,6 +30,11 @@ struct TabBarFeature {
         case study(StudyFeature.Action)
         case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
+        
+        case delegate(Delegate)
+        enum Delegate {
+            case logout
+        }
     }
 
     var body: some ReducerOf<Self> {
@@ -49,12 +54,14 @@ struct TabBarFeature {
             switch action {
             case let .selectedTabChanged(tab):
                 state.selectedTab = tab
+                return .none
+                
+            case .myPage(.delegate(.logoutSucceeded)):
+                return .send(.delegate(.logout))
 
-            case .study, .home, .myPage:
-                break
+            case .study, .home, .myPage, .delegate:
+                return .none
             }
-
-            return .none
         }
     }
 }

@@ -18,7 +18,7 @@ final class AppLogger: @unchecked Sendable {
     private let maxFileSize: UInt64 = 512 // KB
     private let maxFileCount = 10 // 512KB × 10 = 5MB (로그 파일에 5MB 사용 목적)
     private let name = "logfile"
-    let directoryName = "Logs"
+    private let directoryName = "Logs"
 
     private let fileManager = FileManager.default
     private let logQueue = DispatchQueue(label: "com.daeyunkwon.FinQ.AppLogger", qos: .utility)
