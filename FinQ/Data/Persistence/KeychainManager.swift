@@ -17,6 +17,7 @@ protocol KeychainManagerProtocol: Sendable {
 enum KeyType: String, Sendable {
     case accessToken
     case refreshToken
+    case fcmToken
     case userFullName
     case userEmail
 }
