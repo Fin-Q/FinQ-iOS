@@ -12,7 +12,7 @@ import ComposableArchitecture
 struct AuthMainFeature {
     @ObservableState
     struct State: Equatable {
-        
+         
     }
     
     enum Action {
