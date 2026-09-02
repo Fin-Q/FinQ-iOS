@@ -12,8 +12,8 @@ struct AppleOAuthResult: Sendable {
     let userIdentifier: String
     let identityToken: String
     let authorizationCode: String
-    let fullName: String?
-    let email: String?
+    let fullName: String
+    let email: String
 }
 
 enum AppleOAuthError: Error, Sendable {
@@ -95,17 +95,14 @@ extension AppleOAuthManager: ASAuthorizationControllerDelegate {
             return
         }
         
-        let combinedName = [credential.fullName?.familyName, credential.fullName?.givenName].compactMap { $0 }.joined().filter { !$0.isWhitespace }
-
-        let fullName = combinedName.isEmpty ? nil : combinedName
-        let email = credential.email
+        let combinedFullName = [credential.fullName?.familyName, credential.fullName?.givenName].compactMap { $0 }.joined().filter { !$0.isWhitespace }
 
         let result = AppleOAuthResult(
             userIdentifier: credential.user,
             identityToken: identityToken,
             authorizationCode: authorizationCode,
-            fullName: fullName,
-            email: email
+            fullName: combinedFullName,
+            email: credential.email ?? ""
         )
         finish(with: .success(result))
     }
