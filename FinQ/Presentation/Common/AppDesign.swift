@@ -11,18 +11,19 @@ enum AppDesign {
     
     //MARK: - Color
     
-    static let largeTitle = Color.brandBlack
-    
-    static let caption = Color.brandGray
-    static let captionInvalid = Color.brandRed
-    
-    static let placeholder = Color.brandGray
-    
-    static let buttonTitle = Color.brandWhite
-    static let buttonTitleDisabled = Color.brandGray
-    static let buttonBG = Color.brandBlue
-    static let buttonBGDisabled = Color.brandLightGray
-    
+    enum Colors {
+        static let largeTitle = Color.brandBlack
+        
+        static let caption = Color.brandGray
+        static let captionInvalid = Color.brandRed
+        
+        static let placeholder = Color.brandGray
+        
+        static let buttonTitle = Color.brandWhite
+        static let buttonTitleDisabled = Color.brandGray
+        static let buttonBG = Color.brandBlue
+        static let buttonBGDisabled = Color.brandLightGray
+    }
     
     //MARK: - Font
     
