@@ -9,28 +9,40 @@ import SwiftUI
 
 struct CustomDefaultButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    
+    let activeBackgroundColor: Color
+    let activeForegroundColor: Color
+    
+    init(
+        activeBackgroundColor: Color = AppDesign.Colors.buttonBG,
+        activeForegroundColor: Color = AppDesign.Colors.buttonTitle
+    ) {
+        self.activeBackgroundColor = activeBackgroundColor
+        self.activeForegroundColor = activeForegroundColor
+    }
+
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(AppDesign.Fonts.buttonTitle)
             .foregroundStyle(
-                isEnabled ? .brandWhite : .brandGray
+                isEnabled ? activeForegroundColor : AppDesign.Colors.buttonTitleDisabled
             )
             .padding(.horizontal, 20)
             .frame(maxWidth: .infinity)
             .frame(height: 60)
             .background(
-                isEnabled ? .brandBlue : .brandLightGray
+                isEnabled ? activeBackgroundColor : AppDesign.Colors.buttonBGDisabled
             )
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: 12,
+                    cornerRadius: 16,
                     style: .continuous
                 )
             )
             .contentShape(
                 RoundedRectangle(
-                    cornerRadius: 12,
+                    cornerRadius: 16,
                     style: .continuous
                 )
             )
@@ -46,5 +58,12 @@ struct CustomDefaultButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == CustomDefaultButtonStyle {
     static var customDefault: CustomDefaultButtonStyle {
         CustomDefaultButtonStyle()
+    }
+    
+    static func customDefault(activeBackgroundColor: Color, activeForegroundColor: Color) -> CustomDefaultButtonStyle {
+        CustomDefaultButtonStyle(
+            activeBackgroundColor: activeBackgroundColor,
+            activeForegroundColor: activeForegroundColor
+        )
     }
 }

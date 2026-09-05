@@ -20,6 +20,8 @@ enum AppDesign {
         static let placeholder = Color.brandGray
         
         static let buttonTitle = Color.brandWhite
+        static let buttonTitleBlack = Color.brandBlack
+        static let buttonTitleDarkGray = Color.brandDarkGray
         static let buttonTitleDisabled = Color.brandGray
         static let buttonBG = Color.brandBlue
         static let buttonBGDisabled = Color.brandLightGray
