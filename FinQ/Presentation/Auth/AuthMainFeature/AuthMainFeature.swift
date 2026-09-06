@@ -13,6 +13,8 @@ struct AuthMainFeature {
     @Reducer
     enum Path {
         case signUpTerms(SignUpTermsFeature)
+        case termsDetail(TermsDetailFeature)
+        case signUp(SignUpFeature)
     }
     
     @ObservableState
@@ -39,6 +41,23 @@ struct AuthMainFeature {
                 
             case .signUpButtonTapped:
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
+                return .none
+                
+            case let .path(.element(id: _, action: .signUpTerms(.termRowTapped(term)))):
+                state.path.append(.termsDetail(TermsDetailFeature.State(term: term)))
+                return .none
+                
+            case let .path(.element(id: _, action: .termsDetail(.delegate(.agreed(term))))):
+                guard let signUpTermsID = state.path.ids.dropLast().last else {
+                    return .none
+                }
+                
+                state.path.removeLast()
+
+                return .send(.path(.element(id: signUpTermsID, action: .signUpTerms(.termAgreementChanged(term: term)))))
+                
+            case .path(.element(id: _, action: .signUpTerms(.delegate(.pushToSignUpView)))):
+                state.path.append(.signUp(SignUpFeature.State()))
                 return .none
                 
             case .path:

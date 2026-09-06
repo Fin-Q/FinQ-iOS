@@ -23,19 +23,22 @@ struct SignUpTermsView: View {
                     .frame(height: 40)
                 
                 Button {
-
-                    } label: {
-                        HStack {
-                            Image(.checkCircleDisabled)
-
-                            Text("모두 동의합니다")
-                                .font(AppDesign.Fonts.buttonTitle16SemiBold)
-                                .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
-                        }
+                    HapticManager.selection()
+                    store.send(.allAgreeButtonTapped)
+                } label: {
+                    HStack {
+                        Image(
+                            store.isAllAgreed ? .checkCircle : .checkCircleDisabled
+                        )
+                        
+                        Text("모두 동의합니다")
+                            .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                            .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                     }
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 8)
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
                 
                 Rectangle()
                     .fill(AppDesign.Colors.divider)
@@ -43,21 +46,20 @@ struct SignUpTermsView: View {
                     .padding(.vertical, 8)
                 
                 Button {
-                    
+                    HapticManager.selection()
+                    store.send(.ageAgreeButtonTapped)
                 } label: {
                     HStack(spacing: 8) {
-                        Image(.check)
-
+                        Image(
+                            store.isAgeAgreed ? .checkBlue : .check
+                        )
+                        
                         Text("만 14세 이상입니다 (필수)")
                             .font(AppDesign.Fonts.buttonTitle16)
                             .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                             .padding(.leading, 5)
-
+                        
                         Spacer()
-
-                        Image(.chevronRight)
-                            .renderingMode(.template)
-                            .foregroundStyle(AppDesign.Colors.chevron)
                     }
                     .padding(.horizontal, 14)
                     .frame(maxWidth: .infinity)
@@ -67,18 +69,20 @@ struct SignUpTermsView: View {
                 .buttonStyle(.plain)
                 
                 Button {
-                    
+                    store.send(.termRowTapped(.serviceTerms))
                 } label: {
                     HStack(spacing: 8) {
-                        Image(.check)
-
+                        Image(
+                            store.isServiceAgreed ? .checkBlue : .check
+                        )
+                        
                         Text("서비스 이용 약관에 동의 (필수)")
                             .font(AppDesign.Fonts.buttonTitle16)
                             .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                             .padding(.leading, 5)
-
+                        
                         Spacer()
-
+                        
                         Image(.chevronRight)
                             .renderingMode(.template)
                             .foregroundStyle(AppDesign.Colors.chevron)
@@ -91,18 +95,20 @@ struct SignUpTermsView: View {
                 .buttonStyle(.plain)
                 
                 Button {
-                    
+                    store.send(.termRowTapped(.privacyPolicy))
                 } label: {
                     HStack(spacing: 8) {
-                        Image(.check)
-
+                        Image(
+                            store.isPrivacyAgreed ? .checkBlue : .check
+                        )
+                        
                         Text("개인정보 수집 및 이용에 동의 (필수)")
                             .font(AppDesign.Fonts.buttonTitle16)
                             .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                             .padding(.leading, 5)
-
+                        
                         Spacer()
-
+                        
                         Image(.chevronRight)
                             .renderingMode(.template)
                             .foregroundStyle(AppDesign.Colors.chevron)
@@ -118,13 +124,14 @@ struct SignUpTermsView: View {
             Spacer()
             
             Button {
-                
+                HapticManager.selection()
+                store.send(.nextButtonTapped)
             } label: {
                 Text("다음")
-                    
             }
             .buttonStyle(.customDefault)
-            .padding(.bottom, 64)
+            .disabled(!store.state.isAllAgreed)
+            .padding(.bottom, 16)
         }
         .padding(.top, 24)
         .padding(.horizontal, 16)

@@ -36,6 +36,12 @@ struct AuthMainView: View {
             switch store.case {
             case let .signUpTerms(store):
                 SignUpTermsView(store: store)
+                
+            case let .termsDetail(store):
+                TermsDetailView(store: store)
+                
+            case let .signUp(store):
+                SignUpView(store: store)
             }
         }
     }
@@ -45,6 +51,7 @@ struct AuthMainView: View {
             Text("FINQ")
                 .font(AppDesign.Fonts.largeTitleBold)
                 .foregroundStyle(AppDesign.Colors.largeTitle)
+                .padding(.bottom, 16)
             
             
             Text("로그인 후 이용해 주세요")
