@@ -13,6 +13,7 @@ enum AppDesign {
     
     enum Colors {
         static let largeTitle = Color.brandBlack
+        static let title = Color.brandBlack
         
         static let caption = Color.brandGray
         static let captionInvalid = Color.brandRed
@@ -44,5 +45,7 @@ enum AppDesign {
         static let buttonTitle18 = Font.system(size: 18, weight: .semibold)
         static let buttonTitle16SemiBold = Font.system(size: 16, weight: .semibold)
         static let buttonTitle16 = Font.system(size: 16, weight: .medium)
+        
+        static let textField = Font.system(size: 18, weight: .semibold)
     }
 }
