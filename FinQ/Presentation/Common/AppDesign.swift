@@ -25,6 +25,9 @@ enum AppDesign {
         static let buttonTitleDisabled = Color.brandGray
         static let buttonBG = Color.brandBlue
         static let buttonBGDisabled = Color.brandLightGray
+        
+        static let divider = Color.brandLightGray
+        static let chevron = Color.brandGray300
     }
     
     //MARK: - Font
@@ -38,6 +41,8 @@ enum AppDesign {
         
         static let caption = Font.system(size: 14, weight: .medium)
         
-        static let buttonTitle = Font.system(size: 18, weight: .semibold)
+        static let buttonTitle18 = Font.system(size: 18, weight: .semibold)
+        static let buttonTitle16SemiBold = Font.system(size: 16, weight: .semibold)
+        static let buttonTitle16 = Font.system(size: 16, weight: .medium)
     }
 }

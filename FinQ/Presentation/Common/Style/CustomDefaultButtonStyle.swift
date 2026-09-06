@@ -24,7 +24,7 @@ struct CustomDefaultButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(AppDesign.Fonts.buttonTitle)
+            .font(AppDesign.Fonts.buttonTitle18)
             .foregroundStyle(
                 isEnabled ? activeForegroundColor : AppDesign.Colors.buttonTitleDisabled
             )

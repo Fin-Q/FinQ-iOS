@@ -10,13 +10,20 @@ import ComposableArchitecture
 
 @Reducer
 struct AuthMainFeature {
+    @Reducer
+    enum Path {
+        case signUpTerms(SignUpTermsFeature)
+    }
+    
     @ObservableState
     struct State: Equatable {
-        
+        var path = StackState<Path.State>()
     }
     
     enum Action {
+        case path(StackActionOf<Path>)
         case loginButtonTapped
+        case signUpButtonTapped
         case delegate(Delegate)
         
         enum Delegate: Equatable {
@@ -30,9 +37,19 @@ struct AuthMainFeature {
             case .loginButtonTapped:
                 return .send(.delegate(.loginSucceeded))
                 
+            case .signUpButtonTapped:
+                state.path.append(.signUpTerms(SignUpTermsFeature.State()))
+                return .none
+                
+            case .path:
+                return .none
+                
             case .delegate:
                  return .none
             }
         }
+        .forEach(\.path, action: \.path)
     }
 }
+
+extension AuthMainFeature.Path.State: Equatable {}

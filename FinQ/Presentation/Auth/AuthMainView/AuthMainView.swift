@@ -9,7 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 
 struct AuthMainView: View {
-    let store: StoreOf<AuthMainFeature>
+    @Bindable var store: StoreOf<AuthMainFeature>
     
     private enum SocialLoginProvider {
         case kakao
@@ -28,12 +28,28 @@ struct AuthMainView: View {
     @GestureState private var pressedProvider: SocialLoginProvider?
     
     var body: some View {
+        NavigationStack(
+            path: $store.scope(\.path, action: \.path)
+        ) {
+            authMainContent
+        } destination: { store in
+            switch store.case {
+            case let .signUpTerms(store):
+                SignUpTermsView(store: store)
+            }
+        }
+    }
+    
+    private var authMainContent: some View {
         VStack(alignment: .leading) {
             Text("FINQ")
                 .font(AppDesign.Fonts.largeTitleBold)
+                .foregroundStyle(AppDesign.Colors.largeTitle)
+            
             
             Text("로그인 후 이용해 주세요")
                 .font(AppDesign.Fonts.largeTitleBold)
+                .foregroundStyle(AppDesign.Colors.largeTitle)
             
             Rectangle()
                 .fill(Color.gray.opacity(0.15))
@@ -77,7 +93,7 @@ struct AuthMainView: View {
                 }
 
                 Button {
-                    
+                    store.send(.signUpButtonTapped)
                 } label: {
                     Text("회원가입")
                         .font(AppDesign.Fonts.body)
