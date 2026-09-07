@@ -121,6 +121,9 @@ struct AuthMainView: View {
         
         return Button(action: action) {
             provider.image
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
         .scaleEffect(isPressed ? 0.98 : 1)
