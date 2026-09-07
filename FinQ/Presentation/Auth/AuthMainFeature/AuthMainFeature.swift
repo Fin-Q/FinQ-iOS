@@ -16,6 +16,7 @@ struct AuthMainFeature {
         case termsDetail(TermsDetailFeature)
         case signUp(SignUpFeature)
         case login(LoginFeature)
+        case findPassword(FindPasswordFeature)
     }
     
     @ObservableState
@@ -27,6 +28,7 @@ struct AuthMainFeature {
         case path(StackActionOf<Path>)
         case loginButtonTapped
         case signUpButtonTapped
+        case findPasswordButtonTapped
         case delegate(Delegate)
         
         enum Delegate: Equatable {
@@ -43,6 +45,10 @@ struct AuthMainFeature {
                 
             case .signUpButtonTapped:
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
+                return .none
+                
+            case .findPasswordButtonTapped:
+                state.path.append(.findPassword(FindPasswordFeature.State()))
                 return .none
                 
             case let .path(.element(id: _, action: .signUpTerms(.termRowTapped(term)))):

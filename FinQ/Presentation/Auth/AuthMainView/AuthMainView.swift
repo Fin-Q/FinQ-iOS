@@ -45,6 +45,9 @@ struct AuthMainView: View {
                 
             case let .login(store):
                 LoginView(store: store)
+                
+            case let .findPassword(store):
+                FindPasswordView(store: store)
             }
         }
     }
@@ -94,7 +97,7 @@ struct AuthMainView: View {
             HStack(spacing: 40) {
                 
                 Button {
-                    
+                    store.send(.findPasswordButtonTapped)
                 } label: {
                     Text("비밀번호 찾기")
                         .font(AppDesign.Fonts.body)
