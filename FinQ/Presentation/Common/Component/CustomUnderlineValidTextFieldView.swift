@@ -74,3 +74,16 @@ struct CustomUnderlineValidTextFieldView: View {
         }
     }
 }
+
+#Preview("Invalid") {
+    @Previewable @State var text = "invalid-email"
+
+    CustomUnderlineValidTextFieldView(
+        title: "이메일 주소",
+        text: $text,
+        validationState: .invalid(
+            message: "올바른 이메일 형식으로 입력해 주세요."
+        )
+    )
+    .padding()
+}

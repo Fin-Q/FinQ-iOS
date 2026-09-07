@@ -42,6 +42,9 @@ struct AuthMainView: View {
                 
             case let .signUp(store):
                 SignUpView(store: store)
+                
+            case let .login(store):
+                LoginView(store: store)
             }
         }
     }
@@ -69,7 +72,7 @@ struct AuthMainView: View {
                 .padding(.vertical, 40)
             
             Button {
-                
+                store.send(.loginButtonTapped)
             } label: {
                 Text("회원 로그인")
             }

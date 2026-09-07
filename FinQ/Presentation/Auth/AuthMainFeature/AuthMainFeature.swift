@@ -15,6 +15,7 @@ struct AuthMainFeature {
         case signUpTerms(SignUpTermsFeature)
         case termsDetail(TermsDetailFeature)
         case signUp(SignUpFeature)
+        case login(LoginFeature)
     }
     
     @ObservableState
@@ -37,7 +38,8 @@ struct AuthMainFeature {
         Reduce { state, action in
             switch action {
             case .loginButtonTapped:
-                return .send(.delegate(.loginSucceeded))
+                state.path.append(.login(LoginFeature.State()))
+                return .none
                 
             case .signUpButtonTapped:
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
