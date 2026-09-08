@@ -31,11 +31,14 @@ struct FindPasswordView: View {
                     store.send(.emailChanged(""))
                 }
             )
+            .keyboardType(.emailAddress)
+            .textContentType(.emailAddress)
             
             Spacer()
             
             Button {
                 HapticManager.selection()
+                store.send(.sendButtonTapped)
             } label: {
                 Text("인증번호 보내기")
             }

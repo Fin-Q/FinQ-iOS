@@ -11,6 +11,7 @@ struct CustomUnderlineTextFieldView: View {
     let title: String
     @Binding var text: String
     
+    var showsClearButton: Bool = true
     var onClearTapped: () -> Void = { }
     
     var body: some View {
@@ -27,7 +28,7 @@ struct CustomUnderlineTextFieldView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 
-                if !text.isEmpty {
+                if showsClearButton && !text.isEmpty {
                     Button {
                         onClearTapped()
                     } label: {

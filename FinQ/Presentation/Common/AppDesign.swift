@@ -29,6 +29,7 @@ enum AppDesign {
         
         static let divider = Color.brandLightGray
         static let chevron = Color.brandGray300
+        static let xmarkGray = Color.brandGray
     }
     
     //MARK: - Font

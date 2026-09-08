@@ -48,6 +48,9 @@ struct AuthMainView: View {
                 
             case let .findPassword(store):
                 FindPasswordView(store: store)
+                
+            case let .emailVerification(store):
+                EmailVerificationView(store: store)
             }
         }
     }
