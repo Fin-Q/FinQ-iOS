@@ -19,11 +19,13 @@ struct AuthMainFeature {
         case findPassword(FindPasswordFeature)
         case emailVerification(EmailVerificationFeature)
         case newPassword(NewPasswordFeature)
+        case passwordResetDone(PasswordResetDoneFeature)
     }
     
     @ObservableState
     struct State: Equatable {
         var path = StackState<Path.State>()
+        var loginIDPendingCleanup: StackElementID?
     }
     
     enum Action {
@@ -76,6 +78,40 @@ struct AuthMainFeature {
                 
             case .path(.element(id: _, action: .emailVerification(.delegate(.pushToNewPasswordView)))):
                 state.path.append(.newPassword(NewPasswordFeature.State()))
+                return .none
+
+            case .path(.element(id: _, action: .newPassword(.delegate(.pushToPasswordResetDoneView)))):
+                state.path.append(.passwordResetDone(PasswordResetDoneFeature.State()))
+                return .none
+                
+            case let .path(.element(id: id, action: .passwordResetDone(.navigateLoginButtonTapped))):
+                // 현재 최상위 화면에서 누른 버튼만 처리
+                guard state.path.ids.last == id else { return .none }
+                
+                // 먼저 로그인 화면으로 push
+                state.path.append(.login(LoginFeature.State()))
+                
+                // 이 로그인 화면이 표시 완료되면 이전 화면들을 정리
+                state.loginIDPendingCleanup = state.path.ids.last
+                return .none
+                
+            case let .path(.element(id: id, action: .login(.didAppear))):
+                // 재설정 완료 화면에서 진입한 로그인만 처리
+                guard state.loginIDPendingCleanup == id, state.path.ids.last == id else { return .none }
+                
+                // 중복 표시 콜백이 와도 다시 정리하지 않도록 초기화
+                state.loginIDPendingCleanup = nil
+                
+                // 마지막 로그인 화면의 상태와 ID는 유지
+                if state.path.count > 1 {
+                    state.path.removeFirst(state.path.count - 1)
+                }
+                
+                return .none
+                
+            case .path(.popFrom(id: _)):
+                // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소
+                state.loginIDPendingCleanup = nil
                 return .none
                 
             case .path:

@@ -54,6 +54,9 @@ struct AuthMainView: View {
                 
             case let .newPassword(store):
                 NewPasswordView(store: store)
+
+            case let .passwordResetDone(store):
+                PasswordResetDoneView(store: store)
             }
         }
     }

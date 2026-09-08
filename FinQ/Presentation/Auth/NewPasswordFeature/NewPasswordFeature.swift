@@ -48,6 +48,11 @@ struct NewPasswordFeature {
         case passwordEditingEnded
         case passwordCheckEditingEnded
         case nextButtonTapped
+        case delegate(Delegate)
+
+        enum Delegate {
+            case pushToPasswordResetDoneView
+        }
     }
     
     var body: some ReducerOf<Self> {
@@ -75,6 +80,10 @@ struct NewPasswordFeature {
             case .nextButtonTapped:
                 state.shouldShowPasswordValidation = true
                 state.shouldShowPasswordCheckValidation = true
+                guard state.isFormValid else { return .none }
+                return .send(.delegate(.pushToPasswordResetDoneView))
+
+            case .delegate:
                 return .none
             }
         }

@@ -15,13 +15,14 @@ struct LoginFeature {
         var email: String = ""
         var password: String = ""
         var isLoginButtonEnabled: Bool {
-            return !email.replacingOccurrences(of: "", with: "").isEmpty && !password.replacingOccurrences(of: "", with: "").isEmpty
+            return !email.replacingOccurrences(of: " ", with: "").isEmpty && !password.replacingOccurrences(of: " ", with: "").isEmpty
         }
     }
     
     enum Action {
         case emailChanged(String)
         case passwordChanged(String)
+        case didAppear
     }
     
     var body: some ReducerOf<Self> {
@@ -33,6 +34,9 @@ struct LoginFeature {
                 
             case .passwordChanged(let value):
                 state.password = value
+                return .none
+                
+            case .didAppear:
                 return .none
             }
         }

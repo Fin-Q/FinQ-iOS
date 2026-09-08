@@ -58,6 +58,14 @@ struct LoginView: View {
             .padding(.bottom, 16)
         }
         .padding(.horizontal, 16)
+        .onDidAppear {
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            
+            withTransaction(transaction) {
+                _ = store.send(.didAppear)
+            }
+        }
     }
 }
 
