@@ -51,6 +51,9 @@ struct AuthMainView: View {
                 
             case let .emailVerification(store):
                 EmailVerificationView(store: store)
+                
+            case let .newPassword(store):
+                NewPasswordView(store: store)
             }
         }
     }

@@ -74,6 +74,7 @@ struct EmailVerificationView: View {
             
             Button {
                 HapticManager.selection()
+                store.send(.nextButtonTapped)
             } label: {
                 Text("다음")
             }

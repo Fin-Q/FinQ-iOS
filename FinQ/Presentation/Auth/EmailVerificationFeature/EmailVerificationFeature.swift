@@ -27,7 +27,13 @@ struct EmailVerificationFeature {
         case task
         case timerTick
         case resendButtonTapped
+        case nextButtonTapped
         case onDisappear
+        
+        case delegate(Delegate)
+        enum Delegate {
+            case pushToNewPasswordView
+        }
     }
     
     enum VerificationState {
@@ -64,8 +70,14 @@ struct EmailVerificationFeature {
                 if state.seconds == 0 { state.verificationState = .timeout }
                 return .none
                 
+            case .nextButtonTapped:
+                return .send(.delegate(.pushToNewPasswordView))
+                
             case .onDisappear:
                 return .cancel(id: CancelID.timer)
+                
+            case .delegate:
+                return .none
             }
         }
     }

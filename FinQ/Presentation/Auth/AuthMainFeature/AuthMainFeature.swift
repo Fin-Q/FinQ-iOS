@@ -18,6 +18,7 @@ struct AuthMainFeature {
         case login(LoginFeature)
         case findPassword(FindPasswordFeature)
         case emailVerification(EmailVerificationFeature)
+        case newPassword(NewPasswordFeature)
     }
     
     @ObservableState
@@ -71,6 +72,10 @@ struct AuthMainFeature {
                 
             case let .path(.element(id: _, action: .findPassword(.delegate(.pushToEmailVerificationView(email))))):
                 state.path.append(.emailVerification(EmailVerificationFeature.State(email: email)))
+                return .none
+                
+            case .path(.element(id: _, action: .emailVerification(.delegate(.pushToNewPasswordView)))):
+                state.path.append(.newPassword(NewPasswordFeature.State()))
                 return .none
                 
             case .path:
