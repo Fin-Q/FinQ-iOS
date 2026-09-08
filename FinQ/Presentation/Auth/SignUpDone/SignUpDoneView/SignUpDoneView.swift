@@ -2,7 +2,7 @@
 //  SignUpDoneView.swift
 //  FinQ
 //
-//  Created by 권대윤 on 9/7/26.
+//  Created by 권대윤 on 9/8/26.
 //
 
 import SwiftUI
@@ -12,40 +12,41 @@ struct SignUpDoneView: View {
     let store: StoreOf<SignUpDoneFeature>
     
     var body: some View {
-        VStack {
-            Spacer()
-                .frame(height: 121)
-            
+        VStack(spacing: 0) {
             Image(.checkCircle)
                 .resizable()
+                .scaledToFit()
                 .frame(width: 60, height: 60)
-                .padding(.bottom, 36)
+                .accessibilityHidden(true)
+                .padding(.top, 160)
             
-            Text("회원 가입이 완료됐어요")
+            Text("회원가입이 완료됐어요")
                 .font(AppDesign.Fonts.largeTitleSemiBold)
                 .foregroundStyle(AppDesign.Colors.largeTitle)
-                .padding(.bottom, 12)
+                .multilineTextAlignment(.center)
+                .padding(.top, 40)
             
             Text("이제 궁금했던 금융 질문부터 시작해봐요")
                 .font(AppDesign.Fonts.body)
                 .foregroundStyle(AppDesign.Colors.caption)
+                .multilineTextAlignment(.center)
+                .padding(.top, 16)
             
-            Spacer()
+            Spacer(minLength: 32)
             
-            Button {
-                
-            } label: {
+            Button {} label: {
                 Text("시작하기")
             }
             .buttonStyle(.customDefault)
             .padding(.bottom, 16)
         }
         .padding(.horizontal, 16)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
-    SignUpDoneView(store: .init(initialState: SignUpDoneFeature.State(), reducer: {
-        SignUpDoneFeature()
-    }))
+    NavigationStack {
+        SignUpDoneView(store: .init(initialState: SignUpDoneFeature.State(), reducer: { SignUpDoneFeature() }))
+    }
 }
