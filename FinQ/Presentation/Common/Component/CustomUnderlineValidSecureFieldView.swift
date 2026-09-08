@@ -34,7 +34,7 @@ struct CustomUnderlineValidSecureFieldView: View {
                 .foregroundStyle(AppDesign.Colors.title)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-                .textContentType(.none)
+                .textContentType(.oneTimeCode)
                 .focused($isFocused)
                 .onChange(of: isFocused) { oldValue, newValue in
                     guard oldValue, !newValue else {
