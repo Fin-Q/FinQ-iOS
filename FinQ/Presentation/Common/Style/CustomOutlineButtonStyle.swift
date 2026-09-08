@@ -22,19 +22,18 @@ struct CustomOutlineButtonStyle: ButtonStyle {
                 isSelected ? AppDesign.Fonts.buttonTitle16SemiBold : AppDesign.Fonts.buttonTitle16
             )
             .foregroundStyle(
-                isSelected ? selectedColor : AppDesign.Colors.buttonTitleGray400
+                isSelected ? selectedColor : AppDesign.Colors.caption
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay {
                 RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(
-                        isSelected ? selectedColor : AppDesign.Colors.buttonTitleGray400
-                        , lineWidth: 1)
+                        isSelected ? selectedColor : AppDesign.Colors.chevron, lineWidth: isSelected ? 2 : 1)
             }
             .contentShape(RoundedRectangle(cornerRadius: 16))
+//            .accessibilityAddTraits(isSelected ? .isSelected : [])
             .opacity(configuration.isPressed ? 0.7 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-//            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
             .animation(
                 .easeOut(duration: 0.12),
                 value: configuration.isPressed
