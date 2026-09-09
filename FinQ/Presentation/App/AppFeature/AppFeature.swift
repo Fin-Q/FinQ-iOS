@@ -28,7 +28,7 @@ struct AppFeature {
         case auth(AuthMainFeature.Action)
         case onboarding(OnboardingFeature.Action)
         case tabBar(TabBarFeature.Action)
-        case authViewDidDisappear
+        case routeTransitionCompleted(Route)
     }
     
     var body: some ReducerOf<Self> {
@@ -64,9 +64,10 @@ struct AppFeature {
                 return .none
 
             case .onboarding(.delegate(.completed)):
+                guard state.route == .onboarding else { return .none }
+
+                state.tabBar = TabBarFeature.State(selectedTab: .home)
                 state.route = .tabBar
-                state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
                 
             case .tabBar(.delegate(.logout)):
@@ -79,10 +80,12 @@ struct AppFeature {
             case .auth, .onboarding, .tabBar:
                 return .none
                 
-            case .authViewDidDisappear:
-                guard state.route != .auth else { return .none }
-                
-                state.auth = AuthMainFeature.State()
+            case let .routeTransitionCompleted(route):
+                guard state.route == route else { return .none }
+
+                // 페이드가 끝나기 전에는 사라지는 화면의 스택을 유지합니다.
+                if route != .auth { state.auth = AuthMainFeature.State() }
+                if route != .onboarding { state.onboarding = OnboardingFeature.State() }
                 return .none
             }
         }

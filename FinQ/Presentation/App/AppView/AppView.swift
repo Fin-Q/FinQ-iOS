@@ -10,24 +10,52 @@ import ComposableArchitecture
 
 struct AppView: View {
     let store: StoreOf<AppFeature>
+
+    @State private var displayedRoute: AppFeature.Route
+    @State private var activeTransitionID: UUID?
+
+    init(store: StoreOf<AppFeature>) {
+        self.store = store
+        _displayedRoute = State(initialValue: store.route)
+    }
     
     var body: some View {
         ZStack {
-            switch store.route {
+            switch displayedRoute {
             case .auth:
                 AuthMainView(store: store.scope(\.auth, action: \.auth))
                     .transition(.opacity)
-                    .onDidDisappear { store.send(.authViewDidDisappear) }
 
             case .onboarding:
                 OnboardingView(store: store.scope(\.onboarding, action: \.onboarding))
+                    .transition(.opacity)
                 
             case .tabBar:
                 TabBarView(store: store.scope(\.tabBar, action: \.tabBar))
+                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(store.route == .onboarding ? .easeInOut(duration: 0.35) : nil, value: store.route)
+        .background(Color.brandWhite.ignoresSafeArea())
+        .allowsHitTesting(activeTransitionID == nil)
+        .onChange(of: store.route) { oldRoute, newRoute in
+            transition(from: oldRoute, to: newRoute)
+        }
+    }
+
+    private func transition(from oldRoute: AppFeature.Route, to newRoute: AppFeature.Route) {
+        let transitionID = UUID()
+        let shouldAnimate = newRoute == .onboarding || (oldRoute == .onboarding && newRoute == .tabBar)
+        activeTransitionID = transitionID
+
+        withAnimation(shouldAnimate ? .easeInOut(duration: 0.35) : nil, completionCriteria: .removed) {
+            displayedRoute = newRoute
+        } completion: {
+            guard activeTransitionID == transitionID, store.route == newRoute else { return }
+
+            activeTransitionID = nil
+            store.send(.routeTransitionCompleted(newRoute))
+        }
     }
 }
 
