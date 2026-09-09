@@ -11,7 +11,7 @@ struct SignUpResponseData: Decodable, Sendable {
     let refreshToken: String
     let tokenType: String
     let accessTokenExpiresIn: Int
-    let onboardingStatus: SignUpOnboardingStatusResponse
+    let onboardingStatus: OnboardingStatusResponse
 
     enum CodingKeys: String, CodingKey {
         case userID = "userId"
@@ -23,7 +23,7 @@ struct SignUpResponseData: Decodable, Sendable {
     }
 }
 
-enum SignUpOnboardingStatusResponse: String, Decodable, Sendable {
+enum OnboardingStatusResponse: String, Decodable, Sendable {
     case interestSelection = "INTEREST_SELECTION"
     case characterGuide = "CHARACTER_GUIDE"
     case completed = "COMPLETED"

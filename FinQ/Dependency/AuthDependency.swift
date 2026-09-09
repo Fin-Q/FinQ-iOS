@@ -22,3 +22,19 @@ extension DependencyValues {
         set { self[SignUpUseCaseKey.self] = newValue }
     }
 }
+
+private enum LoginUseCaseKey: DependencyKey {
+    static let liveValue: any LoginUseCaseProtocol = LoginUseCase(
+        repository: LoginRepository(
+            networkManager: NetworkManager.shared,
+            keychainManager: KeychainManager.shared
+        )
+    )
+}
+
+extension DependencyValues {
+    var loginUseCase: any LoginUseCaseProtocol {
+        get { self[LoginUseCaseKey.self] }
+        set { self[LoginUseCaseKey.self] = newValue }
+    }
+}

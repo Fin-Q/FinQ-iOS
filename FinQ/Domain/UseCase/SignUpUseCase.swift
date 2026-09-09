@@ -5,6 +5,8 @@
 //  Created by 권대윤 on 9/7/26.
 //
 
+import Foundation
+
 protocol SignUpUseCaseProtocol: Sendable {
     func signUp(email: String, password: String, nickname: String) async throws -> SignUpResult
 }

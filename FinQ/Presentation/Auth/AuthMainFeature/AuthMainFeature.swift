@@ -37,7 +37,7 @@ struct AuthMainFeature {
         
         case delegate(Delegate)
         enum Delegate: Equatable {
-            case loginSucceeded
+            case loginSucceeded(isOnboardingCompleted: Bool)
             case startOnboarding
         }
     }
@@ -116,6 +116,11 @@ struct AuthMainFeature {
                 }
                 
                 return .none
+
+            case let .path(.element(id: id, action: .login(.delegate(.loginSucceeded(isOnboardingCompleted))))):
+                guard state.path.ids.last == id else { return .none }
+
+                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: isOnboardingCompleted)))
                 
             case .path(.popFrom(id: _)):
                 // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소

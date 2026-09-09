@@ -46,9 +46,16 @@ struct AppFeature {
         
         Reduce { state, action in
             switch action {
-            case .auth(.delegate(.loginSucceeded)):
-                state.route = .tabBar
-                state.tabBar = TabBarFeature.State()
+            case let .auth(.delegate(.loginSucceeded(isOnboardingCompleted))):
+                guard state.route == .auth else { return .none }
+
+                if isOnboardingCompleted {
+                    state.tabBar = TabBarFeature.State(selectedTab: .home)
+                    state.route = .tabBar
+                } else {
+                    state.onboarding = OnboardingFeature.State()
+                    state.route = .onboarding
+                }
                 return .none
                 
             case .auth(.delegate(.startOnboarding)):
@@ -73,7 +80,7 @@ struct AppFeature {
                 return .none
                 
             case .authViewDidDisappear:
-                guard state.route == .onboarding else { return .none }
+                guard state.route != .auth else { return .none }
                 
                 state.auth = AuthMainFeature.State()
                 return .none

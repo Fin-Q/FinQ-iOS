@@ -53,6 +53,11 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
                 level: .error
             )
             #endif
+
+            if let statusCode = response.response?.statusCode,
+               (500..<600).contains(statusCode) {
+                throw APIErrorResponse(message: "일시적인 오류가 발생했어요.\n잠시 후 다시 시도해 주세요.")
+            }
             
             if let statusCode = response.response?.statusCode,
                !(200..<300).contains(statusCode),
@@ -60,12 +65,6 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
                let serverError = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
                 throw serverError
             }
-            
-            if let statusCode = response.response?.statusCode,
-               (500..<600).contains(statusCode) {
-                throw APIErrorResponse(message: "일시적인 오류가 발생했어요.\n잠시 후 다시 시도해 주세요.")
-            }
-
             throw error
         }
     }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import ComposableArchitecture
 
 struct LoginView: View {
@@ -49,7 +50,9 @@ struct LoginView: View {
             Spacer()
             
             Button {
+                dismissKeyboard()
                 HapticManager.selection()
+                store.send(.loginButtonTapped)
             } label: {
                 Text("로그인")
             }
@@ -57,7 +60,31 @@ struct LoginView: View {
             .buttonStyle(.customDefault)
             .padding(.bottom, 16)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
+        .allowsHitTesting(!store.isLoading)
+        .overlay {
+            if store.isLoading {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(
+            isPresented: Binding(get: { store.loginErrorMessage != nil }, set: { _ in }),
+            title: "알림",
+            message: store.loginErrorMessage ?? "",
+            onConfirm: {
+                HapticManager.selection()
+                store.send(.alertOKButtonTapped)
+            }
+        )
         .onDidAppear {
             var transaction = Transaction(animation: nil)
             transaction.disablesAnimations = true
@@ -66,6 +93,10 @@ struct LoginView: View {
                 _ = store.send(.didAppear)
             }
         }
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

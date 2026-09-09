@@ -5,6 +5,8 @@
 //  Created by 권대윤 on 9/7/26.
 //
 
+import Foundation
+
 struct SignUpRepository: SignUpRepositoryProtocol {
     private let networkManager: any NetworkManagerProtocol
     private let keychainManager: any KeychainManagerProtocol

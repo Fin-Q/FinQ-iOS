@@ -11,6 +11,7 @@ import Alamofire
 enum APIRouter: Sendable {
     //MARK: - Auth
     case signUp(SignUpRequest)
+    case login(LoginRequest)
 }
 
 extension APIRouter {
@@ -21,19 +22,20 @@ extension APIRouter {
     var path: String {
         switch self {
         case .signUp: return "/auth/sign-up"
+        case .login: return "/auth/login"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp:
+        case .signUp, .login:
             return .post
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp:
+        case .signUp, .login:
             return [
                 "Content-Type": "application/json"
             ]
@@ -42,14 +44,14 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp:
+        case .signUp, .login:
             return JSONEncoding.default
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case let .signUp(request):
+        case .signUp(let request):
             return [
                 "email": request.email,
                 "password": request.password,
@@ -61,6 +63,12 @@ extension APIRouter {
                         "agreed": agreement.agreed
                     ]
                 }
+            ]
+            
+        case .login(let request):
+            return [
+                "email": request.email,
+                "password": request.password
             ]
         }
     }
