@@ -10,14 +10,14 @@ import ComposableArchitecture
 @Reducer
 struct TabBarFeature {
     enum Tab: Hashable {
-        case study
         case home
+        case study
         case myPage
     }
 
     @ObservableState
     struct State: Equatable {
-        var selectedTab: Tab = .study
+        var selectedTab: Tab = .home
 
         var study = StudyFeature.State()
         var home = HomeFeature.State()
