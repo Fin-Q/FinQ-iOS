@@ -73,15 +73,10 @@ struct AuthMainView: View {
                 .font(AppDesign.Fonts.largeTitleBold)
                 .foregroundStyle(AppDesign.Colors.largeTitle)
             
-            Rectangle()
-                .fill(Color.gray.opacity(0.15))
-                .frame(height: 232)
-                .overlay {
-                    Image(systemName: "photo")
-                        .font(.system(size: 32))
-                        .foregroundStyle(.gray)
-                }
-                .padding(.vertical, 40)
+            Image(.authMainCharacter)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 300)
             
             Button {
                 store.send(.loginButtonTapped)
