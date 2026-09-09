@@ -80,8 +80,12 @@ struct AuthMainFeature {
                 state.path.append(.signUpDone(SignUpDoneFeature.State()))
                 return .none
                 
-            case let .path(.element(id: _, action: .findPassword(.delegate(.pushToEmailVerificationView(email))))):
-                state.path.append(.emailVerification(EmailVerificationFeature.State(email: email)))
+            case let .path(.element(id: id, action: .findPassword(.delegate(.pushToEmailVerificationView(email, verification))))):
+                guard state.path.ids.last == id else { return .none }
+
+                let seconds = max(0, verification.expiresIn)
+                let verificationState: EmailVerificationFeature.VerificationState = seconds > 0 ? .progress : .timeout
+                state.path.append(.emailVerification(EmailVerificationFeature.State(email: email, verificationID: verification.verificationID, verificationState: verificationState, seconds: seconds, resendAvailableIn: max(0, verification.resendAvailableIn))))
                 return .none
                 
             case .path(.element(id: _, action: .emailVerification(.delegate(.pushToNewPasswordView)))):

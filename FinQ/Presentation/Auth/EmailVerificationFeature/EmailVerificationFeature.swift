@@ -10,16 +10,26 @@ import ComposableArchitecture
 
 @Reducer
 struct EmailVerificationFeature {
+    @Dependency(\.passwordResetVerificationUseCase) private var passwordResetVerificationUseCase
+    @Dependency(\.continuousClock) var clock
+
     @ObservableState
     struct State: Equatable {
         var email: String = ""
+        var verificationID: String = ""
         var code: String = ""
         var verificationState: VerificationState = .progress
+        var isResending: Bool = false
+        var resendErrorMessage: String?
         
         var seconds: Int = 180
+        var resendAvailableIn: Int = 0
+
         var secondsText: String {
             return String(format: "%02d:%02d", seconds / 60, seconds % 60)
         }
+
+        var isResendButtonEnabled: Bool { !isResending && resendAvailableIn == 0 && !email.isEmpty }
     }
     
     enum Action {
@@ -27,6 +37,9 @@ struct EmailVerificationFeature {
         case task
         case timerTick
         case resendButtonTapped
+        case verificationResent(PasswordResetVerificationResult)
+        case resendFailed(String)
+        case alertOKButtonTapped
         case nextButtonTapped
         case onDisappear
         
@@ -42,9 +55,7 @@ struct EmailVerificationFeature {
         case error
     }
     
-    private enum CancelID { case timer }
-    
-    @Dependency(\.continuousClock) var clock
+    private enum CancelID { case timer, resend }
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -54,19 +65,58 @@ struct EmailVerificationFeature {
                 return .none
                 
             case .task:
-                return .run { [clock, seconds = state.seconds] send in
-                    for await _ in clock.timer(interval: .seconds(1)).prefix(seconds) {
+                let remainingTicks = max(0, max(state.seconds, state.resendAvailableIn))
+                if state.seconds == 0 { state.verificationState = .timeout }
+                guard remainingTicks > 0 else { return .cancel(id: CancelID.timer) }
+
+                return .run { [clock] send in
+                    for await _ in clock.timer(interval: .seconds(1)).prefix(remainingTicks) {
                         await send(.timerTick)
                     }
                 }
+                .cancellable(id: CancelID.timer, cancelInFlight: true)
                 
             case .resendButtonTapped:
-                state.verificationState = .progress
-                state.seconds = 180
+                guard state.isResendButtonEnabled else { return .none }
+
+                let email = state.email
+                state.isResending = true
+                state.resendErrorMessage = nil
+
+                return .run { send in
+                    do {
+                        let result = try await passwordResetVerificationUseCase.sendVerification(loginID: email)
+                        guard !Task.isCancelled else { return }
+
+                        await send(.verificationResent(result))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.resendFailed(error.localizedDescription))
+                    }
+                }
+                .cancellable(id: CancelID.resend, cancelInFlight: true)
+
+            case let .verificationResent(result):
+                state.isResending = false
+                state.verificationID = result.verificationID
+                state.code = ""
+                state.seconds = max(0, result.expiresIn)
+                state.resendAvailableIn = max(0, result.resendAvailableIn)
+                state.verificationState = state.seconds > 0 ? .progress : .timeout
                 return .send(.task)
+
+            case let .resendFailed(message):
+                state.isResending = false
+                state.resendErrorMessage = message
+                return .none
+
+            case .alertOKButtonTapped:
+                state.resendErrorMessage = nil
+                return .none
                 
             case .timerTick:
                 state.seconds = max(0, state.seconds - 1)
+                state.resendAvailableIn = max(0, state.resendAvailableIn - 1)
                 if state.seconds == 0 { state.verificationState = .timeout }
                 return .none
                 
@@ -74,7 +124,8 @@ struct EmailVerificationFeature {
                 return .send(.delegate(.pushToNewPasswordView))
                 
             case .onDisappear:
-                return .cancel(id: CancelID.timer)
+                state.isResending = false
+                return .merge(.cancel(id: CancelID.timer), .cancel(id: CancelID.resend))
                 
             case .delegate:
                 return .none

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import ComposableArchitecture
 
 struct EmailVerificationView: View {
@@ -57,15 +58,19 @@ struct EmailVerificationView: View {
                 Spacer()
                 
                 Button(action: {
+                    dismissKeyboard()
                     HapticManager.selection()
                     store.send(.resendButtonTapped)
                 }) {
-                    Text("인증번호 재발송")
+                    Text(store.resendAvailableIn > 0 ? "재발송까지 \(store.resendAvailableIn)초" : "인증번호 재발송")
                         .font(AppDesign.Fonts.caption)
+                        .monospacedDigit()
                         .foregroundStyle(AppDesign.Colors.caption)
                         .underline(true, color: AppDesign.Colors.caption)
                 }
                 .buttonStyle(.plain)
+                .disabled(!store.isResendButtonEnabled)
+                .opacity(store.isResendButtonEnabled ? 1 : 0.5)
             }
             .frame(height: 44)
             .padding(.top, 3)
@@ -73,6 +78,7 @@ struct EmailVerificationView: View {
             Spacer()
             
             Button {
+                dismissKeyboard()
                 HapticManager.selection()
                 store.send(.nextButtonTapped)
             } label: {
@@ -80,12 +86,40 @@ struct EmailVerificationView: View {
             }
             .buttonStyle(.customDefault)
             .padding(.bottom, 16)
-            .disabled(store.code.replacingOccurrences(of: " ", with: "").isEmpty)
+            .disabled(store.isResending || store.code.replacingOccurrences(of: " ", with: "").isEmpty)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
+        .allowsHitTesting(!store.isResending)
+        .overlay {
+            if store.isResending {
+                ZStack {
+                    Color.black.opacity(0.2).ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(
+            isPresented: Binding(get: { store.resendErrorMessage != nil }, set: { _ in }),
+            title: "알림",
+            message: store.resendErrorMessage ?? "",
+            onConfirm: {
+                HapticManager.selection()
+                store.send(.alertOKButtonTapped)
+            }
+        )
         .task {
             await store.send(.task).finish()
         }
+        .onDisappear { store.send(.onDisappear) }
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

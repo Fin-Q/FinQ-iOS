@@ -38,3 +38,14 @@ extension DependencyValues {
         set { self[LoginUseCaseKey.self] = newValue }
     }
 }
+
+private enum PasswordResetVerificationUseCaseKey: DependencyKey {
+    static let liveValue: any PasswordResetVerificationUseCaseProtocol = PasswordResetVerificationUseCase(repository: PasswordResetVerificationRepository(networkManager: NetworkManager.shared))
+}
+
+extension DependencyValues {
+    var passwordResetVerificationUseCase: any PasswordResetVerificationUseCaseProtocol {
+        get { self[PasswordResetVerificationUseCaseKey.self] }
+        set { self[PasswordResetVerificationUseCaseKey.self] = newValue }
+    }
+}

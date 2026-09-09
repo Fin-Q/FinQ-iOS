@@ -12,6 +12,7 @@ enum APIRouter: Sendable {
     //MARK: - Auth
     case signUp(SignUpRequest)
     case login(LoginRequest)
+    case sendPasswordResetVerification(PasswordResetVerificationRequest)
 }
 
 extension APIRouter {
@@ -23,19 +24,20 @@ extension APIRouter {
         switch self {
         case .signUp: return "/auth/sign-up"
         case .login: return "/auth/login"
+        case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login:
+        case .signUp, .login, .sendPasswordResetVerification:
             return .post
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login:
+        case .signUp, .login, .sendPasswordResetVerification:
             return [
                 "Content-Type": "application/json"
             ]
@@ -44,7 +46,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login:
+        case .signUp, .login, .sendPasswordResetVerification:
             return JSONEncoding.default
         }
     }
@@ -70,6 +72,9 @@ extension APIRouter {
                 "email": request.email,
                 "password": request.password
             ]
+
+        case .sendPasswordResetVerification(let request):
+            return ["loginId": request.loginID]
         }
     }
 }
