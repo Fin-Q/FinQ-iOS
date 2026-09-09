@@ -34,7 +34,10 @@ struct SignUpDoneView: View {
             
             Spacer(minLength: 32)
             
-            Button {} label: {
+            Button {
+                HapticManager.selection()
+                store.send(.startButtonTapped)
+            } label: {
                 Text("시작하기")
             }
             .buttonStyle(.customDefault)

@@ -7,5 +7,16 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>finq-prod-public-alb-108906608.ap-northeast-2.elb.amazonaws.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
 </dict>
 </plist>

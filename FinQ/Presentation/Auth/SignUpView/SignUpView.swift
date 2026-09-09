@@ -88,17 +88,43 @@ struct SignUpView: View {
                 
                 Button {
                     dismissKeyboard()
+                    HapticManager.selection()
                     store.send(.nextButtonTapped)
                 } label: {
                     Text("다음")
                 }
                 .buttonStyle(.customDefault)
-                .disabled(!store.isFormValid)
+                .disabled(!store.isFormValid || store.isLoading)
                 .padding(.bottom, 16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal, 16)
         }
+        .overlay {
+            if store.isLoading {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(
+            isPresented: Binding(
+                get: { store.signUpErrorMessage != nil },
+                set: { _ in }
+            ),
+            title: "알림",
+            message: store.signUpErrorMessage ?? "",
+            onConfirm: {
+                HapticManager.selection()
+                store.send(.alertOKButtonTapped)
+            }
+        )
     }
 
     private var emailValidationState: CustomUnderlineValidTextFieldView.ValidationState {

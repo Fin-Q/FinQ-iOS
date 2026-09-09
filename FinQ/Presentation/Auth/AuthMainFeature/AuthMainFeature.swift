@@ -15,6 +15,7 @@ struct AuthMainFeature {
         case signUpTerms(SignUpTermsFeature)
         case termsDetail(TermsDetailFeature)
         case signUp(SignUpFeature)
+        case signUpDone(SignUpDoneFeature)
         case login(LoginFeature)
         case findPassword(FindPasswordFeature)
         case emailVerification(EmailVerificationFeature)
@@ -33,10 +34,11 @@ struct AuthMainFeature {
         case loginButtonTapped
         case signUpButtonTapped
         case findPasswordButtonTapped
-        case delegate(Delegate)
         
+        case delegate(Delegate)
         enum Delegate: Equatable {
             case loginSucceeded
+            case startOnboarding
         }
     }
     
@@ -70,6 +72,12 @@ struct AuthMainFeature {
                 
             case .path(.element(id: _, action: .signUpTerms(.delegate(.pushToSignUpView)))):
                 state.path.append(.signUp(SignUpFeature.State()))
+                return .none
+                
+            case let .path(.element(id: id, action: .signUp(.delegate(.pushToSignUpDoneView)))):
+                guard state.path.ids.last == id else { return .none }
+
+                state.path.append(.signUpDone(SignUpDoneFeature.State()))
                 return .none
                 
             case let .path(.element(id: _, action: .findPassword(.delegate(.pushToEmailVerificationView(email))))):
@@ -113,6 +121,11 @@ struct AuthMainFeature {
                 // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소
                 state.loginIDPendingCleanup = nil
                 return .none
+                
+            case let .path(.element(id: id, action: .signUpDone(.delegate(.pushToOnboardingView)))):
+                guard state.path.ids.last == id else { return .none }
+
+                return .send(.delegate(.startOnboarding))
                 
             case .path:
                 return .none

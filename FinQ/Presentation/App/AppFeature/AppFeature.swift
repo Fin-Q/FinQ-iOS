@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct AppFeature {
     enum Route: Equatable {
         case auth
+        case onboarding
         case tabBar
     }
     
@@ -19,17 +20,24 @@ struct AppFeature {
     struct State: Equatable {
         var route: Route = .auth
         var auth = AuthMainFeature.State()
+        var onboarding = OnboardingFeature.State()
         var tabBar = TabBarFeature.State()
     }
     
     enum Action {
         case auth(AuthMainFeature.Action)
+        case onboarding(OnboardingFeature.Action)
         case tabBar(TabBarFeature.Action)
+        case authViewDidDisappear
     }
     
     var body: some ReducerOf<Self> {
         Scope(\.auth, action: \.auth) {
             AuthMainFeature()
+        }
+
+        Scope(\.onboarding, action: \.onboarding) {
+            OnboardingFeature()
         }
         
         Scope(\.tabBar, action: \.tabBar) {
@@ -43,13 +51,31 @@ struct AppFeature {
                 state.tabBar = TabBarFeature.State()
                 return .none
                 
-            case .tabBar(.delegate(.logout)):
-                state.route = .auth
-                state.auth = AuthMainFeature.State()
+            case .auth(.delegate(.startOnboarding)):
+                state.onboarding = OnboardingFeature.State()
+                state.route = .onboarding
+                return .none
+
+            case .onboarding(.delegate(.completed)):
+                state.route = .tabBar
+                state.onboarding = OnboardingFeature.State()
                 state.tabBar = TabBarFeature.State()
                 return .none
                 
-            case .auth, .tabBar:
+            case .tabBar(.delegate(.logout)):
+                state.route = .auth
+                state.auth = AuthMainFeature.State()
+                state.onboarding = OnboardingFeature.State()
+                state.tabBar = TabBarFeature.State()
+                return .none
+                
+            case .auth, .onboarding, .tabBar:
+                return .none
+                
+            case .authViewDidDisappear:
+                guard state.route == .onboarding else { return .none }
+                
+                state.auth = AuthMainFeature.State()
                 return .none
             }
         }

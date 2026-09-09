@@ -22,14 +22,17 @@ enum AppDesign {
         
         static let buttonTitle = Color.brandWhite
         static let buttonTitleBlack = Color.brandBlack
+        static let buttonTitleGray400 = Color.brandGray400
         static let buttonTitleDarkGray = Color.brandDarkGray
         static let buttonTitleDisabled = Color.brandGray
         static let buttonBG = Color.brandBlue
         static let buttonBGDisabled = Color.brandLightGray
         
+        
         static let divider = Color.brandLightGray
         static let chevron = Color.brandGray300
         static let xmarkGray = Color.brandGray
+        static let progress = Color.brandWhite
     }
     
     //MARK: - Font

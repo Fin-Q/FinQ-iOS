@@ -13,9 +13,23 @@ struct SignUpDoneFeature {
     @ObservableState
     struct State: Equatable {}
     
-    enum Action {}
+    enum Action {
+        case startButtonTapped
+        case delegate(Delegate)
+        enum Delegate {
+            case pushToOnboardingView
+        }
+    }
     
     var body: some ReducerOf<Self> {
-        EmptyReducer()
+        Reduce { state, action in
+            switch action {
+            case .startButtonTapped:
+                return .send(.delegate(.pushToOnboardingView))
+                
+            case .delegate:
+                return .none
+            }
+        }
     }
 }

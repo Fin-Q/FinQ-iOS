@@ -43,6 +43,9 @@ struct AuthMainView: View {
             case let .signUp(store):
                 SignUpView(store: store)
                 
+            case let .signUpDone(store):
+                SignUpDoneView(store: store)
+                
             case let .login(store):
                 LoginView(store: store)
                 
