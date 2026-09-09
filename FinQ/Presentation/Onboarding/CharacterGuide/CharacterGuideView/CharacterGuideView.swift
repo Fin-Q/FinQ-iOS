@@ -25,11 +25,7 @@ struct CharacterGuideView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 28)
 
-            Rectangle()
-                .fill(AppDesign.Colors.buttonBGDisabled)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .accessibilityHidden(true)
-                .padding(.top, 44)
+            Spacer()
 
             Button {
                 HapticManager.selection()
@@ -43,7 +39,13 @@ struct CharacterGuideView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
-        .background(Color.brandWhite.ignoresSafeArea())
+        .background(
+            Image(.onboardingCharacter)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+        )
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
     }
