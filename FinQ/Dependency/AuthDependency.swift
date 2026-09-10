@@ -68,3 +68,16 @@ extension DependencyValues {
         set { self[AppleOAuthUseCaseKey.self] = newValue }
     }
 }
+
+//MARK: - KakaoOAuthUseCaseKey
+
+private enum KakaoOAuthUseCaseKey: DependencyKey {
+    static let liveValue: any KakaoOAuthUseCaseProtocol = KakaoOAuthUseCase(authorizationRepository: KakaoAuthorizationRepository(), loginRepository: KakaoLoginRepository(networkManager: NetworkManager.shared, keychainManager: KeychainManager.shared))
+}
+
+extension DependencyValues {
+    var kakaoOAuthUseCase: any KakaoOAuthUseCaseProtocol {
+        get { self[KakaoOAuthUseCaseKey.self] }
+        set { self[KakaoOAuthUseCaseKey.self] = newValue }
+    }
+}

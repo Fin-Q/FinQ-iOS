@@ -136,7 +136,7 @@ struct SignUpTermsView: View {
         .padding(.top, 24)
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationBarBackButtonHidden(store.flow == .apple)
+        .navigationBarBackButtonHidden(store.flow != .email)
     }
 }
 

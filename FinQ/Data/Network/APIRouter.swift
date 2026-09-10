@@ -14,6 +14,7 @@ enum APIRouter: Sendable {
     case signUp(SignUpRequest)
     case login(LoginRequest)
     case appleLogin(AppleLoginRequest)
+    case kakaoLogin(KakaoLoginRequest)
     case tokenRefresh(TokenRefreshRequest)
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
 
@@ -32,6 +33,7 @@ extension APIRouter {
         case .signUp: return "/auth/sign-up"
         case .login: return "/auth/login"
         case .appleLogin: return "/auth/social/apple"
+        case .kakaoLogin: return "/auth/social/kakao"
         case .tokenRefresh: return "/auth/token/refresh"
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         case .saveInterests: return "/users/me/interests"
@@ -41,7 +43,7 @@ extension APIRouter {
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests:
             return .post
         case .completeOnboarding:
             return .patch
@@ -50,7 +52,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
             return [
                 "Content-Type": "application/json"
             ]
@@ -59,7 +61,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
         }
     }
@@ -97,6 +99,13 @@ extension APIRouter {
                 "identityToken": request.identityToken,
                 "authorizationCode": request.authorizationCode,
                 "nonce": request.nonce,
+                "nickname": request.nickname,
+                "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
+            ]
+
+        case .kakaoLogin(let request):
+            return [
+                "kakaoAccessToken": request.kakaoAccessToken,
                 "nickname": request.nickname,
                 "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
             ]

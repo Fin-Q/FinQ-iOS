@@ -11,8 +11,9 @@ import ComposableArchitecture
 @Reducer
 struct AuthMainFeature {
     @Dependency(\.appleOAuthUseCase) private var appleOAuthUseCase
+    @Dependency(\.kakaoOAuthUseCase) private var kakaoOAuthUseCase
 
-    private enum CancelID { case appleAuthorization }
+    private enum CancelID { case appleAuthorization, kakaoAuthorization }
 
     @Reducer
     enum Path {
@@ -31,8 +32,8 @@ struct AuthMainFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var loginIDPendingCleanup: StackElementID?
-        var isAppleAuthorizing: Bool = false
-        var appleLoginErrorMessage: String?
+        var isSocialAuthorizing: Bool = false
+        var socialLoginErrorMessage: String?
     }
     
     enum Action {
@@ -40,6 +41,10 @@ struct AuthMainFeature {
         case loginButtonTapped
         case signUpButtonTapped
         case findPasswordButtonTapped
+        case kakaoLoginButtonTapped
+        case kakaoLoginSucceeded(KakaoLoginResult)
+        case kakaoLoginFailed(String)
+        case kakaoLoginCancelled
         case appleLoginButtonTapped
         case appleLoginSucceeded(AppleLoginResult)
         case appleLoginFailed(String)
@@ -56,24 +61,68 @@ struct AuthMainFeature {
         Reduce { state, action in
             switch action {
             case .loginButtonTapped:
-                guard !state.isAppleAuthorizing else { return .none }
+                guard !state.isSocialAuthorizing else { return .none }
                 state.path.append(.login(LoginFeature.State()))
                 return .none
                 
             case .signUpButtonTapped:
-                guard !state.isAppleAuthorizing else { return .none }
+                guard !state.isSocialAuthorizing else { return .none }
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
                 return .none
                 
             case .findPasswordButtonTapped:
-                guard !state.isAppleAuthorizing else { return .none }
+                guard !state.isSocialAuthorizing else { return .none }
                 state.path.append(.findPassword(FindPasswordFeature.State()))
                 return .none
 
+            case .kakaoLoginButtonTapped:
+                guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
+                state.isSocialAuthorizing = true
+                state.socialLoginErrorMessage = nil
+
+                return .run { send in
+                    do {
+                        let credential = try await kakaoOAuthUseCase.signIn()
+                        try Task.checkCancellation()
+
+                        let result = try await kakaoOAuthUseCase.login(credential: credential, nickname: RandomNicknameGenerator.generate())
+                        try Task.checkCancellation()
+                        await send(.kakaoLoginSucceeded(result))
+                    } catch is CancellationError {
+                        guard !Task.isCancelled else { return }
+                        await send(.kakaoLoginCancelled)
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.kakaoLoginFailed(error.localizedDescription))
+                    }
+                }
+                .cancellable(id: CancelID.kakaoAuthorization, cancelInFlight: true)
+
+            case let .kakaoLoginSucceeded(result):
+                guard state.isSocialAuthorizing else { return .none }
+                state.isSocialAuthorizing = false
+                guard state.path.isEmpty else { return .none }
+
+                if result.isNewUser {
+                    state.path.append(.signUpTerms(SignUpTermsFeature.State(flow: .kakao)))
+                    return .none
+                }
+
+                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted)))
+
+            case let .kakaoLoginFailed(message):
+                state.isSocialAuthorizing = false
+                state.socialLoginErrorMessage = message
+                return .none
+
+            case .kakaoLoginCancelled:
+                state.isSocialAuthorizing = false
+                return .none
+
             case .appleLoginButtonTapped:
-                guard !state.isAppleAuthorizing, state.path.isEmpty else { return .none }
-                state.isAppleAuthorizing = true
-                state.appleLoginErrorMessage = nil
+                guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
+                state.isSocialAuthorizing = true
+                state.socialLoginErrorMessage = nil
 
                 return .run { send in
                     do {
@@ -94,8 +143,8 @@ struct AuthMainFeature {
                 .cancellable(id: CancelID.appleAuthorization, cancelInFlight: true)
 
             case let .appleLoginSucceeded(result):
-                guard state.isAppleAuthorizing else { return .none }
-                state.isAppleAuthorizing = false
+                guard state.isSocialAuthorizing else { return .none }
+                state.isSocialAuthorizing = false
                 guard state.path.isEmpty else { return .none }
 
                 if result.isNewUser {
@@ -106,16 +155,16 @@ struct AuthMainFeature {
                 return .send(.delegate(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted)))
 
             case let .appleLoginFailed(message):
-                state.isAppleAuthorizing = false
-                state.appleLoginErrorMessage = message
+                state.isSocialAuthorizing = false
+                state.socialLoginErrorMessage = message
                 return .none
 
             case .appleLoginCancelled:
-                state.isAppleAuthorizing = false
+                state.isSocialAuthorizing = false
                 return .none
 
             case .alertOKButtonTapped:
-                state.appleLoginErrorMessage = nil
+                state.socialLoginErrorMessage = nil
                 return .none
                 
             case let .path(.element(id: id, action: .signUpTerms(.termRowTapped(term)))):
@@ -138,7 +187,7 @@ struct AuthMainFeature {
                 return .none
 
             case let .path(.element(id: id, action: .signUpTerms(.delegate(.pushToSignUpDoneView)))):
-                guard state.path.ids.last == id, case let .signUpTerms(terms) = state.path[id: id], terms.flow == .apple else { return .none }
+                guard state.path.ids.last == id, case let .signUpTerms(terms) = state.path[id: id], terms.flow != .email else { return .none }
                 state.path.append(.signUpDone(SignUpDoneFeature.State(isOnboardingCompleted: false)))
                 return .none
                 
