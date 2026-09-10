@@ -39,7 +39,7 @@ struct OnboardingView: View {
                 .padding(.top, 24)
 
             LazyVGrid(columns: columns, spacing: 20) {
-                ForEach(OnboardingFeature.Topic.allCases) { topic in
+                ForEach(InterestTopic.allCases) { topic in
                     topicButton(topic)
                 }
             }
@@ -63,9 +63,27 @@ struct OnboardingView: View {
         .background(Color.brandWhite.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .allowsHitTesting(!store.isSavingInterests)
+        .overlay {
+            if store.isSavingInterests {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(isPresented: Binding(get: { store.interestSelectionErrorMessage != nil }, set: { _ in }), title: "알림", message: store.interestSelectionErrorMessage ?? "", onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
     }
 
-    private func topicButton(_ topic: OnboardingFeature.Topic) -> some View {
+    private func topicButton(_ topic: InterestTopic) -> some View {
         Button {
             HapticManager.selection()
             store.send(.topicTapped(topic))

@@ -34,6 +34,7 @@ struct CharacterGuideView: View {
                 Text("시작하기")
             }
             .buttonStyle(.customDefault)
+            .disabled(store.isLoading)
             .padding(.top, 40)
             .padding(.bottom, 44)
         }
@@ -48,6 +49,24 @@ struct CharacterGuideView: View {
         )
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .allowsHitTesting(!store.isLoading)
+        .overlay {
+            if store.isLoading {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
     }
 }
 
