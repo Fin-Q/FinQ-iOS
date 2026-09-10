@@ -16,6 +16,10 @@ enum APIRouter: Sendable {
     case appleLogin(AppleLoginRequest)
     case tokenRefresh(TokenRefreshRequest)
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
+
+    //MARK: - Onboarding
+    case saveInterests(InterestSelectionRequest)
+    case completeOnboarding
 }
 
 extension APIRouter {
@@ -30,19 +34,23 @@ extension APIRouter {
         case .appleLogin: return "/auth/social/apple"
         case .tokenRefresh: return "/auth/token/refresh"
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
+        case .saveInterests: return "/users/me/interests"
+        case .completeOnboarding: return "/users/me/onboarding/complete"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests:
             return .post
+        case .completeOnboarding:
+            return .patch
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
             return [
                 "Content-Type": "application/json"
             ]
@@ -51,7 +59,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
         }
     }
@@ -92,6 +100,12 @@ extension APIRouter {
                 "nickname": request.nickname,
                 "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
             ]
+
+        case .saveInterests(let request):
+            return ["interestTopicIds": request.interestTopicIds]
+
+        case .completeOnboarding:
+            return nil
         }
     }
 
