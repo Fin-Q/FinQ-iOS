@@ -14,6 +14,7 @@ enum APIRouter: Sendable {
     case signUp(SignUpRequest)
     case login(LoginRequest)
     case appleLogin(AppleLoginRequest)
+    case tokenRefresh(TokenRefreshRequest)
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
 }
 
@@ -27,20 +28,21 @@ extension APIRouter {
         case .signUp: return "/auth/sign-up"
         case .login: return "/auth/login"
         case .appleLogin: return "/auth/social/apple"
+        case .tokenRefresh: return "/auth/token/refresh"
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
             return .post
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
             return [
                 "Content-Type": "application/json"
             ]
@@ -49,7 +51,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification:
             return JSONEncoding.default
         }
     }
@@ -79,6 +81,9 @@ extension APIRouter {
         case .sendPasswordResetVerification(let request):
             return ["loginId": request.loginID]
 
+        case .tokenRefresh(let request):
+            return ["refreshToken": request.refreshToken]
+
         case .appleLogin(let request):
             return [
                 "identityToken": request.identityToken,
@@ -87,6 +92,16 @@ extension APIRouter {
                 "nickname": request.nickname,
                 "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
             ]
+        }
+    }
+
+    var requiresAuthorization: Bool {
+        // 토큰 갱신 API를 제외한 모든 API에 인증 인터셉터를 적용
+        switch self {
+        case .tokenRefresh:
+            return false
+        default:
+            return true
         }
     }
 }

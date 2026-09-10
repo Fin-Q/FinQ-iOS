@@ -14,12 +14,13 @@ protocol NetworkManagerProtocol: Sendable {
 
 final class NetworkManager: NetworkManagerProtocol, Sendable {
     static let shared = NetworkManager()
+    private let authInterceptor = AuthInterceptor()
     private init() { }
     
     func perform<Response: Decodable & Sendable>(api: APIRouter, responseType: Response.Type) async throws -> Response {
         let url = api.baseURL + api.path
         
-        let response = await AF.request(url, method: api.method, parameters: api.parameters, encoding: api.encoding, headers: api.headers)
+        let response = await AF.request(url, method: api.method, parameters: api.parameters, encoding: api.encoding, headers: api.headers, interceptor: api.requiresAuthorization ? authInterceptor : nil)
             .validate(statusCode: 200..<300)
             .serializingDecodable(responseType)
             .response
@@ -33,6 +34,9 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
             return data
             
         case let .failure(error):
+            if case let .requestRetryFailed(retryError, _) = error { throw retryError }
+            if case let .requestAdaptationFailed(underlyingError) = error { throw underlyingError }
+
             let responseBody = response.data.flatMap {
                 String(data: $0, encoding: .utf8)
             }
