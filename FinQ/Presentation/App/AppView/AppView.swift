@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 import ComposableArchitecture
 
 struct AppView: View {
@@ -38,6 +39,9 @@ struct AppView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.brandWhite.ignoresSafeArea())
         .allowsHitTesting(activeTransitionID == nil)
+        .onReceive(NotificationCenter.default.publisher(for: .tokenRefreshFailed).receive(on: DispatchQueue.main)) { _ in
+            store.send(.tokenRefreshFailed)
+        }
         .onChange(of: store.route) { oldRoute, newRoute in
             transition(from: oldRoute, to: newRoute)
         }

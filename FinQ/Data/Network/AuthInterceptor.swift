@@ -73,10 +73,26 @@ private actor TokenRefreshCoordinator {
         if let token = keychainManager.getItem(forKey: .accessToken), !token.isEmpty, failedAuthorization != "Bearer \(token)" { return }
         guard let refreshToken = keychainManager.getItem(forKey: .refreshToken), !refreshToken.isEmpty else { throw TokenRefreshError.missingRefreshToken }
 
-        let task = Task { try await self.performRefresh(refreshToken: refreshToken) }
+        let task = Task {
+            do {
+                try await self.performRefresh(refreshToken: refreshToken)
+            } catch {
+                self.handleRefreshFailure(refreshToken: refreshToken)
+                throw error
+            }
+        }
         refreshTask = task
         defer { refreshTask = nil }
         try await task.value
+    }
+
+    private func handleRefreshFailure(refreshToken: String) {
+        // 다른 로그인으로 인증 정보가 바뀌었다면 새 세션은 유지합니다.
+        guard keychainManager.getItem(forKey: .refreshToken) == refreshToken else { return }
+        _ = keychainManager.deleteItem(forKey: .accessToken)
+        _ = keychainManager.deleteItem(forKey: .refreshToken)
+        // 공유하는 갱신 작업에서 한 번만 알립니다.
+        NotificationCenter.default.post(name: .tokenRefreshFailed, object: nil)
     }
 
     private func performRefresh(refreshToken: String) async throws {

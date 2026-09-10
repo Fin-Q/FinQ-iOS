@@ -28,6 +28,7 @@ struct AppFeature {
         case auth(AuthMainFeature.Action)
         case onboarding(OnboardingFeature.Action)
         case tabBar(TabBarFeature.Action)
+        case tokenRefreshFailed
         case routeTransitionCompleted(Route)
     }
     
@@ -65,7 +66,7 @@ struct AppFeature {
                 state.route = .tabBar
                 return .none
                 
-            case .tabBar(.delegate(.logout)):
+            case .tabBar(.delegate(.logout)), .tokenRefreshFailed:
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
