@@ -19,7 +19,8 @@ struct CustomOutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(
-                isSelected ? AppDesign.Fonts.buttonTitle16SemiBold : AppDesign.Fonts.buttonTitle16
+//                isSelected ? AppDesign.Fonts.buttonTitle16SemiBold : AppDesign.Fonts.buttonTitle16
+                AppDesign.Fonts.buttonTitle16SemiBold
             )
             .foregroundStyle(
                 isSelected ? selectedColor : AppDesign.Colors.caption
