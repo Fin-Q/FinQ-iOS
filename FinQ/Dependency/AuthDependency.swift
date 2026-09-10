@@ -7,6 +7,8 @@
 
 import ComposableArchitecture
 
+//MARK: - SignUpUseCaseKey
+
 private enum SignUpUseCaseKey: DependencyKey {
     static let liveValue: any SignUpUseCaseProtocol = SignUpUseCase(
         repository: SignUpRepository(
@@ -22,6 +24,8 @@ extension DependencyValues {
         set { self[SignUpUseCaseKey.self] = newValue }
     }
 }
+
+//MARK: - LoginUseCaseKey
 
 private enum LoginUseCaseKey: DependencyKey {
     static let liveValue: any LoginUseCaseProtocol = LoginUseCase(
@@ -39,6 +43,8 @@ extension DependencyValues {
     }
 }
 
+//MARK: - PasswordResetVerificationUseCaseKey
+
 private enum PasswordResetVerificationUseCaseKey: DependencyKey {
     static let liveValue: any PasswordResetVerificationUseCaseProtocol = PasswordResetVerificationUseCase(repository: PasswordResetVerificationRepository(networkManager: NetworkManager.shared))
 }
@@ -47,5 +53,18 @@ extension DependencyValues {
     var passwordResetVerificationUseCase: any PasswordResetVerificationUseCaseProtocol {
         get { self[PasswordResetVerificationUseCaseKey.self] }
         set { self[PasswordResetVerificationUseCaseKey.self] = newValue }
+    }
+}
+
+//MARK: - AppleOAuthUseCaseKey
+
+private enum AppleOAuthUseCaseKey: DependencyKey {
+    static let liveValue: any AppleOAuthUseCaseProtocol = AppleOAuthUseCase(authorizationRepository: AppleAuthorizationRepository(), loginRepository: AppleLoginRepository(networkManager: NetworkManager.shared, keychainManager: KeychainManager.shared))
+}
+
+extension DependencyValues {
+    var appleOAuthUseCase: any AppleOAuthUseCaseProtocol {
+        get { self[AppleOAuthUseCaseKey.self] }
+        set { self[AppleOAuthUseCaseKey.self] = newValue }
     }
 }

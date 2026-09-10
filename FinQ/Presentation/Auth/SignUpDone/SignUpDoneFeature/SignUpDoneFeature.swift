@@ -11,13 +11,15 @@ import ComposableArchitecture
 @Reducer
 struct SignUpDoneFeature {
     @ObservableState
-    struct State: Equatable {}
+    struct State: Equatable {
+        var isOnboardingCompleted: Bool = false
+    }
     
     enum Action {
         case startButtonTapped
         case delegate(Delegate)
         enum Delegate {
-            case pushToOnboardingView
+            case start(isOnboardingCompleted: Bool)
         }
     }
     
@@ -25,7 +27,7 @@ struct SignUpDoneFeature {
         Reduce { state, action in
             switch action {
             case .startButtonTapped:
-                return .send(.delegate(.pushToOnboardingView))
+                return .send(.delegate(.start(isOnboardingCompleted: state.isOnboardingCompleted)))
                 
             case .delegate:
                 return .none

@@ -58,11 +58,6 @@ struct AppFeature {
                 }
                 return .none
                 
-            case .auth(.delegate(.startOnboarding)):
-                state.onboarding = OnboardingFeature.State()
-                state.route = .onboarding
-                return .none
-
             case .onboarding(.delegate(.completed)):
                 guard state.route == .onboarding else { return .none }
 

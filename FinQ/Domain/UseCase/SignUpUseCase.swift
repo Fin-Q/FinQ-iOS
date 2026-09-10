@@ -19,23 +19,7 @@ struct SignUpUseCase: SignUpUseCaseProtocol {
     }
 
     func signUp(email: String, password: String, nickname: String) async throws -> SignUpResult {
-        let input = SignUpInput(
-            email: email,
-            password: password,
-            nickname: nickname,
-            agreements: [
-                .init(
-                    agreementCode: "TERMS_OF_SERVICE",
-                    version: "1.0",
-                    agreed: true
-                ),
-                .init(
-                    agreementCode: "PRIVACY_POLICY",
-                    version: "1.0",
-                    agreed: true
-                )
-            ]
-        )
+        let input = SignUpInput(email: email, password: password, nickname: nickname, agreements: AuthAgreement.required)
 
         return try await repository.signUp(input: input)
     }

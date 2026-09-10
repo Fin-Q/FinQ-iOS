@@ -11,9 +11,5 @@ struct SignUpInput: Equatable, Sendable {
     let nickname: String
     let agreements: [Agreement]
 
-    struct Agreement: Equatable, Sendable {
-        let agreementCode: String
-        let version: String
-        let agreed: Bool
-    }
+    typealias Agreement = AuthAgreement
 }

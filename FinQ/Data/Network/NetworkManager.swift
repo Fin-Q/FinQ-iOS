@@ -26,7 +26,10 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
         
         switch response.result {
         case .success(let data):
-            AppLogger.shared.log("\(api) 호출 응답 성공", level: .debug)
+            AppLogger.shared.log("\(api.method.rawValue) \(api.path) 호출 응답 성공", level: .debug)
+            #if DEBUG
+            AppLogger.shared.log("\(data)", level: .debug)
+            #endif
             return data
             
         case let .failure(error):

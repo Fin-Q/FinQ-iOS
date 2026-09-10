@@ -25,8 +25,11 @@ enum SignUpTerm: Equatable, Sendable {
 
 @Reducer
 struct SignUpTermsFeature {
+    enum Flow: Equatable { case email, apple }
+
     @ObservableState
     struct State: Equatable {
+        var flow: Flow = .email
         var isAgeAgreed: Bool = false
         var isServiceAgreed: Bool = false
         var isPrivacyAgreed: Bool = false
@@ -47,6 +50,7 @@ struct SignUpTermsFeature {
         
         enum Delegate: Equatable {
             case pushToSignUpView
+            case pushToSignUpDoneView
         }
     }
     
@@ -75,7 +79,14 @@ struct SignUpTermsFeature {
                 
             case .nextButtonTapped:
                 guard state.isAllAgreed else { return .none }
-                return .send(.delegate(.pushToSignUpView))
+
+                switch state.flow {
+                case .email:
+                    return .send(.delegate(.pushToSignUpView))
+
+                case .apple:
+                    return .send(.delegate(.pushToSignUpDoneView))
+                }
                 
             case .delegate:
                 return .none

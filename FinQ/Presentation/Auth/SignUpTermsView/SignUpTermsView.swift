@@ -130,11 +130,13 @@ struct SignUpTermsView: View {
                 Text("다음")
             }
             .buttonStyle(.customDefault)
-            .disabled(!store.state.isAllAgreed)
+            .disabled(!store.isAllAgreed)
             .padding(.bottom, 16)
         }
         .padding(.top, 24)
         .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationBarBackButtonHidden(store.flow == .apple)
     }
 }
 

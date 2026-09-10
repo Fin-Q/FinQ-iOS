@@ -97,7 +97,8 @@ struct AuthMainView: View {
             .padding(.bottom, 16)
             
             self.socialLoginButton(.apple) {
-                
+                HapticManager.selection()
+                store.send(.appleLoginButtonTapped)
             }
             .padding(.bottom, 31)
             
@@ -124,6 +125,12 @@ struct AuthMainView: View {
             .frame(maxWidth: .infinity)
         }
         .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .allowsHitTesting(!store.isAppleAuthorizing)
+        .customOneButtonAlert(isPresented: Binding(get: { store.appleLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.appleLoginErrorMessage ?? "", onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
     }
     
     private func socialLoginButton(_ provider: SocialLoginProvider, action: @escaping () -> Void) -> some View {

@@ -10,6 +10,10 @@ import ComposableArchitecture
 
 @Reducer
 struct AuthMainFeature {
+    @Dependency(\.appleOAuthUseCase) private var appleOAuthUseCase
+
+    private enum CancelID { case appleAuthorization }
+
     @Reducer
     enum Path {
         case signUpTerms(SignUpTermsFeature)
@@ -27,6 +31,8 @@ struct AuthMainFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var loginIDPendingCleanup: StackElementID?
+        var isAppleAuthorizing: Bool = false
+        var appleLoginErrorMessage: String?
     }
     
     enum Action {
@@ -34,11 +40,15 @@ struct AuthMainFeature {
         case loginButtonTapped
         case signUpButtonTapped
         case findPasswordButtonTapped
+        case appleLoginButtonTapped
+        case appleLoginSucceeded(AppleLoginResult)
+        case appleLoginFailed(String)
+        case appleLoginCancelled
+        case alertOKButtonTapped
         
         case delegate(Delegate)
         enum Delegate: Equatable {
             case loginSucceeded(isOnboardingCompleted: Bool)
-            case startOnboarding
         }
     }
     
@@ -46,18 +56,70 @@ struct AuthMainFeature {
         Reduce { state, action in
             switch action {
             case .loginButtonTapped:
+                guard !state.isAppleAuthorizing else { return .none }
                 state.path.append(.login(LoginFeature.State()))
                 return .none
                 
             case .signUpButtonTapped:
+                guard !state.isAppleAuthorizing else { return .none }
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
                 return .none
                 
             case .findPasswordButtonTapped:
+                guard !state.isAppleAuthorizing else { return .none }
                 state.path.append(.findPassword(FindPasswordFeature.State()))
                 return .none
+
+            case .appleLoginButtonTapped:
+                guard !state.isAppleAuthorizing, state.path.isEmpty else { return .none }
+                state.isAppleAuthorizing = true
+                state.appleLoginErrorMessage = nil
+
+                return .run { send in
+                    do {
+                        let credential = try await appleOAuthUseCase.signIn()
+                        try Task.checkCancellation()
+
+                        let result = try await appleOAuthUseCase.login(credential: credential, nickname: RandomNicknameGenerator.generate())
+                        try Task.checkCancellation()
+                        await send(.appleLoginSucceeded(result))
+                    } catch is CancellationError {
+                        guard !Task.isCancelled else { return }
+                        await send(.appleLoginCancelled)
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.appleLoginFailed(error.localizedDescription))
+                    }
+                }
+                .cancellable(id: CancelID.appleAuthorization, cancelInFlight: true)
+
+            case let .appleLoginSucceeded(result):
+                guard state.isAppleAuthorizing else { return .none }
+                state.isAppleAuthorizing = false
+                guard state.path.isEmpty else { return .none }
+
+                if result.isNewUser {
+                    state.path.append(.signUpTerms(SignUpTermsFeature.State(flow: .apple)))
+                    return .none
+                }
+
+                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted)))
+
+            case let .appleLoginFailed(message):
+                state.isAppleAuthorizing = false
+                state.appleLoginErrorMessage = message
+                return .none
+
+            case .appleLoginCancelled:
+                state.isAppleAuthorizing = false
+                return .none
+
+            case .alertOKButtonTapped:
+                state.appleLoginErrorMessage = nil
+                return .none
                 
-            case let .path(.element(id: _, action: .signUpTerms(.termRowTapped(term)))):
+            case let .path(.element(id: id, action: .signUpTerms(.termRowTapped(term)))):
+                guard state.path.ids.last == id else { return .none }
                 state.path.append(.termsDetail(TermsDetailFeature.State(term: term)))
                 return .none
                 
@@ -70,8 +132,14 @@ struct AuthMainFeature {
 
                 return .send(.path(.element(id: signUpTermsID, action: .signUpTerms(.termAgreementChanged(term: term)))))
                 
-            case .path(.element(id: _, action: .signUpTerms(.delegate(.pushToSignUpView)))):
+            case let .path(.element(id: id, action: .signUpTerms(.delegate(.pushToSignUpView)))):
+                guard state.path.ids.last == id, case let .signUpTerms(terms) = state.path[id: id], terms.flow == .email else { return .none }
                 state.path.append(.signUp(SignUpFeature.State()))
+                return .none
+
+            case let .path(.element(id: id, action: .signUpTerms(.delegate(.pushToSignUpDoneView)))):
+                guard state.path.ids.last == id, case let .signUpTerms(terms) = state.path[id: id], terms.flow == .apple else { return .none }
+                state.path.append(.signUpDone(SignUpDoneFeature.State(isOnboardingCompleted: false)))
                 return .none
                 
             case let .path(.element(id: id, action: .signUp(.delegate(.pushToSignUpDoneView)))):
@@ -131,10 +199,10 @@ struct AuthMainFeature {
                 state.loginIDPendingCleanup = nil
                 return .none
                 
-            case let .path(.element(id: id, action: .signUpDone(.delegate(.pushToOnboardingView)))):
+            case let .path(.element(id: id, action: .signUpDone(.delegate(.start(isOnboardingCompleted))))):
                 guard state.path.ids.last == id else { return .none }
 
-                return .send(.delegate(.startOnboarding))
+                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: isOnboardingCompleted)))
                 
             case .path:
                 return .none

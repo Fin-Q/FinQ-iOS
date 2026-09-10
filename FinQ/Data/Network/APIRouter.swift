@@ -9,9 +9,11 @@ import Foundation
 import Alamofire
 
 enum APIRouter: Sendable {
+    
     //MARK: - Auth
     case signUp(SignUpRequest)
     case login(LoginRequest)
+    case appleLogin(AppleLoginRequest)
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
 }
 
@@ -24,20 +26,21 @@ extension APIRouter {
         switch self {
         case .signUp: return "/auth/sign-up"
         case .login: return "/auth/login"
+        case .appleLogin: return "/auth/social/apple"
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
             return .post
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
             return [
                 "Content-Type": "application/json"
             ]
@@ -46,7 +49,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .sendPasswordResetVerification:
+        case .signUp, .login, .appleLogin, .sendPasswordResetVerification:
             return JSONEncoding.default
         }
     }
@@ -75,6 +78,15 @@ extension APIRouter {
 
         case .sendPasswordResetVerification(let request):
             return ["loginId": request.loginID]
+
+        case .appleLogin(let request):
+            return [
+                "identityToken": request.identityToken,
+                "authorizationCode": request.authorizationCode,
+                "nonce": request.nonce,
+                "nickname": request.nickname,
+                "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
+            ]
         }
     }
 }
