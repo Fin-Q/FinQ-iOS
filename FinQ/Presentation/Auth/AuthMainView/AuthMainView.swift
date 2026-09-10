@@ -9,30 +9,152 @@ import SwiftUI
 import ComposableArchitecture
 
 struct AuthMainView: View {
-    let store: StoreOf<AuthMainFeature>
+    @Bindable var store: StoreOf<AuthMainFeature>
+    
+    private enum SocialLoginProvider {
+        case kakao
+        case apple
+        
+        var image: Image {
+            switch self {
+            case .kakao:
+                Image(.kakaoButton)
+                
+            case .apple:
+                Image(.appleButton)
+            }
+        }
+    }
+    @GestureState private var pressedProvider: SocialLoginProvider?
     
     var body: some View {
-        Spacer()
+        NavigationStack(
+            path: $store.scope(\.path, action: \.path)
+        ) {
+            authMainContent
+        } destination: { store in
+            switch store.case {
+            case let .signUpTerms(store):
+                SignUpTermsView(store: store)
+                
+            case let .termsDetail(store):
+                TermsDetailView(store: store)
+                
+            case let .signUp(store):
+                SignUpView(store: store)
+                
+            case let .signUpDone(store):
+                SignUpDoneView(store: store)
+                
+            case let .login(store):
+                LoginView(store: store)
+                
+            case let .findPassword(store):
+                FindPasswordView(store: store)
+                
+            case let .emailVerification(store):
+                EmailVerificationView(store: store)
+                
+            case let .newPassword(store):
+                NewPasswordView(store: store)
+
+            case let .passwordResetDone(store):
+                PasswordResetDoneView(store: store)
+            }
+        }
+    }
+    
+    private var authMainContent: some View {
+        VStack(alignment: .leading) {
+            Text("FINQ")
+                .font(AppDesign.Fonts.largeTitleBold)
+                .foregroundStyle(AppDesign.Colors.largeTitle)
+                .padding(.bottom, 16)
+            
+            
+            Text("로그인 후 이용해 주세요")
+                .font(AppDesign.Fonts.largeTitleBold)
+                .foregroundStyle(AppDesign.Colors.largeTitle)
+            
+            Image(.authMainCharacter)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 300)
+            
+            Button {
+                store.send(.loginButtonTapped)
+            } label: {
+                Text("회원 로그인")
+            }
+            .buttonStyle(
+                .customDefault(activeBackgroundColor: AppDesign.Colors.buttonBGDisabled, activeForegroundColor: AppDesign.Colors.buttonTitleBlack)
+            )
+            .padding(.bottom, 16)
+            
+            self.socialLoginButton(.kakao) {
+                
+            }
+            .padding(.bottom, 16)
+            
+            self.socialLoginButton(.apple) {
+                HapticManager.selection()
+                store.send(.appleLoginButtonTapped)
+            }
+            .padding(.bottom, 31)
+            
+            HStack(spacing: 40) {
+                
+                Button {
+                    store.send(.findPasswordButtonTapped)
+                } label: {
+                    Text("비밀번호 찾기")
+                        .font(AppDesign.Fonts.body)
+                        .tint(AppDesign.Colors.buttonTitleDarkGray)
+                        .lineLimit(1)
+                }
+
+                Button {
+                    store.send(.signUpButtonTapped)
+                } label: {
+                    Text("회원가입")
+                        .font(AppDesign.Fonts.body)
+                        .tint(AppDesign.Colors.buttonTitleDarkGray)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .allowsHitTesting(!store.isAppleAuthorizing)
+        .customOneButtonAlert(isPresented: Binding(get: { store.appleLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.appleLoginErrorMessage ?? "", onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
+    }
+    
+    private func socialLoginButton(_ provider: SocialLoginProvider, action: @escaping () -> Void) -> some View {
+        let isPressed = pressedProvider == provider
         
-        Text("Hello, AuthMainView!")
-        
-        Spacer()
-        
-        Button {
-            store.send(.loginButtonTapped)
-        } label: {
-            Text("로그인")
-                .font(.headline)
-                .foregroundStyle(.white)
+        return Button(action: action) {
+            provider.image
+                .resizable()
+                .scaledToFit()
                 .frame(maxWidth: .infinity)
-                .frame(height: 55)
-                .background(Color(uiColor: .black))
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 14)
-        
-        Spacer()
+        .scaleEffect(isPressed ? 0.98 : 1)
+        .opacity(isPressed ? 0.7 : 1)
+        .animation(
+            .easeOut(duration: 0.12),
+            value: isPressed
+        )
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .updating($pressedProvider) { _, state, _ in
+                    state = provider
+                }
+        )
     }
 }
 

@@ -38,8 +38,7 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         // 기존 값을 갱신
         let attributes = [
             kSecValueData: data,
-            kSecAttrAccessible:
-                kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            kSecAttrAccessible: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         ] as CFDictionary
         
         let updateStatus = SecItemUpdate(
@@ -49,7 +48,7 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         
         // 기존 값 업데이트 성공
         if updateStatus == errSecSuccess {
-            AppLogger.shared.log("키체인 업데이트 성공", level: .debug)
+            AppLogger.shared.log("키체인 업데이트 성공: \(key)", level: .debug)
             return true
         }
         
@@ -69,15 +68,15 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
             )
             
             if addStatus == errSecSuccess {
-                AppLogger.shared.log("키체인 저장 성공", level: .debug)
+                AppLogger.shared.log("키체인 저장 성공: \(key)", level: .debug)
             } else {
-                AppLogger.shared.log("키체인 저장 실패: \(SecCopyErrorMessageString(addStatus, nil) as String? ?? "")", level: .error)
+                AppLogger.shared.log("키체인 저장 실패: \(key) \(SecCopyErrorMessageString(addStatus, nil) as String? ?? "")", level: .error)
             }
             
             return addStatus == errSecSuccess
         }
         
-        AppLogger.shared.log("키체인 업데이트 실패: \(SecCopyErrorMessageString(updateStatus, nil) as String? ?? "")", level: .error)
+        AppLogger.shared.log("키체인 업데이트 실패: \(key) \(SecCopyErrorMessageString(updateStatus, nil) as String? ?? "")", level: .error)
         return false
     }
     
@@ -110,10 +109,10 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         let status = SecItemDelete(query)
         
         if status == errSecSuccess {
-            AppLogger.shared.log("키체인 삭제 성공", level: .debug)
+            AppLogger.shared.log("키체인 삭제 성공: \(key)", level: .debug)
         } else {
             print(SecCopyErrorMessageString(status, nil) ?? "")
-            AppLogger.shared.log("키체인 삭제 실패: \(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
+            AppLogger.shared.log("키체인 삭제 실패: \(key) \(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
         }
         
         return status == errSecSuccess
