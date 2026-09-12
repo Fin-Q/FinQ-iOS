@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct NewPasswordFeature {
     @ObservableState
     struct State: Equatable {
+        var passwordResetToken: String = ""
         var password: String = ""
         var passwordCheck: String = ""
         var shouldShowPasswordValidation: Bool = false

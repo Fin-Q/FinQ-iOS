@@ -205,8 +205,9 @@ struct AuthMainFeature {
                 state.path.append(.emailVerification(EmailVerificationFeature.State(email: email, verificationID: verification.verificationID, verificationState: verificationState, seconds: seconds, resendAvailableIn: max(0, verification.resendAvailableIn))))
                 return .none
                 
-            case .path(.element(id: _, action: .emailVerification(.delegate(.pushToNewPasswordView)))):
-                state.path.append(.newPassword(NewPasswordFeature.State()))
+            case let .path(.element(id: id, action: .emailVerification(.delegate(.pushToNewPasswordView(passwordResetToken))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.newPassword(NewPasswordFeature.State(passwordResetToken: passwordResetToken)))
                 return .none
 
             case .path(.element(id: _, action: .newPassword(.delegate(.pushToPasswordResetDoneView)))):

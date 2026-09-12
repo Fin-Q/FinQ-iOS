@@ -20,7 +20,8 @@ struct EmailVerificationFeature {
         var code: String = ""
         var verificationState: VerificationState = .progress
         var isResending: Bool = false
-        var resendErrorMessage: String?
+        var isConfirming: Bool = false
+        var errorMessage: String?
         
         var seconds: Int = 180
         var resendAvailableIn: Int = 0
@@ -29,7 +30,9 @@ struct EmailVerificationFeature {
             return String(format: "%02d:%02d", seconds / 60, seconds % 60)
         }
 
-        var isResendButtonEnabled: Bool { !isResending && resendAvailableIn == 0 && !email.isEmpty }
+        var isLoading: Bool { isResending || isConfirming }
+        var isResendButtonEnabled: Bool { !isLoading && resendAvailableIn == 0 && !email.isEmpty }
+        var isNextButtonEnabled: Bool { !isLoading && !code.replacingOccurrences(of: " ", with: "").isEmpty }
     }
     
     enum Action {
@@ -39,13 +42,15 @@ struct EmailVerificationFeature {
         case resendButtonTapped
         case verificationResent(PasswordResetVerificationResult)
         case resendFailed(String)
+        case verificationConfirmed(VerificationCodeConfirmResult)
+        case verificationConfirmationFailed(String)
         case alertOKButtonTapped
         case nextButtonTapped
         case onDisappear
         
         case delegate(Delegate)
         enum Delegate {
-            case pushToNewPasswordView
+            case pushToNewPasswordView(passwordResetToken: String)
         }
     }
     
@@ -55,7 +60,7 @@ struct EmailVerificationFeature {
         case error
     }
     
-    private enum CancelID { case timer, resend }
+    private enum CancelID { case timer, resend, confirm }
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -81,7 +86,7 @@ struct EmailVerificationFeature {
 
                 let email = state.email
                 state.isResending = true
-                state.resendErrorMessage = nil
+                state.errorMessage = nil
 
                 return .run { send in
                     do {
@@ -107,11 +112,11 @@ struct EmailVerificationFeature {
 
             case let .resendFailed(message):
                 state.isResending = false
-                state.resendErrorMessage = message
+                state.errorMessage = message
                 return .none
 
             case .alertOKButtonTapped:
-                state.resendErrorMessage = nil
+                state.errorMessage = nil
                 return .none
                 
             case .timerTick:
@@ -121,11 +126,39 @@ struct EmailVerificationFeature {
                 return .none
                 
             case .nextButtonTapped:
-                return .send(.delegate(.pushToNewPasswordView))
+                guard state.isNextButtonEnabled else { return .none }
+
+                let verificationID = state.verificationID
+                let code = state.code
+                state.isConfirming = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        let result = try await passwordResetVerificationUseCase.confirmVerificationCode(id: verificationID, code: code)
+                        guard !Task.isCancelled else { return }
+
+                        await send(.verificationConfirmed(result))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.verificationConfirmationFailed(error.localizedDescription))
+                    }
+                }
+                .cancellable(id: CancelID.confirm, cancelInFlight: true)
+
+            case let .verificationConfirmed(result):
+                state.isConfirming = false
+                return .send(.delegate(.pushToNewPasswordView(passwordResetToken: result.passwordResetToken)))
+
+            case let .verificationConfirmationFailed(message):
+                state.isConfirming = false
+                state.errorMessage = message
+                return .none
                 
             case .onDisappear:
                 state.isResending = false
-                return .merge(.cancel(id: CancelID.timer), .cancel(id: CancelID.resend))
+                state.isConfirming = false
+                return .merge(.cancel(id: CancelID.timer), .cancel(id: CancelID.resend), .cancel(id: CancelID.confirm))
                 
             case .delegate:
                 return .none

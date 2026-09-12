@@ -86,13 +86,13 @@ struct EmailVerificationView: View {
             }
             .buttonStyle(.customDefault)
             .padding(.bottom, 16)
-            .disabled(store.isResending || store.code.replacingOccurrences(of: " ", with: "").isEmpty)
+            .disabled(!store.isNextButtonEnabled)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
-        .allowsHitTesting(!store.isResending)
+        .allowsHitTesting(!store.isLoading)
         .overlay {
-            if store.isResending {
+            if store.isLoading {
                 ZStack {
                     Color.black.opacity(0.2).ignoresSafeArea()
 
@@ -104,9 +104,9 @@ struct EmailVerificationView: View {
             }
         }
         .customOneButtonAlert(
-            isPresented: Binding(get: { store.resendErrorMessage != nil }, set: { _ in }),
+            isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }),
             title: "알림",
-            message: store.resendErrorMessage ?? "",
+            message: store.errorMessage ?? "",
             onConfirm: {
                 HapticManager.selection()
                 store.send(.alertOKButtonTapped)

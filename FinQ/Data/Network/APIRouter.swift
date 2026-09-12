@@ -17,6 +17,7 @@ enum APIRouter: Sendable {
     case kakaoLogin(KakaoLoginRequest)
     case tokenRefresh(TokenRefreshRequest)
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
+    case verificationCodeConfirm(VerificationCodeConfirmRequest)
 
     //MARK: - Onboarding
     case saveInterests(InterestSelectionRequest)
@@ -36,6 +37,7 @@ extension APIRouter {
         case .kakaoLogin: return "/auth/social/kakao"
         case .tokenRefresh: return "/auth/token/refresh"
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
+        case .verificationCodeConfirm: return "/auth/password-reset/verifications/confirm"
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
         }
@@ -43,7 +45,7 @@ extension APIRouter {
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .saveInterests:
             return .post
         case .completeOnboarding:
             return .patch
@@ -52,7 +54,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .saveInterests, .completeOnboarding:
             return [
                 "Content-Type": "application/json"
             ]
@@ -61,7 +63,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
         }
     }
@@ -81,7 +83,7 @@ extension APIRouter {
                     ]
                 }
             ]
-            
+
         case .login(let request):
             return [
                 "email": request.email,
@@ -90,6 +92,12 @@ extension APIRouter {
 
         case .sendPasswordResetVerification(let request):
             return ["loginId": request.loginID]
+
+        case .verificationCodeConfirm(let request):
+            return [
+                "verificationId": request.verificationId,
+                "verificationCode": request.verificationCode
+            ]
 
         case .tokenRefresh(let request):
             return ["refreshToken": request.refreshToken]

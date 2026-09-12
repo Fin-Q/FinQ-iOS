@@ -9,6 +9,6 @@ import Foundation
 
 extension InterestSelectionInput {
     func toRequest() -> InterestSelectionRequest {
-        InterestSelectionRequest(interestTopicIds: topics.map(\.id).sorted())
+        return InterestSelectionRequest(interestTopicIds: topics.map(\.id).sorted())
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 
 extension SignUpInput {
     func toRequest() -> SignUpRequest {
-        SignUpRequest(
+        return SignUpRequest(
             email: email,
             password: password,
             nickname: nickname,
@@ -26,7 +26,7 @@ extension SignUpInput {
 
 extension SignUpResponseData {
     func toDomain() -> SignUpResult {
-        SignUpResult(
+        return SignUpResult(
             userID: userID,
             accessToken: accessToken,
             refreshToken: refreshToken
