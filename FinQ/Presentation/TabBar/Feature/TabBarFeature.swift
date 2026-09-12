@@ -11,7 +11,7 @@ import ComposableArchitecture
 struct TabBarFeature {
     enum Tab: Hashable {
         case home
-        case study
+        case knowledgeMap
         case myPage
     }
 
@@ -19,7 +19,7 @@ struct TabBarFeature {
     struct State: Equatable {
         var selectedTab: Tab = .home
 
-        var study = StudyFeature.State()
+        var knowledgeMap = KnowledgeMapFeature.State()
         var home = HomeFeature.State()
         var myPage = MyPageFeature.State()
     }
@@ -27,7 +27,7 @@ struct TabBarFeature {
     enum Action {
         case selectedTabChanged(Tab)
 
-        case study(StudyFeature.Action)
+        case knowledgeMap(KnowledgeMapFeature.Action)
         case home(HomeFeature.Action)
         case myPage(MyPageFeature.Action)
         
@@ -38,8 +38,8 @@ struct TabBarFeature {
     }
 
     var body: some ReducerOf<Self> {
-        Scope(state: \.study, action: \.study) {
-            StudyFeature()
+        Scope(state: \.knowledgeMap, action: \.knowledgeMap) {
+            KnowledgeMapFeature()
         }
 
         Scope(state: \.home, action: \.home) {
@@ -59,7 +59,7 @@ struct TabBarFeature {
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
 
-            case .study, .home, .myPage, .delegate:
+            case .knowledgeMap, .home, .myPage, .delegate:
                 return .none
             }
         }
