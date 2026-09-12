@@ -56,6 +56,19 @@ extension DependencyValues {
     }
 }
 
+//MARK: - PasswordResetUseCaseKey
+
+private enum PasswordResetUseCaseKey: DependencyKey {
+    static let liveValue: any PasswordResetUseCaseProtocol = PasswordResetUseCase(repository: PasswordResetRepository(networkManager: NetworkManager.shared))
+}
+
+extension DependencyValues {
+    var passwordResetUseCase: any PasswordResetUseCaseProtocol {
+        get { self[PasswordResetUseCaseKey.self] }
+        set { self[PasswordResetUseCaseKey.self] = newValue }
+    }
+}
+
 //MARK: - AppleOAuthUseCaseKey
 
 private enum AppleOAuthUseCaseKey: DependencyKey {

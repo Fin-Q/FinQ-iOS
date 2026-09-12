@@ -10,6 +10,8 @@ import ComposableArchitecture
 
 @Reducer
 struct NewPasswordFeature {
+    @Dependency(\.passwordResetUseCase) private var passwordResetUseCase
+
     @ObservableState
     struct State: Equatable {
         var passwordResetToken: String = ""
@@ -17,6 +19,8 @@ struct NewPasswordFeature {
         var passwordCheck: String = ""
         var shouldShowPasswordValidation: Bool = false
         var shouldShowPasswordCheckValidation: Bool = false
+        var isLoading: Bool = false
+        var errorMessage: String?
         
         var isPasswordValid: Bool {
             let hasEnglishLetter = password.range(of: "[A-Za-z]", options: .regularExpression) != nil
@@ -24,7 +28,7 @@ struct NewPasswordFeature {
             let specialCharacters = CharacterSet.punctuationCharacters.union(.symbols)
             let hasSpecialCharacter = password.rangeOfCharacter(from: specialCharacters) != nil
             
-            return password.count >= 8
+            return (8...72).contains(password.count)
             && hasEnglishLetter
             && hasNumber
             && hasSpecialCharacter
@@ -41,6 +45,10 @@ struct NewPasswordFeature {
         var isFormValid: Bool {
             return isPasswordValid && isPasswordCheckValid
         }
+
+        var isNextButtonEnabled: Bool {
+            return isFormValid && !isLoading && !passwordResetToken.isEmpty
+        }
     }
     
     enum Action {
@@ -49,6 +57,9 @@ struct NewPasswordFeature {
         case passwordEditingEnded
         case passwordCheckEditingEnded
         case nextButtonTapped
+        case passwordResetSucceeded
+        case passwordResetFailed(String)
+        case alertOKButtonTapped
         case delegate(Delegate)
 
         enum Delegate {
@@ -81,8 +92,37 @@ struct NewPasswordFeature {
             case .nextButtonTapped:
                 state.shouldShowPasswordValidation = true
                 state.shouldShowPasswordCheckValidation = true
-                guard state.isFormValid else { return .none }
+                guard state.isNextButtonEnabled else { return .none }
+
+                let passwordResetToken = state.passwordResetToken
+                let newPassword = state.password
+                state.isLoading = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        try await passwordResetUseCase.resetPassword(passwordResetToken: passwordResetToken, newPassword: newPassword)
+                        guard !Task.isCancelled else { return }
+
+                        await send(.passwordResetSucceeded)
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.passwordResetFailed(error.localizedDescription))
+                    }
+                }
+
+            case .passwordResetSucceeded:
+                state.isLoading = false
                 return .send(.delegate(.pushToPasswordResetDoneView))
+
+            case let .passwordResetFailed(message):
+                state.isLoading = false
+                state.errorMessage = message
+                return .none
+
+            case .alertOKButtonTapped:
+                state.errorMessage = nil
+                return .none
 
             case .delegate:
                 return .none
