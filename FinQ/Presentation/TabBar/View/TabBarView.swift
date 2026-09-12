@@ -6,38 +6,46 @@
 //
 
 import SwiftUI
-import UIKit
 import ComposableArchitecture
 
 struct TabBarView: View {
     @Bindable var store: StoreOf<TabBarFeature>
 
-    init(store: StoreOf<TabBarFeature>) {
-        self.store = store
-        UITabBar.appearance().unselectedItemTintColor = .black
+    var body: some View {
+        VStack(spacing: 0) {
+            selectedContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            if shouldShowTabBar {
+                AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+            }
+        }
+        .background(Color.brandWhite.ignoresSafeArea())
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 
-    var body: some View {
-        TabView(selection: $store.selectedTab.sending(\.selectedTabChanged)) {
+    @ViewBuilder
+    private var selectedContent: some View {
+        switch store.selectedTab {
+        case .home:
             HomeView(store: store.scope(\.home, action: \.home))
-            .tabItem {
-                Label { Text("홈") } icon: { Image("home").renderingMode(.template) }
-            }
-            .tag(TabBarFeature.Tab.home)
 
+        case .knowledgeMap:
             KnowledgeMapView(store: store.scope(\.knowledgeMap, action: \.knowledgeMap))
-            .tabItem {
-                Label { Text("지식맵") } icon: { Image("knowledgeMap").renderingMode(.template) }
-            }
-            .tag(TabBarFeature.Tab.knowledgeMap)
 
+        case .myPage:
             MyPageView(store: store.scope(\.myPage, action: \.myPage))
-            .tabItem {
-                Label { Text("마이페이지") } icon: { Image("myPage").renderingMode(.template) }
-            }
-            .tag(TabBarFeature.Tab.myPage)
         }
-        .tint(.black)
+    }
+    
+    private var shouldShowTabBar: Bool {
+        switch store.selectedTab {
+        case .knowledgeMap:
+            return store.knowledgeMap.path.isEmpty
+
+        case .home, .myPage:
+            return true
+        }
     }
 }
 

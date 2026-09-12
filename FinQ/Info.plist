@@ -21,6 +21,8 @@
 	<array>
 		<string>kakaokompassauth</string>
 	</array>
+	<key>UIDesignRequiresCompatibility</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

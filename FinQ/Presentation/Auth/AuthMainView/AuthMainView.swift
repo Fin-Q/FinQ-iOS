@@ -36,30 +36,44 @@ struct AuthMainView: View {
             switch store.case {
             case let .signUpTerms(store):
                 SignUpTermsView(store: store)
-                
+
             case let .termsDetail(store):
                 TermsDetailView(store: store)
-                
+
             case let .signUp(store):
                 SignUpView(store: store)
-                
+
             case let .signUpDone(store):
                 SignUpDoneView(store: store)
-                
+
             case let .login(store):
                 LoginView(store: store)
-                
+
             case let .findPassword(store):
                 FindPasswordView(store: store)
-                
+
             case let .emailVerification(store):
                 EmailVerificationView(store: store)
-                
+
             case let .newPassword(store):
                 NewPasswordView(store: store)
 
             case let .passwordResetDone(store):
                 PasswordResetDoneView(store: store)
+            }
+        }
+        .overlay {
+            if store.isLoginLoading {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+                .allowsHitTesting(false)
             }
         }
     }

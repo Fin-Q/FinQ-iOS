@@ -23,6 +23,9 @@ enum APIRouter: Sendable {
     //MARK: - Onboarding
     case saveInterests(InterestSelectionRequest)
     case completeOnboarding
+
+    //MARK: - KnowledgeMap
+    case knowledgeMap
 }
 
 extension APIRouter {
@@ -42,6 +45,7 @@ extension APIRouter {
         case .passwordReset: return "/auth/password-reset"
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
+        case .knowledgeMap: return "/knowledge-map"
         }
     }
     
@@ -51,12 +55,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
+        case .knowledgeMap:
+            return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap:
             return [
                 "Content-Type": "application/json"
             ]
@@ -67,6 +73,8 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
+        case .knowledgeMap:
+            return URLEncoding.default
         }
     }
     
@@ -129,7 +137,7 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding:
+        case .completeOnboarding, .knowledgeMap:
             return nil
         }
     }

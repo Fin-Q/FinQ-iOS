@@ -63,19 +63,6 @@ struct LoginView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
         .allowsHitTesting(!store.isLoading)
-        .overlay {
-            if store.isLoading {
-                ZStack {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(AppDesign.Colors.progress)
-                        .padding(24)
-                }
-            }
-        }
         .customOneButtonAlert(
             isPresented: Binding(get: { store.loginErrorMessage != nil }, set: { _ in }),
             title: "알림",
