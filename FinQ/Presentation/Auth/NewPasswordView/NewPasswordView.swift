@@ -20,7 +20,7 @@ struct NewPasswordView: View {
                 .padding(.top, 24)
             
             CustomUnderlineValidSecureFieldView(
-                title: "비밀번호 (영문+숫자+특수문자 8자리 이상)",
+                title: "비밀번호 (영문+숫자+특수문자 8~72자)",
                 text: Binding(get: { store.password }, set: { store.send(.passwordChanged($0)) }),
                 validationState: passwordValidationState,
                 onEditingEnded: { store.send(.passwordEditingEnded) }
@@ -45,16 +45,33 @@ struct NewPasswordView: View {
                 Text("다음")
             }
             .buttonStyle(.customDefault)
-            .disabled(!store.isFormValid)
+            .disabled(!store.isNextButtonEnabled)
             .padding(.bottom, 16)
 
         }
         .padding(.horizontal,16)
+        .allowsHitTesting(!store.isLoading)
+        .overlay {
+            if store.isLoading {
+                ZStack {
+                    Color.black.opacity(0.2).ignoresSafeArea()
+
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(AppDesign.Colors.progress)
+                        .padding(24)
+                }
+            }
+        }
+        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
     }
 
     private var passwordValidationState: CustomUnderlineValidSecureFieldView.ValidationState {
         guard store.shouldShowPasswordValidation, !store.password.isEmpty else { return .idle }
-        return store.isPasswordValid ? .valid : .invalid(message: "8자 이상 영문 숫자 특수문자 조합으로 입력해 주세요.")
+        return store.isPasswordValid ? .valid : .invalid(message: "8~72자 영문 숫자 특수문자 조합으로 입력해 주세요.")
     }
 
     private var passwordCheckValidationState: CustomUnderlineValidSecureFieldView.ValidationState {

@@ -7,4 +7,5 @@
 
 protocol PasswordResetVerificationRepositoryProtocol: Sendable {
     func sendVerification(input: PasswordResetVerificationInput) async throws -> PasswordResetVerificationResult
+    func confirmVerificationCode(input: VerificationCodeConfirmInput) async throws -> VerificationCodeConfirmResult
 }

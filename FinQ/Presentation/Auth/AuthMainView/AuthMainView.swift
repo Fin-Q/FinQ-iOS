@@ -92,7 +92,8 @@ struct AuthMainView: View {
             .padding(.bottom, 16)
             
             self.socialLoginButton(.kakao) {
-                
+                HapticManager.selection()
+                store.send(.kakaoLoginButtonTapped)
             }
             .padding(.bottom, 16)
             
@@ -126,8 +127,8 @@ struct AuthMainView: View {
         }
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .allowsHitTesting(!store.isAppleAuthorizing)
-        .customOneButtonAlert(isPresented: Binding(get: { store.appleLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.appleLoginErrorMessage ?? "", onConfirm: {
+        .allowsHitTesting(!store.isSocialAuthorizing)
+        .customOneButtonAlert(isPresented: Binding(get: { store.socialLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.socialLoginErrorMessage ?? "", onConfirm: {
             HapticManager.selection()
             store.send(.alertOKButtonTapped)
         })

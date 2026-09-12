@@ -7,6 +7,7 @@
 
 protocol PasswordResetVerificationUseCaseProtocol: Sendable {
     func sendVerification(loginID: String) async throws -> PasswordResetVerificationResult
+    func confirmVerificationCode(id: String, code: String) async throws -> VerificationCodeConfirmResult
 }
 
 struct PasswordResetVerificationUseCase: PasswordResetVerificationUseCaseProtocol {
@@ -18,5 +19,9 @@ struct PasswordResetVerificationUseCase: PasswordResetVerificationUseCaseProtoco
 
     func sendVerification(loginID: String) async throws -> PasswordResetVerificationResult {
         try await repository.sendVerification(input: PasswordResetVerificationInput(loginID: loginID))
+    }
+
+    func confirmVerificationCode(id: String, code: String) async throws -> VerificationCodeConfirmResult {
+        try await repository.confirmVerificationCode(input: .init(id: id, code: code))
     }
 }

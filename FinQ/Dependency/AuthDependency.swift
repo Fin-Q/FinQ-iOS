@@ -56,6 +56,19 @@ extension DependencyValues {
     }
 }
 
+//MARK: - PasswordResetUseCaseKey
+
+private enum PasswordResetUseCaseKey: DependencyKey {
+    static let liveValue: any PasswordResetUseCaseProtocol = PasswordResetUseCase(repository: PasswordResetRepository(networkManager: NetworkManager.shared))
+}
+
+extension DependencyValues {
+    var passwordResetUseCase: any PasswordResetUseCaseProtocol {
+        get { self[PasswordResetUseCaseKey.self] }
+        set { self[PasswordResetUseCaseKey.self] = newValue }
+    }
+}
+
 //MARK: - AppleOAuthUseCaseKey
 
 private enum AppleOAuthUseCaseKey: DependencyKey {
@@ -66,5 +79,18 @@ extension DependencyValues {
     var appleOAuthUseCase: any AppleOAuthUseCaseProtocol {
         get { self[AppleOAuthUseCaseKey.self] }
         set { self[AppleOAuthUseCaseKey.self] = newValue }
+    }
+}
+
+//MARK: - KakaoOAuthUseCaseKey
+
+private enum KakaoOAuthUseCaseKey: DependencyKey {
+    static let liveValue: any KakaoOAuthUseCaseProtocol = KakaoOAuthUseCase(authorizationRepository: KakaoAuthorizationRepository(), loginRepository: KakaoLoginRepository(networkManager: NetworkManager.shared, keychainManager: KeychainManager.shared))
+}
+
+extension DependencyValues {
+    var kakaoOAuthUseCase: any KakaoOAuthUseCaseProtocol {
+        get { self[KakaoOAuthUseCaseKey.self] }
+        set { self[KakaoOAuthUseCaseKey.self] = newValue }
     }
 }

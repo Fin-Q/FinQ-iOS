@@ -16,4 +16,9 @@ struct PasswordResetVerificationRepository: PasswordResetVerificationRepositoryP
         let response = try await networkManager.perform(api: .sendPasswordResetVerification(input.toRequest()), responseType: APIResponse<PasswordResetVerificationResponse>.self)
         return response.data.toDomain()
     }
+
+    func confirmVerificationCode(input: VerificationCodeConfirmInput) async throws -> VerificationCodeConfirmResult {
+        let response = try await networkManager.perform(api: .verificationCodeConfirm(input.toRequest()), responseType: APIResponse<VerificationCodeConfirmResponse>.self)
+        return response.data.toDomain()
+    }
 }

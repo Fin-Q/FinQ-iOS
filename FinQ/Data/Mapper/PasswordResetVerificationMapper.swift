@@ -7,12 +7,24 @@
 
 extension PasswordResetVerificationInput {
     func toRequest() -> PasswordResetVerificationRequest {
-        PasswordResetVerificationRequest(loginID: loginID)
+        return PasswordResetVerificationRequest(loginID: loginID)
     }
 }
 
 extension PasswordResetVerificationResponse {
     func toDomain() -> PasswordResetVerificationResult {
-        PasswordResetVerificationResult(verificationID: verificationID, expiresIn: expiresIn, resendAvailableIn: resendAvailableIn)
+        return PasswordResetVerificationResult(verificationID: verificationID, expiresIn: expiresIn, resendAvailableIn: resendAvailableIn)
+    }
+}
+
+extension VerificationCodeConfirmInput {
+    func toRequest() -> VerificationCodeConfirmRequest {
+        return VerificationCodeConfirmRequest(verificationId: id, verificationCode: code)
+    }
+}
+
+extension VerificationCodeConfirmResponse {
+    func toDomain() -> VerificationCodeConfirmResult {
+        return VerificationCodeConfirmResult(passwordResetToken: passwordResetToken, expireSeconds: expiresIn)
     }
 }

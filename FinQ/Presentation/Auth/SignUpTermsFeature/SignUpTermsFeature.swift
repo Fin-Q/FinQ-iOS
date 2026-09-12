@@ -25,7 +25,7 @@ enum SignUpTerm: Equatable, Sendable {
 
 @Reducer
 struct SignUpTermsFeature {
-    enum Flow: Equatable { case email, apple }
+    enum Flow: Equatable { case email, apple, kakao }
 
     @ObservableState
     struct State: Equatable {
@@ -84,7 +84,7 @@ struct SignUpTermsFeature {
                 case .email:
                     return .send(.delegate(.pushToSignUpView))
 
-                case .apple:
+                case .apple, .kakao:
                     return .send(.delegate(.pushToSignUpDoneView))
                 }
                 
