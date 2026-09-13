@@ -37,7 +37,10 @@ struct EmailVerificationView: View {
                 text: Binding(
                     get: { store.code },
                     set: { store.send(.codeChanged($0)) }
-                )
+                ),
+                onClearTapped: {
+                    store.send(.codeChanged(""))
+                }
             )
             .keyboardType(.numberPad)
             .padding(.top, 20)
