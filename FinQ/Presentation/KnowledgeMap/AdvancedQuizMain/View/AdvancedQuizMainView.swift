@@ -32,7 +32,7 @@ struct AdvancedQuizMainView: View {
                     .foregroundStyle(Color.brandBlack)
                     .padding(.top, 30)
 
-                Text(store.quiz?.introTitle ?? "")
+                Text("심화퀴즈 3문제를 도전해봐요.")
                     .font(AppDesign.Fonts.subTitle16)
                     .foregroundStyle(Color.brandDarkGray)
                     .padding(.top, 12)
@@ -101,7 +101,7 @@ struct AdvancedQuizMainView: View {
                 .resizable()
                 .renderingMode(.original)
                 .scaledToFit()
-                .frame(width: 12, height: 9)
+                .frame(width: 14, height: 24)
 
             Text(title)
                 .font(.system(size: 14, weight: .regular))
@@ -117,18 +117,11 @@ struct AdvancedQuizMainView: View {
     }
 
     private var benefitDescriptions: [String] {
-        guard let introDescription = store.quiz?.introDescription else { return [] }
-
-        let normalizedDescription = introDescription
-            .replacingOccurrences(of: "\\n", with: "\n")
-            .replacingOccurrences(of: "\r\n", with: "\n")
-
-        let descriptions = normalizedDescription
-            .components(separatedBy: "\n\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        return Array(descriptions.prefix(3))
+        return [
+            "이번 카테고리의 최종 관문이에요",
+            "원하는 카테고리를 한 번에 클리어",
+            "성공하면 30XP 획득"
+        ]
     }
 
 }
