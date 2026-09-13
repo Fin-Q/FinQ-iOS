@@ -11,6 +11,7 @@ import ComposableArchitecture
 @Reducer
 struct AppFeature {
     @Dependency(\.loginUseCase) private var loginUseCase
+    @Dependency(\.pushTokenUseCase) private var pushTokenUseCase
 
     enum Route: Equatable {
         case launching
@@ -57,6 +58,7 @@ struct AppFeature {
                 if loginUseCase.hasActiveSession() {
                     state.tabBar = TabBarFeature.State(selectedTab: .home)
                     state.route = .tabBar
+                    return registerPushToken()
                 } else {
                     state.route = .auth
                 }
@@ -72,7 +74,7 @@ struct AppFeature {
                     state.onboarding = OnboardingFeature.State()
                     state.route = .onboarding
                 }
-                return .none
+                return registerPushToken()
                 
             case .onboarding(.delegate(.completed)):
                 guard state.route == .onboarding else { return .none }
@@ -106,6 +108,16 @@ struct AppFeature {
                 if route != .auth { state.auth = AuthMainFeature.State() }
                 if route != .onboarding { state.onboarding = OnboardingFeature.State() }
                 return .none
+            }
+        }
+    }
+
+    private func registerPushToken() -> Effect<Action> {
+        return .run { _ in
+            do {
+                try await pushTokenUseCase.registerCurrentToken()
+            } catch {
+                AppLogger.shared.log("FCM 토큰 등록 실패: \(error.localizedDescription)", level: .error)
             }
         }
     }
