@@ -27,6 +27,7 @@ enum APIRouter: Sendable {
     //MARK: - KnowledgeMap
     case knowledgeMap
     case categoryDetail(String)
+    case advancedQuiz(Int)
 }
 
 extension APIRouter {
@@ -48,6 +49,7 @@ extension APIRouter {
         case .completeOnboarding: return "/users/me/onboarding/complete"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
+        case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
         }
     }
     
@@ -57,14 +59,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
-        case .knowledgeMap, .categoryDetail:
+        case .knowledgeMap, .categoryDetail, .advancedQuiz:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz:
             return [
                 "Content-Type": "application/json"
             ]
@@ -75,7 +77,7 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
-        case .knowledgeMap, .categoryDetail:
+        case .knowledgeMap, .categoryDetail, .advancedQuiz:
             return URLEncoding.default
         }
     }
@@ -139,7 +141,7 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding, .knowledgeMap, .categoryDetail:
+        case .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz:
             return nil
         }
     }

@@ -40,6 +40,8 @@ enum AppDesign {
     enum Fonts {
         static let largeTitleBold = Font.system(size: 28, weight: .bold)
         static let largeTitleSemiBold = Font.system(size: 28, weight: .semibold)
+        static let largeTitleSemiBold24 = Font.system(size: 24, weight: .semibold)
+        static let subTitle16 = Font.system(size: 16, weight: .medium)
         
         static let largeBody = Font.system(size: 18, weight: .medium)
         static let body = Font.system(size: 16, weight: .medium)

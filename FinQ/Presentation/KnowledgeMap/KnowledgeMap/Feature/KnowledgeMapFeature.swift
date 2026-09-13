@@ -15,6 +15,7 @@ struct KnowledgeMapFeature {
     @Reducer
     enum Path {
         case mapDetail(MapDetailFeature)
+        case advancedQuizMain(AdvancedQuizMainFeature)
     }
 
     @ObservableState
@@ -69,6 +70,11 @@ struct KnowledgeMapFeature {
                 
             case .categoryTapped(let category):
                 state.path.append(.mapDetail(MapDetailFeature.State(category: category)))
+                return .none
+
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.advancedQuizRequested(categoryID))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizMain(AdvancedQuizMainFeature.State(categoryID: categoryID)))
                 return .none
                 
             case .path:

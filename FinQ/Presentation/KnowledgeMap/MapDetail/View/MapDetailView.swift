@@ -96,6 +96,7 @@ struct MapDetailView: View {
             Text(categoryName)
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundStyle(Color.brandBlack)
+                .padding(.top, 24)
             
             Text(store.category.topic.knowledgeMapDescription.replacingOccurrences(of: "\n", with: " "))
                 .font(.system(size: 14, weight: .regular))
@@ -142,6 +143,7 @@ struct MapDetailView: View {
             Spacer(minLength: 8)
             
             Button {
+                HapticManager.selection()
                 store.send(.challengeButtonTapped)
             } label: {
                 Text("도전하기")
