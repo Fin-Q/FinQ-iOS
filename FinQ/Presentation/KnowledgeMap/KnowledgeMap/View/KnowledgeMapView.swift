@@ -74,9 +74,13 @@ struct KnowledgeMapView: View {
             RoundedRectangle(cornerRadius: 16)
                 .fill(category.topic.cardBackgroundColor)
 
-            Image(category.topic.cardImageName)
-                .resizable()
-                .scaledToFill()
+            GeometryReader { proxy in
+                Image(category.topic.cardImageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .clipped()
+            }
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(String(format: "%02d", category.categoryID))
