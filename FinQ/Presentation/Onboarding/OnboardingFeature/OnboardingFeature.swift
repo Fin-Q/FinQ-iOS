@@ -24,7 +24,7 @@ struct OnboardingFeature {
         var isSavingInterests: Bool = false
         var interestSelectionErrorMessage: String?
 
-        var isNextButtonEnabled: Bool { selectedTopics.count == 2 && !isSavingInterests }
+        var isNextButtonEnabled: Bool { !selectedTopics.isEmpty && !isSavingInterests }
 
         func isTopicSelectionDisabled(_ topic: InterestTopic) -> Bool {
             isSavingInterests || (selectedTopics.count >= 2 && !selectedTopics.contains(topic))
