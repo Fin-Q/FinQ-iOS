@@ -9,4 +9,6 @@ import Foundation
 
 protocol LoginRepositoryProtocol: Sendable {
     func login(input: LoginInput) async throws -> LoginResult
+    func hasActiveSession() -> Bool
+    func clearSession()
 }
