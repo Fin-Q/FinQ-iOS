@@ -23,6 +23,10 @@ struct AppView: View {
     var body: some View {
         ZStack {
             switch displayedRoute {
+            case .launching:
+                Color.brandBlue
+                    .ignoresSafeArea()
+
             case .auth:
                 AuthMainView(store: store.scope(\.auth, action: \.auth))
                     .transition(.opacity)
@@ -39,6 +43,7 @@ struct AppView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.brandWhite.ignoresSafeArea())
         .allowsHitTesting(activeTransitionID == nil)
+        .task { store.send(.onAppear) }
         .onReceive(NotificationCenter.default.publisher(for: .tokenRefreshFailed).receive(on: DispatchQueue.main)) { _ in
             store.send(.tokenRefreshFailed)
         }
@@ -64,7 +69,7 @@ struct AppView: View {
 }
 
 #Preview("인증 화면") {
-    AppView(store: Store(initialState: AppFeature.State()) {
+    AppView(store: Store(initialState: AppFeature.State(route: .auth)) {
         AppFeature()
     })
 }

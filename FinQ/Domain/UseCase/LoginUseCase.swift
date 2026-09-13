@@ -9,6 +9,8 @@ import Foundation
 
 protocol LoginUseCaseProtocol: Sendable {
     func login(email: String, password: String) async throws -> LoginResult
+    func hasActiveSession() -> Bool
+    func clearSession()
 }
 
 struct LoginUseCase: LoginUseCaseProtocol {
@@ -21,5 +23,13 @@ struct LoginUseCase: LoginUseCaseProtocol {
     func login(email: String, password: String) async throws -> LoginResult {
         let input = LoginInput(email: email, password: password)
         return try await repository.login(input: input)
+    }
+
+    func hasActiveSession() -> Bool {
+        return repository.hasActiveSession()
+    }
+
+    func clearSession() {
+        repository.clearSession()
     }
 }

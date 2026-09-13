@@ -10,7 +10,11 @@ import ComposableArchitecture
 
 @Reducer
 struct AppFeature {
+    @Dependency(\.loginUseCase) private var loginUseCase
+    @Dependency(\.pushTokenUseCase) private var pushTokenUseCase
+
     enum Route: Equatable {
+        case launching
         case auth
         case onboarding
         case tabBar
@@ -18,13 +22,14 @@ struct AppFeature {
     
     @ObservableState
     struct State: Equatable {
-        var route: Route = .auth
+        var route: Route = .launching
         var auth = AuthMainFeature.State()
         var onboarding = OnboardingFeature.State()
         var tabBar = TabBarFeature.State()
     }
     
     enum Action {
+        case onAppear
         case auth(AuthMainFeature.Action)
         case onboarding(OnboardingFeature.Action)
         case tabBar(TabBarFeature.Action)
@@ -47,6 +52,18 @@ struct AppFeature {
         
         Reduce { state, action in
             switch action {
+            case .onAppear:
+                guard state.route == .launching else { return .none }
+
+                if loginUseCase.hasActiveSession() {
+                    state.tabBar = TabBarFeature.State(selectedTab: .home)
+                    state.route = .tabBar
+                    return registerPushToken()
+                } else {
+                    state.route = .auth
+                }
+                return .none
+
             case let .auth(.delegate(.loginSucceeded(isOnboardingCompleted))):
                 guard state.route == .auth else { return .none }
 
@@ -57,7 +74,7 @@ struct AppFeature {
                     state.onboarding = OnboardingFeature.State()
                     state.route = .onboarding
                 }
-                return .none
+                return registerPushToken()
                 
             case .onboarding(.delegate(.completed)):
                 guard state.route == .onboarding else { return .none }
@@ -66,7 +83,15 @@ struct AppFeature {
                 state.route = .tabBar
                 return .none
                 
-            case .tabBar(.delegate(.logout)), .tokenRefreshFailed:
+            case .tabBar(.delegate(.logout)):
+                loginUseCase.clearSession()
+                state.route = .auth
+                state.auth = AuthMainFeature.State()
+                state.onboarding = OnboardingFeature.State()
+                state.tabBar = TabBarFeature.State()
+                return .none
+
+            case .tokenRefreshFailed:
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
@@ -83,6 +108,16 @@ struct AppFeature {
                 if route != .auth { state.auth = AuthMainFeature.State() }
                 if route != .onboarding { state.onboarding = OnboardingFeature.State() }
                 return .none
+            }
+        }
+    }
+
+    private func registerPushToken() -> Effect<Action> {
+        return .run { _ in
+            do {
+                try await pushTokenUseCase.registerCurrentToken()
+            } catch {
+                AppLogger.shared.log("FCM 토큰 등록 실패: \(error.localizedDescription)", level: .error)
             }
         }
     }

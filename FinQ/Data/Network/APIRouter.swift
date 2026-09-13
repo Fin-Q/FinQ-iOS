@@ -19,6 +19,7 @@ enum APIRouter: Sendable {
     case sendPasswordResetVerification(PasswordResetVerificationRequest)
     case verificationCodeConfirm(VerificationCodeConfirmRequest)
     case passwordReset(PasswordResetConfirmRequest)
+    case registerFCMToken(RegisterFCMTokenRequest)
 
     //MARK: - Onboarding
     case saveInterests(InterestSelectionRequest)
@@ -40,6 +41,8 @@ extension APIRouter {
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         case .verificationCodeConfirm: return "/auth/password-reset/verifications/confirm"
         case .passwordReset: return "/auth/password-reset"
+        case .registerFCMToken(let request): return "/users/me/push-tokens/\(request.deviceID)"
+        
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
         }
@@ -47,7 +50,7 @@ extension APIRouter {
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests:
             return .post
         case .completeOnboarding:
             return .patch
@@ -56,7 +59,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
             return [
                 "Content-Type": "application/json"
             ]
@@ -65,7 +68,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
         }
     }
@@ -124,6 +127,12 @@ extension APIRouter {
                 "kakaoAccessToken": request.kakaoAccessToken,
                 "nickname": request.nickname,
                 "agreements": request.agreements.map { ["agreementCode": $0.agreementCode, "version": $0.version, "agreed": $0.agreed] as Parameters }
+            ]
+            
+        case .registerFCMToken(let request):
+            return [
+                "fcmToken": request.fcmToken,
+                "platform": request.platform
             ]
 
         case .saveInterests(let request):

@@ -26,4 +26,14 @@ struct LoginRepository: LoginRepositoryProtocol {
         
         return response.data.toDomain()
     }
+
+    func hasActiveSession() -> Bool {
+        guard let accessToken = keychainManager.getItem(forKey: .accessToken), !accessToken.isEmpty, let refreshToken = keychainManager.getItem(forKey: .refreshToken), !refreshToken.isEmpty else { return false }
+        return true
+    }
+
+    func clearSession() {
+        _ = keychainManager.deleteItem(forKey: .accessToken)
+        _ = keychainManager.deleteItem(forKey: .refreshToken)
+    }
 }
