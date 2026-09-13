@@ -9,4 +9,5 @@ import Foundation
 
 protocol KnowledgeMapRepositoryProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
+    func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
 }

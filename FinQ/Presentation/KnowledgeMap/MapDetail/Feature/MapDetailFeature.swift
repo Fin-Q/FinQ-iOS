@@ -10,18 +10,60 @@ import ComposableArchitecture
 
 @Reducer
 struct MapDetailFeature {
+    @Dependency(\.knowledgeMapUseCase) private var knowledgeMapUseCase
+
+    @ObservableState
     struct State: Equatable {
         let category: KnowledgeMapCategory
+        var detail: KnowledgeMapCategoryDetail?
+        var isLoading: Bool = false
+        var errorMessage: String?
     }
     
     enum Action {
-        
+        case onAppear
+        case fetchDetailSucceeded(KnowledgeMapCategoryDetail)
+        case fetchDetailFailed(String)
+        case alertOKButtonTapped
+        case challengeButtonTapped
+        case contentCardTapped(Int)
     }
     
     var body: some ReducerOf<Self> {
-        Reduce { state, body in
-            switch body {
-                
+        Reduce { state, action in
+            switch action {
+            case .onAppear:
+                guard !state.isLoading else { return .none }
+                state.isLoading = true
+                state.errorMessage = nil
+
+                return .run { [topic = state.category.topic] send in
+                    do {
+                        let detail = try await knowledgeMapUseCase.fetchCategoryDetail(topic: topic)
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchDetailSucceeded(detail))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchDetailFailed(error.localizedDescription))
+                    }
+                }
+
+            case let .fetchDetailSucceeded(detail):
+                state.detail = detail
+                state.isLoading = false
+                return .none
+
+            case let .fetchDetailFailed(message):
+                state.isLoading = false
+                state.errorMessage = message
+                return .none
+
+            case .alertOKButtonTapped:
+                state.errorMessage = nil
+                return .none
+
+            case .challengeButtonTapped, .contentCardTapped:
+                return .none
             }
         }
     }

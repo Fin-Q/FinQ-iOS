@@ -18,4 +18,9 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
         let response = try await networkManager.perform(api: .knowledgeMap, responseType: APIResponse<KnowledgeMapResponse>.self)
         return try response.data.categories.map { try $0.toDomain() }
     }
+
+    func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail {
+        let response = try await networkManager.perform(api: .categoryDetail(topic.rawValue), responseType: APIResponse<KnowledgeMapCategoryDetailResponse>.self)
+        return try response.data.toDomain()
+    }
 }

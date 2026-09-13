@@ -35,8 +35,20 @@ struct APIResponse<Payload: Decodable & Sendable>: Decodable, Sendable {
 
 struct APIErrorResponse: Decodable, Sendable, LocalizedError {
     let message: String
+    let details: [APIErrorDetail]?
+
+    init(message: String, details: [APIErrorDetail]? = nil) {
+        self.message = message
+        self.details = details
+    }
     
     var errorDescription: String? {
-        return message
+        let reasons = details?.map(\.reason).filter { !$0.isEmpty } ?? []
+        return reasons.isEmpty ? message : reasons.joined(separator: "\n")
     }
+}
+
+struct APIErrorDetail: Decodable, Sendable {
+    let field: String
+    let reason: String
 }

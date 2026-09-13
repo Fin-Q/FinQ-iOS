@@ -9,6 +9,7 @@ import Foundation
 
 protocol KnowledgeMapUseCaseProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
+    func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
 }
 
 struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
@@ -20,5 +21,9 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
 
     func fetchCategories() async throws -> [KnowledgeMapCategory] {
         return try await repository.fetchCategories()
+    }
+
+    func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail {
+        return try await repository.fetchCategoryDetail(topic: topic)
     }
 }

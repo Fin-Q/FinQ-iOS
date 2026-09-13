@@ -51,6 +51,8 @@ struct FinQApp: App {
 
         let navigationBar = UINavigationBar.appearance()
         navigationBar.tintColor = UIColor(Color.brandGray300)
+        navigationBar.backIndicatorImage = backIndicatorImage
+        navigationBar.backIndicatorTransitionMaskImage = backIndicatorImage
         navigationBar.standardAppearance = navigationBarAppearance
         navigationBar.scrollEdgeAppearance = navigationBarAppearance
         navigationBar.compactAppearance = navigationBarAppearance

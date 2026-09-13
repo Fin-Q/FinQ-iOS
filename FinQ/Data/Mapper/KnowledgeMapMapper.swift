@@ -14,6 +14,25 @@ extension KnowledgeMapCategoryResponse {
     }
 }
 
+extension KnowledgeMapCategoryDetailResponse {
+    func toDomain() throws -> KnowledgeMapCategoryDetail {
+        guard let topic = InterestTopic(rawValue: categoryCode) else { throw KnowledgeMapMappingError.invalidCategoryCode(categoryCode) }
+        return KnowledgeMapCategoryDetail(categoryID: categoryID, topic: topic, categoryName: categoryName, completedContentCount: completedContentCount, totalContentCount: totalContentCount, progressRate: progressRate, categoryCompleted: categoryCompleted, advancedQuizStatus: KnowledgeMapCompletionStatus(code: advancedQuizStatus), contents: contents.map { $0.toDomain() }, premiumContents: premiumContents.map { $0.toDomain() })
+    }
+}
+
+private extension KnowledgeMapContentResponse {
+    func toDomain() -> KnowledgeMapContent {
+        return KnowledgeMapContent(contentID: contentID, contentCode: contentCode, title: title, description: description, completionStatus: KnowledgeMapCompletionStatus(code: completionStatus), order: order)
+    }
+}
+
+private extension KnowledgeMapPremiumContentResponse {
+    func toDomain() -> KnowledgeMapPremiumContent {
+        return KnowledgeMapPremiumContent(contentID: contentID, title: title)
+    }
+}
+
 private enum KnowledgeMapMappingError: LocalizedError {
     case invalidCategoryCode(String)
 

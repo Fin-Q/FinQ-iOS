@@ -26,6 +26,7 @@ enum APIRouter: Sendable {
 
     //MARK: - KnowledgeMap
     case knowledgeMap
+    case categoryDetail(String)
 }
 
 extension APIRouter {
@@ -46,6 +47,7 @@ extension APIRouter {
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
         case .knowledgeMap: return "/knowledge-map"
+        case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         }
     }
     
@@ -55,14 +57,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
-        case .knowledgeMap:
+        case .knowledgeMap, .categoryDetail:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail:
             return [
                 "Content-Type": "application/json"
             ]
@@ -73,7 +75,7 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
-        case .knowledgeMap:
+        case .knowledgeMap, .categoryDetail:
             return URLEncoding.default
         }
     }
@@ -137,7 +139,7 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding, .knowledgeMap:
+        case .completeOnboarding, .knowledgeMap, .categoryDetail:
             return nil
         }
     }
