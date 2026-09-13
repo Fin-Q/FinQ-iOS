@@ -9,9 +9,14 @@ import Foundation
 
 struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
     private let networkManager: any NetworkManagerProtocol
+    private let firebaseAnalyticsManager: any FirebaseAnalyticsManagerProtocol
 
-    init(networkManager: any NetworkManagerProtocol) {
+    init(
+        networkManager: any NetworkManagerProtocol,
+        firebaseAnalyticsManager: any FirebaseAnalyticsManagerProtocol
+    ) {
         self.networkManager = networkManager
+        self.firebaseAnalyticsManager = firebaseAnalyticsManager
     }
 
     func fetchCategories() async throws -> [KnowledgeMapCategory] {
@@ -22,5 +27,9 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail {
         let response = try await networkManager.perform(api: .categoryDetail(topic.rawValue), responseType: APIResponse<KnowledgeMapCategoryDetailResponse>.self)
         return try response.data.toDomain()
+    }
+    
+    func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
     }
 }

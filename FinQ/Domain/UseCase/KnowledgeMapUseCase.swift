@@ -10,6 +10,7 @@ import Foundation
 protocol KnowledgeMapUseCaseProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
+    func logPremiumContentTapped(contentID: Int, categoryCode: String) async
 }
 
 struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
@@ -25,5 +26,9 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
 
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail {
         return try await repository.fetchCategoryDetail(topic: topic)
+    }
+    
+    func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
+        return await repository.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
     }
 }

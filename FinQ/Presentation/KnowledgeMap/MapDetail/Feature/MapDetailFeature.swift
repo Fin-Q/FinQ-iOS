@@ -18,6 +18,7 @@ struct MapDetailFeature {
         var detail: KnowledgeMapCategoryDetail?
         var isLoading: Bool = false
         var errorMessage: String?
+        var isPremiumAlertPresented: Bool = false
     }
     
     enum Action {
@@ -27,6 +28,8 @@ struct MapDetailFeature {
         case alertOKButtonTapped
         case challengeButtonTapped
         case contentCardTapped(Int)
+        case premiumContentTapped(KnowledgeMapPremiumContent)
+        case premiumAlertOKButtonTapped
     }
     
     var body: some ReducerOf<Self> {
@@ -60,6 +63,17 @@ struct MapDetailFeature {
 
             case .alertOKButtonTapped:
                 state.errorMessage = nil
+                return .none
+
+            case let .premiumContentTapped(content):
+                state.isPremiumAlertPresented = true
+
+                return .run { [categoryCode = state.category.topic.rawValue] _ in
+                    await knowledgeMapUseCase.logPremiumContentTapped(contentID: content.contentID, categoryCode: categoryCode)
+                }
+
+            case .premiumAlertOKButtonTapped:
+                state.isPremiumAlertPresented = false
                 return .none
 
             case .challengeButtonTapped, .contentCardTapped:

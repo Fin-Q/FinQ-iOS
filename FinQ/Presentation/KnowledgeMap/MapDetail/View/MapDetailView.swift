@@ -45,6 +45,16 @@ struct MapDetailView: View {
             HapticManager.selection()
             store.send(.alertOKButtonTapped)
         })
+        .customOneButtonAlert(
+            isPresented: Binding(get: { store.isPremiumAlertPresented }, set: { _ in }),
+            title: "프리미엄 문제 제목, 곧 만나요",
+            message: "프리미엄 개념은\n지금 열심히 준비 중이에요.",
+            buttonTitle: "확인했어요",
+            onConfirm: {
+                HapticManager.selection()
+                store.send(.premiumAlertOKButtonTapped)
+            }
+        )
     }
     
     private var backButton: some View {
@@ -162,7 +172,7 @@ struct MapDetailView: View {
                 
                 ForEach(detail.premiumContents) { content in
                     Button {
-                        store.send(.contentCardTapped(content.contentID))
+                        store.send(.premiumContentTapped(content))
                     } label: {
                         premiumCard(content)
                     }

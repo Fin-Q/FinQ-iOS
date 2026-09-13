@@ -9,7 +9,12 @@ import Foundation
 import ComposableArchitecture
 
 private enum KnowledgeMapUseCaseKey: DependencyKey {
-    static let liveValue: any KnowledgeMapUseCaseProtocol = KnowledgeMapUseCase(repository: KnowledgeMapRepository(networkManager: NetworkManager.shared))
+    static let liveValue: any KnowledgeMapUseCaseProtocol = KnowledgeMapUseCase(
+        repository: KnowledgeMapRepository(
+            networkManager: NetworkManager.shared,
+            firebaseAnalyticsManager: FirebaseAnalyticsManager.shared
+        )
+    )
 }
 
 extension DependencyValues {
