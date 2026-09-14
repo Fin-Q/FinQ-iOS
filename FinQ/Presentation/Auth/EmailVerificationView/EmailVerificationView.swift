@@ -93,23 +93,12 @@ struct EmailVerificationView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
-        .allowsHitTesting(!store.isLoading)
-        .overlay {
-            if store.isLoading {
-                ZStack {
-                    Color.black.opacity(0.2).ignoresSafeArea()
-
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(AppDesign.Colors.progress)
-                        .padding(24)
-                }
-            }
-        }
+        .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isLoading }, set: { _ in }))
         .customOneButtonAlert(
             isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }),
             title: "알림",
             message: store.errorMessage ?? "",
+            coversEntireScreen: true,
             onConfirm: {
                 HapticManager.selection()
                 store.send(.alertOKButtonTapped)

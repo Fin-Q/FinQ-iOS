@@ -12,31 +12,52 @@ private struct CustomOneButtonAlertModifier: ViewModifier {
     let title: String
     let message: String
     let buttonTitle: String
+    let coversEntireScreen: Bool
     let onConfirm: () -> Void
-    
+
+    @ViewBuilder
     func body(content: Content) -> some View {
-        content
-            .allowsHitTesting(!isPresented)
-            .overlay {
-                if isPresented {
-                    ZStack {
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
-                        
-                        CustomOneButtonAlert(title: title, message: message, buttonTitle: buttonTitle) {
-                            isPresented = false
-                            onConfirm()
+        if coversEntireScreen {
+            content
+                .allowsHitTesting(!isPresented)
+                .background {
+                    Color.clear
+                        .fullScreenCover(isPresented: $isPresented) {
+                            alertLayer
+                                .presentationBackground(.clear)
                         }
-                        .padding(.horizontal, 16)
-                        .offset(y: -40)
+                        .transaction { transaction in
+                            transaction.disablesAnimations = true
+                        }
+                }
+        } else {
+            content
+                .allowsHitTesting(!isPresented)
+                .overlay {
+                    if isPresented {
+                        alertLayer
                     }
                 }
+        }
+    }
+
+    private var alertLayer: some View {
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+
+            CustomOneButtonAlert(title: title, message: message, buttonTitle: buttonTitle) {
+                isPresented = false
+                onConfirm()
             }
+            .padding(.horizontal, 16)
+            .offset(y: -40)
+        }
     }
 }
 
 extension View {
-    func customOneButtonAlert(isPresented: Binding<Bool>, title: String, message: String, buttonTitle: String = "확인했어요", onConfirm: @escaping () -> Void = {}) -> some View {
-        modifier(CustomOneButtonAlertModifier(isPresented: isPresented, title: title, message: message, buttonTitle: buttonTitle, onConfirm: onConfirm))
+    func customOneButtonAlert(isPresented: Binding<Bool>, title: String, message: String, buttonTitle: String = "확인했어요", coversEntireScreen: Bool = false, onConfirm: @escaping () -> Void = {}) -> some View {
+        modifier(CustomOneButtonAlertModifier(isPresented: isPresented, title: title, message: message, buttonTitle: buttonTitle, coversEntireScreen: coversEntireScreen, onConfirm: onConfirm))
     }
 }

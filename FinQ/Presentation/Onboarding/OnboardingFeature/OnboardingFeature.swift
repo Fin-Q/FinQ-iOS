@@ -103,14 +103,3 @@ struct OnboardingFeature {
 }
 
 extension OnboardingFeature.Path.State: Equatable {}
-
-extension InterestTopic {
-    var title: String {
-        switch self {
-        case .salaryAndSaving: "월급관리·저축"
-        case .investmentBasics: "투자 기초"
-        case .stocksAndETF: "주식·ETF"
-        case .taxSaving: "세금·절세계좌"
-        }
-    }
-}

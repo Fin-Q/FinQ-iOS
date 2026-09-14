@@ -29,7 +29,7 @@ enum AppDesign {
         static let buttonBGDisabled = Color.brandLightGray
         
         
-        static let divider = Color.brandLightGray
+        static let divider = Color.brandGray300
         static let chevron = Color.brandGray300
         static let xmarkGray = Color.brandGray
         static let progress = Color.brandWhite

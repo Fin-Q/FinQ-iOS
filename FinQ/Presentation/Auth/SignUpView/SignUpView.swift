@@ -100,19 +100,7 @@ struct SignUpView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal, 16)
         }
-        .overlay {
-            if store.isLoading {
-                ZStack {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(AppDesign.Colors.progress)
-                        .padding(24)
-                }
-            }
-        }
+        .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isLoading }, set: { _ in }))
         .customOneButtonAlert(
             isPresented: Binding(
                 get: { store.signUpErrorMessage != nil },
@@ -120,6 +108,7 @@ struct SignUpView: View {
             ),
             title: "알림",
             message: store.signUpErrorMessage ?? "",
+            coversEntireScreen: true,
             onConfirm: {
                 HapticManager.selection()
                 store.send(.alertOKButtonTapped)

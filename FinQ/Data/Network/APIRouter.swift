@@ -24,6 +24,10 @@ enum APIRouter: Sendable {
     //MARK: - Onboarding
     case saveInterests(InterestSelectionRequest)
     case completeOnboarding
+
+    //MARK: - KnowledgeMap
+    case knowledgeMap
+    case categoryDetail(String)
 }
 
 extension APIRouter {
@@ -45,6 +49,8 @@ extension APIRouter {
         
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
+        case .knowledgeMap: return "/knowledge-map"
+        case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         }
     }
     
@@ -54,12 +60,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
+        case .knowledgeMap, .categoryDetail:
+            return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail:
             return [
                 "Content-Type": "application/json"
             ]
@@ -70,6 +78,8 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
+        case .knowledgeMap, .categoryDetail:
+            return URLEncoding.default
         }
     }
     
@@ -138,7 +148,7 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding:
+        case .completeOnboarding, .knowledgeMap, .categoryDetail:
             return nil
         }
     }

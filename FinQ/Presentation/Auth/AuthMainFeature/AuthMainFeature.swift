@@ -34,6 +34,11 @@ struct AuthMainFeature {
         var loginIDPendingCleanup: StackElementID?
         var isSocialAuthorizing: Bool = false
         var socialLoginErrorMessage: String?
+
+        var isLoginLoading: Bool {
+            guard let id = path.ids.last, case let .login(loginState) = path[id: id] else { return false }
+            return loginState.isLoading
+        }
     }
     
     enum Action {

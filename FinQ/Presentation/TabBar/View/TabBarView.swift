@@ -12,24 +12,39 @@ struct TabBarView: View {
     @Bindable var store: StoreOf<TabBarFeature>
 
     var body: some View {
-        TabView(selection: $store.selectedTab.sending(\.selectedTabChanged)) {
+        VStack(spacing: 0) {
+            selectedContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            if shouldShowTabBar {
+                AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+            }
+        }
+        .background(Color.brandWhite.ignoresSafeArea())
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+    }
+
+    @ViewBuilder
+    private var selectedContent: some View {
+        switch store.selectedTab {
+        case .home:
             HomeView(store: store.scope(\.home, action: \.home))
-            .tabItem {
-                Label("홈", systemImage: "house")
-            }
-            .tag(TabBarFeature.Tab.home)
 
-            StudyView(store: store.scope(\.study, action: \.study))
-            .tabItem {
-                Label("학습", systemImage: "book.closed")
-            }
-            .tag(TabBarFeature.Tab.study)
+        case .knowledgeMap:
+            KnowledgeMapView(store: store.scope(\.knowledgeMap, action: \.knowledgeMap))
 
+        case .myPage:
             MyPageView(store: store.scope(\.myPage, action: \.myPage))
-            .tabItem {
-                Label("마이페이지", systemImage: "person.crop.circle")
-            }
-            .tag(TabBarFeature.Tab.myPage)
+        }
+    }
+    
+    private var shouldShowTabBar: Bool {
+        switch store.selectedTab {
+        case .knowledgeMap:
+            return store.knowledgeMap.path.isEmpty
+
+        case .home, .myPage:
+            return true
         }
     }
 }
