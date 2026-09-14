@@ -33,6 +33,12 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
         let response = try await networkManager.perform(api: .advancedQuiz(categoryID), responseType: APIResponse<AdvancedQuizResponse>.self)
         return response.data.toDomain()
     }
+
+    func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult {
+        let request = AdvancedQuizAnswerRequest(selectedOptionID: selectedOptionID)
+        let response = try await networkManager.perform(api: .submitAdvancedQuizAnswer(categoryID: categoryID, questionID: questionID, request: request), responseType: APIResponse<AdvancedQuizAnswerResponse>.self)
+        return response.data.toDomain()
+    }
     
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
         firebaseAnalyticsManager.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)

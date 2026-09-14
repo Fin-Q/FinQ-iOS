@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 import ComposableArchitecture
 
 struct AdvancedQuizMainView: View {
@@ -59,7 +58,7 @@ struct AdvancedQuizMainView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, 16)
         }
-        .background(AdvancedQuizInteractivePopGestureEnabler())
+        .enableInteractivePopGesture()
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .task { store.send(.onAppear) }
@@ -124,34 +123,6 @@ struct AdvancedQuizMainView: View {
         ]
     }
 
-}
-
-private struct AdvancedQuizInteractivePopGestureEnabler: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> Controller {
-        return Controller()
-    }
-
-    func updateUIViewController(_ uiViewController: Controller, context: Context) { }
-
-    final class Controller: UIViewController {
-        private weak var popGestureRecognizer: UIGestureRecognizer?
-        private var originalDelegate: (any UIGestureRecognizerDelegate)?
-
-        override func viewDidAppear(_ animated: Bool) {
-            super.viewDidAppear(animated)
-            guard let navigationController, navigationController.viewControllers.count > 1, let gestureRecognizer = navigationController.interactivePopGestureRecognizer else { return }
-            popGestureRecognizer = gestureRecognizer
-            originalDelegate = gestureRecognizer.delegate
-            gestureRecognizer.delegate = nil
-            gestureRecognizer.isEnabled = true
-        }
-
-        override func viewDidDisappear(_ animated: Bool) {
-            super.viewDidDisappear(animated)
-            guard let popGestureRecognizer, popGestureRecognizer.delegate == nil else { return }
-            popGestureRecognizer.delegate = originalDelegate
-        }
-    }
 }
 
 #Preview {

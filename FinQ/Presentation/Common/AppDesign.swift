@@ -42,11 +42,15 @@ enum AppDesign {
         static let largeTitleSemiBold = Font.system(size: 28, weight: .semibold)
         static let largeTitleSemiBold24 = Font.system(size: 24, weight: .semibold)
         static let subTitle16 = Font.system(size: 16, weight: .medium)
+        static let title20SemiBold = Font.system(size: 20, weight: .semibold)
         
         static let largeBody = Font.system(size: 18, weight: .medium)
         static let body = Font.system(size: 16, weight: .medium)
+        static let body18SemiBold = Font.system(size: 18, weight: .semibold)
+        static let body16Redular = Font.system(size: 16, weight: .regular)
         
         static let caption = Font.system(size: 14, weight: .medium)
+        static let caption16 = Font.system(size: 16, weight: .regular)
         
         static let buttonTitle18 = Font.system(size: 18, weight: .semibold)
         static let buttonTitle16SemiBold = Font.system(size: 16, weight: .semibold)

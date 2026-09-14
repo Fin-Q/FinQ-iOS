@@ -28,6 +28,7 @@ enum APIRouter: Sendable {
     case knowledgeMap
     case categoryDetail(String)
     case advancedQuiz(Int)
+    case submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, request: AdvancedQuizAnswerRequest)
 }
 
 extension APIRouter {
@@ -50,12 +51,13 @@ extension APIRouter {
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
+        case let .submitAdvancedQuizAnswer(categoryID, questionID, _): return "/categories/\(categoryID)/quiz/questions/\(questionID)/answers"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .submitAdvancedQuizAnswer:
             return .post
         case .completeOnboarding:
             return .patch
@@ -66,7 +68,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz, .submitAdvancedQuizAnswer:
             return [
                 "Content-Type": "application/json"
             ]
@@ -75,7 +77,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer:
             return JSONEncoding.default
         case .knowledgeMap, .categoryDetail, .advancedQuiz:
             return URLEncoding.default
@@ -140,6 +142,9 @@ extension APIRouter {
 
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
+
+        case .submitAdvancedQuizAnswer(_, _, let request):
+            return ["selectedOptionId": request.selectedOptionID]
 
         case .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz:
             return nil

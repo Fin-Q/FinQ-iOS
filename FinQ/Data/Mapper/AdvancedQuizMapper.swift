@@ -24,3 +24,15 @@ private extension AdvancedQuizOptionResponse {
         return AdvancedQuizOption(optionID: optionID, optionText: optionText)
     }
 }
+
+extension AdvancedQuizAnswerResponse {
+    func toDomain() -> AdvancedQuizAnswerResult {
+        return AdvancedQuizAnswerResult(correct: correct, explanation: explanation, selectedOptionID: selectedOptionID, correctOptionID: correctOptionID, isLastQuestion: isLastQuestion, categoryResult: categoryResult?.toDomain())
+    }
+}
+
+private extension AdvancedQuizCategoryResultResponse {
+    func toDomain() -> AdvancedQuizCategoryResult {
+        return AdvancedQuizCategoryResult(earnedXP: earnedXP, levelUp: levelUp, newLevel: newLevel)
+    }
+}

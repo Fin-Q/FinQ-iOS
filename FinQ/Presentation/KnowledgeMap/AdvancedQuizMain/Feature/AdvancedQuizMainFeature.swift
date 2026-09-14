@@ -26,6 +26,11 @@ struct AdvancedQuizMainFeature {
         case fetchAdvancedQuizFailed(String)
         case alertOKButtonTapped
         case challengeButtonTapped
+        case delegate(Delegate)
+
+        enum Delegate: Equatable {
+            case advancedQuizIntroRequested(AdvancedQuiz)
+        }
     }
 
     var body: some ReducerOf<Self> {
@@ -62,6 +67,10 @@ struct AdvancedQuizMainFeature {
                 return .none
 
             case .challengeButtonTapped:
+                guard let quiz = state.quiz else { return .none }
+                return .send(.delegate(.advancedQuizIntroRequested(quiz)))
+
+            case .delegate:
                 return .none
             }
         }
