@@ -36,6 +36,7 @@ struct KnowledgeMapPremiumContent: Identifiable, Equatable, Sendable {
     let contentID: Int
     let keyword: [String]
     let title: String
+    let description: String
 
     var id: Int { contentID }
 }

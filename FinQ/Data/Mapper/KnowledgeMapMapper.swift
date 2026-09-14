@@ -29,7 +29,7 @@ private extension KnowledgeMapContentResponse {
 
 private extension KnowledgeMapPremiumContentResponse {
     func toDomain() -> KnowledgeMapPremiumContent {
-        return KnowledgeMapPremiumContent(contentID: contentID, keyword: keyword, title: title)
+        return KnowledgeMapPremiumContent(contentID: contentID, keyword: keyword, title: title, description: description)
     }
 }
 
