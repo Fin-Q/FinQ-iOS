@@ -16,12 +16,31 @@ struct TabBarView: View {
             selectedContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            if shouldShowTabBar {
-                AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+            bottomBar
+        }
+        .background {
+            Color.brandWhite.ignoresSafeArea()
+            if store.selectedTab == .home {
+                if store.home.path.isEmpty {
+                    Color.brandSkyBlue.ignoresSafeArea(edges: .top)
+                } else {
+                    Color.brandLightGray.ignoresSafeArea(edges: .bottom)
+                }
             }
         }
-        .background(Color.brandWhite.ignoresSafeArea())
         .ignoresSafeArea(.keyboard, edges: .bottom)
+    }
+
+    @ViewBuilder
+    private var bottomBar: some View {
+        if shouldShowTabBar {
+            AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+        } else if store.selectedTab == .home {
+            Color.brandLightGray
+                .frame(height: 72)
+                .ignoresSafeArea(edges: .bottom)
+                .accessibilityHidden(true)
+        }
     }
 
     @ViewBuilder
@@ -43,7 +62,10 @@ struct TabBarView: View {
         case .knowledgeMap:
             return store.knowledgeMap.path.isEmpty
 
-        case .home, .myPage:
+        case .home:
+            return store.home.path.isEmpty
+
+        case .myPage:
             return true
         }
     }

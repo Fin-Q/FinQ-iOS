@@ -25,6 +25,11 @@ enum APIRouter: Sendable {
     case saveInterests(InterestSelectionRequest)
     case completeOnboarding
 
+    //MARK: - Home
+    case home
+    case streakCalendar(month: String?)
+    case streakStatus
+
     //MARK: - KnowledgeMap
     case knowledgeMap
     case categoryDetail(String)
@@ -49,6 +54,9 @@ extension APIRouter {
         
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
+        case .home: return "/home"
+        case .streakCalendar: return "/streak/calendar"
+        case .streakStatus: return "/streak/status"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         }
@@ -60,14 +68,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
-        case .knowledgeMap, .categoryDetail:
+        case .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
             return [
                 "Content-Type": "application/json"
             ]
@@ -78,7 +86,7 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
-        case .knowledgeMap, .categoryDetail:
+        case .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
             return URLEncoding.default
         }
     }
@@ -148,7 +156,10 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding, .knowledgeMap, .categoryDetail:
+        case let .streakCalendar(month):
+            return month.map { ["month": $0] }
+
+        case .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .streakStatus:
             return nil
         }
     }
