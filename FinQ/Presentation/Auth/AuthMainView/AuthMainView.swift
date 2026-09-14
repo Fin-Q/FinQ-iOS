@@ -62,20 +62,7 @@ struct AuthMainView: View {
                 PasswordResetDoneView(store: store)
             }
         }
-        .overlay {
-            if store.isLoginLoading {
-                ZStack {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(AppDesign.Colors.progress)
-                        .padding(24)
-                }
-                .allowsHitTesting(false)
-            }
-        }
+        .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isSocialAuthorizing }, set: { _ in }))
     }
     
     private var authMainContent: some View {
@@ -142,7 +129,7 @@ struct AuthMainView: View {
         .padding(.horizontal, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .allowsHitTesting(!store.isSocialAuthorizing)
-        .customOneButtonAlert(isPresented: Binding(get: { store.socialLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.socialLoginErrorMessage ?? "", onConfirm: {
+        .customOneButtonAlert(isPresented: Binding(get: { store.socialLoginErrorMessage != nil }, set: { _ in }), title: "알림", message: store.socialLoginErrorMessage ?? "", coversEntireScreen: true, onConfirm: {
             HapticManager.selection()
             store.send(.alertOKButtonTapped)
         })

@@ -14,14 +14,7 @@ struct TermsDetailView: View {
     @State private var isLoading = true
     
     var body: some View {
-        ZStack {
-            TermsWebView(url: store.url, isLoading: $isLoading)
-            
-            if isLoading {
-                ProgressView()
-                    .controlSize(.large)
-            }
-        }
+        TermsWebView(url: store.url, isLoading: $isLoading)
         .navigationTitle(store.navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -35,6 +28,7 @@ struct TermsDetailView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
         }
+        .fullScreenLoadingIndicator(isPresented: $isLoading)
     }
 }
 

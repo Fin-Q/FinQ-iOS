@@ -62,11 +62,12 @@ struct LoginView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
-        .allowsHitTesting(!store.isLoading)
+        .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isLoading }, set: { _ in }))
         .customOneButtonAlert(
             isPresented: Binding(get: { store.loginErrorMessage != nil }, set: { _ in }),
             title: "알림",
             message: store.loginErrorMessage ?? "",
+            coversEntireScreen: true,
             onConfirm: {
                 HapticManager.selection()
                 store.send(.alertOKButtonTapped)

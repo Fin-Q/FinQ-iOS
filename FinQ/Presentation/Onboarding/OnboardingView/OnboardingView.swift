@@ -63,21 +63,8 @@ struct OnboardingView: View {
         .background(Color.brandWhite.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
-        .allowsHitTesting(!store.isSavingInterests)
-        .overlay {
-            if store.isSavingInterests {
-                ZStack {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(AppDesign.Colors.progress)
-                        .padding(24)
-                }
-            }
-        }
-        .customOneButtonAlert(isPresented: Binding(get: { store.interestSelectionErrorMessage != nil }, set: { _ in }), title: "알림", message: store.interestSelectionErrorMessage ?? "", onConfirm: {
+        .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isSavingInterests }, set: { _ in }))
+        .customOneButtonAlert(isPresented: Binding(get: { store.interestSelectionErrorMessage != nil }, set: { _ in }), title: "알림", message: store.interestSelectionErrorMessage ?? "", coversEntireScreen: true, onConfirm: {
             HapticManager.selection()
             store.send(.alertOKButtonTapped)
         })
