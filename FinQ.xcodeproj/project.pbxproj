@@ -14,6 +14,12 @@
 		444822B3303B17E100ABA8A4 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B2303B17E100ABA8A4 /* FirebaseCore */; };
 		444822B5303B17E100ABA8A4 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B4303B17E100ABA8A4 /* FirebaseCrashlytics */; };
 		444822B7303B17E100ABA8A4 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 444822B6303B17E100ABA8A4 /* FirebaseMessaging */; };
+		4450A8D23040607E000808D2 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4450A8D13040607E000808D2 /* ComposableArchitecture */; };
+		4450A8D530406098000808D2 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4450A8D430406098000808D2 /* Alamofire */; };
+		44C5A8DD3046E39100CBBF32 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 44C5A8DC3046E39100CBBF32 /* KakaoSDK */; };
+		44C5A8DF3046E39100CBBF32 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 44C5A8DE3046E39100CBBF32 /* KakaoSDKAuth */; };
+		44C5A8E13046E39100CBBF32 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 44C5A8E03046E39100CBBF32 /* KakaoSDKCommon */; };
+		44C5A8E33046E39100CBBF32 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 44C5A8E23046E39100CBBF32 /* KakaoSDKUser */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,9 +46,22 @@
 		444821F6303B057E00ABA8A4 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		444B43BE3045896100D922DD /* Exceptions for "FinQ" folder in "FinQ" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 444821CB303B038500ABA8A4 /* FinQ */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		444821CE303B038500ABA8A4 /* FinQ */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				444B43BE3045896100D922DD /* Exceptions for "FinQ" folder in "FinQ" target */,
+			);
 			path = FinQ;
 			sourceTree = "<group>";
 		};
@@ -64,11 +83,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				444822B7303B17E100ABA8A4 /* FirebaseMessaging in Frameworks */,
+				44C5A8E13046E39100CBBF32 /* KakaoSDKCommon in Frameworks */,
+				4450A8D530406098000808D2 /* Alamofire in Frameworks */,
 				444822AD303B17E100ABA8A4 /* FirebaseAnalytics in Frameworks */,
+				4450A8D23040607E000808D2 /* ComposableArchitecture in Frameworks */,
 				444822AF303B17E100ABA8A4 /* FirebaseAnalyticsCore in Frameworks */,
 				444822B5303B17E100ABA8A4 /* FirebaseCrashlytics in Frameworks */,
 				444822B3303B17E100ABA8A4 /* FirebaseCore in Frameworks */,
+				44C5A8E33046E39100CBBF32 /* KakaoSDKUser in Frameworks */,
 				444822B1303B17E100ABA8A4 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				44C5A8DD3046E39100CBBF32 /* KakaoSDK in Frameworks */,
+				44C5A8DF3046E39100CBBF32 /* KakaoSDKAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,6 +161,12 @@
 				444822B2303B17E100ABA8A4 /* FirebaseCore */,
 				444822B4303B17E100ABA8A4 /* FirebaseCrashlytics */,
 				444822B6303B17E100ABA8A4 /* FirebaseMessaging */,
+				4450A8D13040607E000808D2 /* ComposableArchitecture */,
+				4450A8D430406098000808D2 /* Alamofire */,
+				44C5A8DC3046E39100CBBF32 /* KakaoSDK */,
+				44C5A8DE3046E39100CBBF32 /* KakaoSDKAuth */,
+				44C5A8E03046E39100CBBF32 /* KakaoSDKCommon */,
+				44C5A8E23046E39100CBBF32 /* KakaoSDKUser */,
 			);
 			productName = FinQ;
 			productReference = 444821CC303B038500ABA8A4 /* FinQ.app */;
@@ -221,6 +252,9 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				444822AB303B17E100ABA8A4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 444821CD303B038500ABA8A4 /* Products */;
@@ -423,18 +457,23 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FinQ/FinQ.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3PVV8DQPL6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FinQ/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FinQ;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				KAKAO_NATIVE_APP_KEY = c7af9061da6be306fbbfe31ebb24d428;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -442,12 +481,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.daeyunkwon.FinQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -457,18 +497,23 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FinQ/FinQ.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3PVV8DQPL6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FinQ/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FinQ;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				KAKAO_NATIVE_APP_KEY = c7af9061da6be306fbbfe31ebb24d428;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -476,12 +521,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.daeyunkwon.FinQ;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -502,7 +548,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinQ";
 			};
@@ -524,7 +570,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FinQ.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FinQ";
 			};
@@ -545,7 +591,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = FinQ;
 			};
@@ -566,7 +612,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = FinQ;
 			};
@@ -622,6 +668,32 @@
 				minimumVersion = 12.18.0;
 			};
 		};
+		4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.26.1;
+			};
+			traits = (
+			);
+		};
+		4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.12.0;
+			};
+		};
+		44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.29.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -654,6 +726,36 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 444822AB303B17E100ABA8A4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		4450A8D13040607E000808D2 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4450A8D03040607E000808D2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		4450A8D430406098000808D2 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4450A8D330406098000808D2 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		44C5A8DC3046E39100CBBF32 /* KakaoSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDK;
+		};
+		44C5A8DE3046E39100CBBF32 /* KakaoSDKAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKAuth;
+		};
+		44C5A8E03046E39100CBBF32 /* KakaoSDKCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCommon;
+		};
+		44C5A8E23046E39100CBBF32 /* KakaoSDKUser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 44C5A8DB3046E39100CBBF32 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKUser;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

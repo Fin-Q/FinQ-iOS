@@ -1,0 +1,13 @@
+//
+//  Notification+Extension.swift
+//  FinQ
+//
+//  Created by 권대윤 on 9/10/26.
+//
+
+import Foundation
+
+extension Notification.Name {
+    static let tokenRefreshFailed = Notification.Name("tokenRefreshFailed")
+    static let navigateToHome = Notification.Name("navigateToHome")
+}
