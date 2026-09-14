@@ -106,8 +106,13 @@ struct MapDetailView: View {
                 Text("학습 완료")
                     .foregroundStyle(Color.brandDarkGray)
                 
-                Text("\(completedContentCount)/\(totalContentCount)")
-                    .foregroundStyle(Color.brandBlue)
+                HStack(spacing: 0) {
+                    Text("\(completedContentCount)")
+                        .foregroundStyle(Color.brandBlue)
+
+                    Text("/\(totalContentCount)")
+                        .foregroundStyle(Color.brandGray300)
+                }
             }
             .font(.system(size: 12, weight: .medium))
             .padding(.horizontal, 12)
