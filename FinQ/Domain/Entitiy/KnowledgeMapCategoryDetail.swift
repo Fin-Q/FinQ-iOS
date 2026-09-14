@@ -23,6 +23,7 @@ struct KnowledgeMapCategoryDetail: Equatable, Sendable {
 struct KnowledgeMapContent: Identifiable, Equatable, Sendable {
     let contentID: Int
     let contentCode: String
+    let keyword: [String]
     let title: String
     let description: String
     let completionStatus: KnowledgeMapCompletionStatus
@@ -33,6 +34,7 @@ struct KnowledgeMapContent: Identifiable, Equatable, Sendable {
 
 struct KnowledgeMapPremiumContent: Identifiable, Equatable, Sendable {
     let contentID: Int
+    let keyword: [String]
     let title: String
 
     var id: Int { contentID }

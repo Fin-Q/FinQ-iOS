@@ -23,13 +23,13 @@ extension KnowledgeMapCategoryDetailResponse {
 
 private extension KnowledgeMapContentResponse {
     func toDomain() -> KnowledgeMapContent {
-        return KnowledgeMapContent(contentID: contentID, contentCode: contentCode, title: title, description: description, completionStatus: KnowledgeMapCompletionStatus(code: completionStatus), order: order)
+        return KnowledgeMapContent(contentID: contentID, contentCode: contentCode, keyword: keyword, title: title, description: description, completionStatus: KnowledgeMapCompletionStatus(code: completionStatus), order: order)
     }
 }
 
 private extension KnowledgeMapPremiumContentResponse {
     func toDomain() -> KnowledgeMapPremiumContent {
-        return KnowledgeMapPremiumContent(contentID: contentID, title: title)
+        return KnowledgeMapPremiumContent(contentID: contentID, keyword: keyword, title: title)
     }
 }
 

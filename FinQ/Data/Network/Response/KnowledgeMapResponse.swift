@@ -60,6 +60,7 @@ struct KnowledgeMapCategoryDetailResponse: Decodable, Sendable {
 struct KnowledgeMapContentResponse: Decodable, Sendable {
     let contentID: Int
     let contentCode: String
+    let keyword: [String]
     let title: String
     let description: String
     let completionStatus: String
@@ -68,19 +69,38 @@ struct KnowledgeMapContentResponse: Decodable, Sendable {
     enum CodingKeys: String, CodingKey {
         case contentID = "contentId"
         case contentCode
+        case keyword
         case title
         case description
         case completionStatus
         case order
     }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        contentID = try container.decode(Int.self, forKey: .contentID)
+        contentCode = try container.decode(String.self, forKey: .contentCode)
+        title = try container.decode(String.self, forKey: .title)
+        description = try container.decode(String.self, forKey: .description)
+        completionStatus = try container.decode(String.self, forKey: .completionStatus)
+        order = try container.decode(Int.self, forKey: .order)
+
+        if let keywords = try? container.decode([String].self, forKey: .keyword) {
+            keyword = keywords
+        } else {
+            keyword = [try container.decode(String.self, forKey: .keyword)]
+        }
+    }
 }
 
 struct KnowledgeMapPremiumContentResponse: Decodable, Sendable {
     let contentID: Int
+    let keyword: [String]
     let title: String
 
     enum CodingKeys: String, CodingKey {
         case contentID = "contentId"
+        case keyword
         case title
     }
 }

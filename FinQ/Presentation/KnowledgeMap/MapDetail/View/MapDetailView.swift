@@ -189,6 +189,14 @@ struct MapDetailView: View {
     
     private func learningCard(_ content: KnowledgeMapContent) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            let normalizedDescription = content.description
+                .replacingOccurrences(of: "\\n", with: "\n")
+                .components(separatedBy: .newlines)
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .joined(separator: " ")
+
+            let attributedDescription = (try? AttributedString(markdown: normalizedDescription, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace))) ?? AttributedString(normalizedDescription)
+
             Text(String(format: "%02d", content.order))
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.brandGray)
@@ -202,15 +210,19 @@ struct MapDetailView: View {
             completionStatus(content.completionStatus)
                 .padding(.top, 15)
 
-            Spacer(minLength: 12)
+            Spacer()
+                .frame(height: 24)
+
+            keywordCapsules(content.keyword)
             
-            Text(content.description)
+            Text(attributedDescription)
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(Color.brandGray)
                 .multilineTextAlignment(.leading)
                 .lineSpacing(3)
                 .lineLimit(2)
                 .truncationMode(.tail)
+                .padding(.top, 25)
         }
         .padding(24)
         .frame(maxWidth: 370, minHeight: 307, maxHeight: 307, alignment: .topLeading)
@@ -237,6 +249,9 @@ struct MapDetailView: View {
                 .foregroundStyle(Color.brandBlack)
                 .multilineTextAlignment(.leading)
                 .padding(.top, 14)
+
+            keywordCapsules(content.keyword)
+                .padding(.top, 24)
         }
         .padding(24)
         .frame(maxWidth: 370, minHeight: 307, maxHeight: 307, alignment: .topLeading)
@@ -246,6 +261,25 @@ struct MapDetailView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func keywordCapsules(_ keywords: [String]) -> some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(Array(keywords.enumerated()), id: \.offset) { _, keyword in
+                    Text("#\(keyword)")
+                        .font(AppDesign.Fonts.body)
+                        .foregroundStyle(Color.brandDarkGray)
+                        .padding(.horizontal, 12)
+                        .frame(height: 36)
+                        .background {
+                            Capsule()
+                                .strokeBorder(Color.brandGray300, lineWidth: 1)
+                        }
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
     }
     
     @ViewBuilder
@@ -298,7 +332,7 @@ private struct InteractivePopGestureEnabler: UIViewControllerRepresentable {
 }
 
 #Preview {
-    MapDetailView(store: Store(initialState: MapDetailFeature.State(category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, title: "세금용어·절세기초")])), reducer: {
+    MapDetailView(store: Store(initialState: MapDetailFeature.State(category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", keyword: ["금융소득"], title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", keyword: ["이자", "배당소득세"], title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, keyword: ["세금용어", "절세기초"], title: "세금용어·절세기초")])), reducer: {
         MapDetailFeature()
     }))
 }
