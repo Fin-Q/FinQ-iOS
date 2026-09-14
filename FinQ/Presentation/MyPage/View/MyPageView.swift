@@ -31,7 +31,7 @@ struct MyPageView: View {
                 }
             }
             .background(Color.brandWhite)
-            .navigationTitle("마이페이지")
+            .navigationTitle(store.nickname)
             .navigationBarTitleDisplayMode(.large)
             .onAppear { store.send(.onAppear) }
             .overlay {
@@ -54,10 +54,6 @@ struct MyPageView: View {
     private var profileHeader: some View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(store.nickname)
-                    .font(AppDesign.Fonts.largeTitleBold)
-                    .foregroundStyle(AppDesign.Colors.largeTitle)
-
                 if !store.interests.isEmpty {
                     FlowLayout(spacing: 8) {
                         ForEach(store.interests, id: \.self) { interest in
@@ -84,7 +80,6 @@ struct MyPageView: View {
                             .foregroundStyle(AppDesign.Colors.caption)
                     }
                 }
-                .padding(.top, 2)
             }
 
             Spacer()
