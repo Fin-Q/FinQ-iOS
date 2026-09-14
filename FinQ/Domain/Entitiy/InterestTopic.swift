@@ -21,4 +21,13 @@ enum InterestTopic: String, CaseIterable, Hashable, Identifiable, Sendable {
         case .taxSaving: 4
         }
     }
+
+    var displayName: String {
+        switch self {
+        case .salaryAndSaving: "첫 월급 & 저축"
+        case .investmentBasics: "투자 기초"
+        case .stocksAndETF: "주식 & ETF"
+        case .taxSaving: "세금 절세"
+        }
+    }
 }

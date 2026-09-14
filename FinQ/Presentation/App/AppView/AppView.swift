@@ -42,6 +42,9 @@ struct AppView: View {
         .onReceive(NotificationCenter.default.publisher(for: .tokenRefreshFailed).receive(on: DispatchQueue.main)) { _ in
             store.send(.tokenRefreshFailed)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToHome).receive(on: DispatchQueue.main)) { _ in
+            store.send(.navigateToHome)
+        }
         .onChange(of: store.route) { oldRoute, newRoute in
             transition(from: oldRoute, to: newRoute)
         }
@@ -56,7 +59,6 @@ struct AppView: View {
             displayedRoute = newRoute
         } completion: {
             guard activeTransitionID == transitionID, store.route == newRoute else { return }
-
             activeTransitionID = nil
             store.send(.routeTransitionCompleted(newRoute))
         }

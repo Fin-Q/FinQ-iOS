@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let tokenRefreshFailed = Notification.Name("tokenRefreshFailed")
+    static let navigateToHome = Notification.Name("navigateToHome")
 }

@@ -20,6 +20,23 @@ enum APIRouter: Sendable {
     //MARK: - Onboarding
     case saveInterests(InterestSelectionRequest)
     case completeOnboarding
+
+    //MARK: - User
+    case fetchUserMe
+
+    //MARK: - Home
+    case fetchHome
+
+    //MARK: - Streak
+    case fetchStreakStatus
+    case fetchStreakCalendar(String?)
+
+    //MARK: - Reward
+    case fetchRewardStatus
+
+    //MARK: - Profile
+    case patchNickname(String)
+    case patchProfileImage(String)
 }
 
 extension APIRouter {
@@ -36,6 +53,13 @@ extension APIRouter {
         case .sendPasswordResetVerification: return "/auth/password-reset/verifications"
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
+        case .fetchUserMe: return "/users/me"
+        case .fetchHome: return "/home"
+        case .fetchStreakStatus: return "/streak/status"
+        case .fetchStreakCalendar: return "/streak/calendar"
+        case .fetchRewardStatus: return "/rewards/status"
+        case .patchNickname: return "/users/me/nickname"
+        case .patchProfileImage: return "/users/me/profile-image"
         }
     }
     
@@ -43,24 +67,30 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests:
             return .post
-        case .completeOnboarding:
+        case .completeOnboarding, .patchNickname, .patchProfileImage:
             return .patch
+        case .fetchUserMe, .fetchHome, .fetchStreakStatus, .fetchStreakCalendar, .fetchRewardStatus:
+            return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding, .patchNickname, .patchProfileImage:
             return [
                 "Content-Type": "application/json"
             ]
+        case .fetchUserMe, .fetchHome, .fetchStreakStatus, .fetchStreakCalendar, .fetchRewardStatus:
+            return nil
         }
     }
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .tokenRefresh, .sendPasswordResetVerification, .saveInterests, .completeOnboarding, .patchNickname, .patchProfileImage:
             return JSONEncoding.default
+        case .fetchUserMe, .fetchHome, .fetchStreakStatus, .fetchStreakCalendar, .fetchRewardStatus:
+            return URLEncoding.default
         }
     }
     
@@ -104,8 +134,15 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
-        case .completeOnboarding:
+        case .fetchUserMe, .fetchHome, .fetchStreakStatus, .fetchRewardStatus, .completeOnboarding:
             return nil
+        case .patchNickname(let nickname):
+            return ["nickname": nickname]
+        case .patchProfileImage(let code):
+            return ["profileImageCode": code]
+        case .fetchStreakCalendar(let month):
+            guard let month else { return nil }
+            return ["month": month]
         }
     }
 

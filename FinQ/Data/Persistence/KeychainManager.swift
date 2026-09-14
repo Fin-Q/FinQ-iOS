@@ -20,6 +20,8 @@ enum KeyType: String, Sendable {
     case fcmToken
     case userFullName
     case userEmail
+    case nickname
+    case userID
 }
 
 final class KeychainManager: KeychainManagerProtocol, Sendable {

@@ -61,10 +61,16 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     
     // 사용자가 알림을 클릭했을 때 처리
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let identifier = response.notification.request.identifier
         let userInfo = response.notification.request.content.userInfo
         AppLogger.shared.log("푸시 알림 클릭됨: \(userInfo)", level: .debug)
-//        NotificationCenter.default.post(name: .didReceivePushNotification, object: nil, userInfo: userInfo)
-        
+
+        if identifier == LocalNotificationManager.dailyNotificationID {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .navigateToHome, object: nil)
+            }
+        }
+
         completionHandler()
     }
     

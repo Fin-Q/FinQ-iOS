@@ -30,6 +30,7 @@ struct AppFeature {
         case tabBar(TabBarFeature.Action)
         case tokenRefreshFailed
         case routeTransitionCompleted(Route)
+        case navigateToHome
     }
     
     var body: some ReducerOf<Self> {
@@ -71,8 +72,15 @@ struct AppFeature {
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
                 state.tabBar = TabBarFeature.State()
-                return .none
+                return .run { _ in
+                    LocalNotificationManager.shared.cancelDailyNotification()
+                }
                 
+            case .navigateToHome:
+                guard state.route == .tabBar else { return .none }
+                state.tabBar.selectedTab = .home
+                return .none
+
             case .auth, .onboarding, .tabBar:
                 return .none
                 

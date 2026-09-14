@@ -21,9 +21,12 @@ struct LoginRepository: LoginRepositoryProtocol {
         
         let response = try await networkManager.perform(api: .login(request), responseType: APIResponse<LoginResponse>.self)
         
-        _ = keychainManager.saveItem(item: response.data.accessToken, forKey: .accessToken)
-        _ = keychainManager.saveItem(item: response.data.refreshToken, forKey: .refreshToken)
+        let result = response.data.toDomain()
+        _ = keychainManager.saveItem(item: result.accessToken, forKey: .accessToken)
+        _ = keychainManager.saveItem(item: result.refreshToken, forKey: .refreshToken)
+        _ = keychainManager.saveItem(item: result.nickname, forKey: .nickname)
+        _ = keychainManager.saveItem(item: result.userID, forKey: .userID)
         
-        return response.data.toDomain()
+        return result
     }
 }

@@ -12,7 +12,9 @@ struct StudyView: View {
     let store: StoreOf<StudyFeature>
     
     var body: some View {
-        Text("Hello, Study!")
+        NavigationStack {
+            Color.brandWhite
+        }
     }
 }
 
