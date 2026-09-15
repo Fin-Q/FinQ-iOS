@@ -60,7 +60,7 @@ struct AppView: View {
 
     private func transition(from oldRoute: AppFeature.Route, to newRoute: AppFeature.Route) {
         let transitionID = UUID()
-        let shouldAnimate = newRoute == .onboarding || (oldRoute == .onboarding && newRoute == .tabBar)
+        let shouldAnimate = (oldRoute == .launching && newRoute == .auth) || newRoute == .onboarding || (oldRoute == .onboarding && newRoute == .tabBar)
         activeTransitionID = transitionID
 
         withAnimation(shouldAnimate ? .easeInOut(duration: 0.35) : nil, completionCriteria: .removed) {
