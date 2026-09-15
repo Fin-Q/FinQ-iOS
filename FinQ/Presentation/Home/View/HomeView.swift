@@ -57,6 +57,7 @@ struct HomeView: View {
                     .padding(.bottom, 24)
             }
         }
+        .padding(.bottom, 72)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.brandSkyBlue.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)

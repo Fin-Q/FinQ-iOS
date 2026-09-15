@@ -36,7 +36,7 @@ struct AppView: View {
                     .transition(.opacity)
                 
             case .tabBar:
-                TabBarView(store: store.scope(\.tabBar, action: \.tabBar))
+                MainTabBarContainerView(store: store.scope(\.tabBar, action: \.tabBar))
                     .transition(.opacity)
             }
         }

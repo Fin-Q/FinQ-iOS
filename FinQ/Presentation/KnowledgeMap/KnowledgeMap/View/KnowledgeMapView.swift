@@ -50,6 +50,7 @@ struct KnowledgeMapView: View {
             }
             .scrollIndicators(.hidden)
         }
+        .padding(.bottom, 72)
         .background(Color.brandWhite.ignoresSafeArea())
         .task { store.send(.onAppear) }
         .allowsHitTesting(!store.isLoading)

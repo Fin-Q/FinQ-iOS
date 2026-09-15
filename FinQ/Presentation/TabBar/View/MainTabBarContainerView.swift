@@ -1,5 +1,5 @@
 //
-//  TabBarView.swift
+//  MainTabBarContainerView.swift
 //  FinQ
 //
 //  Created by 권대윤 on 8/29/26.
@@ -8,14 +8,14 @@
 import SwiftUI
 import ComposableArchitecture
 
-struct TabBarView: View {
+struct MainTabBarContainerView: View {
     @Bindable var store: StoreOf<TabBarFeature>
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             selectedContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             bottomBar
         }
         .background {
@@ -35,11 +35,6 @@ struct TabBarView: View {
     private var bottomBar: some View {
         if shouldShowTabBar {
             AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
-        } else if store.selectedTab == .home {
-            Color.brandLightGray
-                .frame(height: 72)
-                .ignoresSafeArea(edges: .bottom)
-                .accessibilityHidden(true)
         }
     }
 
@@ -72,7 +67,7 @@ struct TabBarView: View {
 }
 
 #Preview {
-    TabBarView(
+    MainTabBarContainerView(
         store: Store(initialState: TabBarFeature.State()) {
             TabBarFeature()
         }

@@ -43,7 +43,7 @@ struct MapDetailView: View {
             if store.isLoading {
                 ProgressView()
                     .controlSize(.large)
-                    .tint(AppDesign.Colors.buttonBG)
+                    .tint(AppDesign.Colors.progress)
                     .padding(24)
             }
         }
