@@ -9,7 +9,7 @@ import Foundation
 
 extension HomeResponse {
     func toDomain() -> HomeSummary {
-        return HomeSummary(nickname: nickname, level: level, characterStage: characterStage, totalXP: totalXP, currentStreak: currentStreak, questions: questions.map { $0.toDomain() })
+        return HomeSummary(nickname: nickname, level: level, characterStage: characterStage, characterImageURL: characterImageURL, totalXP: totalXP, currentStreak: currentStreak, questions: questions.map { $0.toDomain() })
     }
 }
 

@@ -11,6 +11,7 @@ struct HomeSummary: Equatable, Sendable {
     let nickname: String
     let level: Int
     let characterStage: Int
+    let characterImageURL: String
     let totalXP: Int
     let currentStreak: Int
     let questions: [HomeQuestion]

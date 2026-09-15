@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import ComposableArchitecture
+import Kingfisher
 
 struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -34,15 +35,26 @@ struct HomeView: View {
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
 
-                Spacer(minLength: 24)
+                characterImage(urlString: home.characterImageURL)
+                    .padding(.top, 24)
+                    .zIndex(0)
+
+                Spacer(minLength: 0)
 
                 recommendedQuestions(home.questions)
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 24)
-            } else if !store.isLoading {
-                Button("다시 불러오기") { store.send(.onAppear) }
-                    .buttonStyle(.customDefault)
-                    .padding(32)
+                    .zIndex(1)
+            } else {
+                profileHeaderPlaceholder
+                    .padding(.horizontal, 32)
+                    .padding(.top, 16)
+
+                Spacer(minLength: 0)
+
+                recommendedQuestionsPlaceholder
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 24)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -58,7 +70,7 @@ struct HomeView: View {
             if store.isLoading {
                 ProgressView()
                     .controlSize(.large)
-                    .tint(Color.brandGray)
+                    .tint(AppDesign.Colors.progress)
             }
         }
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
@@ -89,23 +101,53 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 8) {
                 Text("레벨 \(home.level)")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(AppDesign.Fonts.captionSemiBold)
                     .foregroundStyle(Color.brandDarkGray)
                     .padding(.horizontal, 12)
                     .frame(height: 30)
                     .background(Color.brandWhite, in: Capsule())
 
                 Text(home.nickname)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(AppDesign.Fonts.largeBodySemi20)
                     .foregroundStyle(Color.brandBlack)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
 
-            HomeProgressBar(progress: home.levelProgress)
+            CustomProgressBar(progress: home.levelProgress)
                 .accessibilityLabel("레벨 \(home.level), 총 \(home.totalXP) XP")
                 .accessibilityValue(home.level == 4 ? "최고 레벨" : "\(Int(home.levelProgress * 100))퍼센트")
         }
+    }
+
+    private var profileHeaderPlaceholder: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Capsule()
+                .fill(Color.brandGray300)
+                .frame(width: 64, height: 30)
+
+            CustomProgressBar(progress: 0)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var recommendedQuestionsPlaceholder: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color.brandWhite)
+            .frame(width: 370, height: 276)
+            .accessibilityHidden(true)
+    }
+
+    private func characterImage(urlString: String) -> some View {
+        KFImage(URL(string: urlString))
+            .placeholder {
+                ProgressView()
+                    .tint(AppDesign.Colors.progress)
+            }
+            .resizable()
+            .scaledToFit()
+            .frame(width: 402, height: 250)
+            .accessibilityHidden(true)
     }
 
     private func recommendedQuestions(_ questions: [HomeQuestion]) -> some View {
@@ -180,7 +222,7 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(store: Store(initialState: HomeFeature.State(home: HomeSummary(nickname: "투자박사357", level: 1, characterStage: 1, totalXP: 24, currentStreak: 5, questions: [
+    HomeView(store: Store(initialState: HomeFeature.State(home: HomeSummary(nickname: "투자박사357", level: 1, characterStage: 1, characterImageURL: "https://finq-assets.s3.ap-northeast-2.amazonaws.com/character-images/character_03.png", totalXP: 24, currentStreak: 5, questions: [
         HomeQuestion(contentID: 4, categoryCode: "SAL", categoryName: "월급관리·저축", title: "예금·적금", completionStatus: .incomplete),
         HomeQuestion(contentID: 5, categoryCode: "SAL", categoryName: "월급관리·저축", title: "목적별 자금 관리", completionStatus: .incomplete),
         HomeQuestion(contentID: 7, categoryCode: "INV", categoryName: "투자기초", title: "복리", completionStatus: .incomplete)

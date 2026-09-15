@@ -11,12 +11,14 @@ struct HomeResponse: Decodable, Sendable {
     let nickname: String
     let level: Int
     let characterStage: Int
+    let characterImageURL: String
     let totalXP: Int
     let currentStreak: Int
     let questions: [HomeQuestionResponse]
 
     enum CodingKeys: String, CodingKey {
         case nickname, level, characterStage, currentStreak, questions
+        case characterImageURL = "characterImageUrl"
         case totalXP = "totalXp"
     }
 }

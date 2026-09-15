@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct HomeProgressBar: View {
+struct CustomProgressBar: View {
     let progress: Double
 
     var body: some View {

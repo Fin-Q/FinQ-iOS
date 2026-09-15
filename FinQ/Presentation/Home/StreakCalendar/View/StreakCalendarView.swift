@@ -55,7 +55,7 @@ struct StreakCalendarView: View {
             if store.isLoading {
                 ProgressView()
                     .controlSize(.large)
-                    .tint(Color.brandGray)
+                    .tint(AppDesign.Colors.progress)
             }
         }
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", coversEntireScreen: true, onConfirm: {
@@ -98,7 +98,7 @@ struct StreakCalendarView: View {
     private func streakCard(_ status: StreakStatus) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 0) {
-                HomeProgressBar(progress: status.bonusProgress)
+                CustomProgressBar(progress: status.bonusProgress)
                     .accessibilityHidden(true)
 
                 Image(.gift)
@@ -106,6 +106,7 @@ struct StreakCalendarView: View {
                     .scaledToFit()
                     .frame(width: 36, height: 36)
                     .accessibilityHidden(true)
+                    .offset(x: -3)
             }
 
             Text("\(status.currentStreak)일 연속")
