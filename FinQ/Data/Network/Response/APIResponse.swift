@@ -34,10 +34,12 @@ struct APIResponse<Payload: Decodable & Sendable>: Decodable, Sendable {
 }
 
 struct APIErrorResponse: Decodable, Sendable, LocalizedError {
+    let errorCode: String?
     let message: String
     let details: [APIErrorDetail]?
 
-    init(message: String, details: [APIErrorDetail]? = nil) {
+    init(errorCode: String? = nil, message: String, details: [APIErrorDetail]? = nil) {
+        self.errorCode = errorCode
         self.message = message
         self.details = details
     }

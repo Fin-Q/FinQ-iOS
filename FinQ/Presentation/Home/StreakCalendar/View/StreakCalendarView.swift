@@ -58,7 +58,7 @@ struct StreakCalendarView: View {
                     .tint(Color.brandGray)
             }
         }
-        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
+        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", coversEntireScreen: true, onConfirm: {
             store.send(.alertOKButtonTapped)
         })
     }
@@ -83,11 +83,12 @@ struct StreakCalendarView: View {
     private var attendanceHeader: some View {
         HStack(spacing: 16) {
             Text(store.isTodayCompleted ? "출석 인증 완료!" : "오늘도 학습해 볼까요?")
-                .font(.system(size: 24, weight: .semibold))
+                .font(AppDesign.Fonts.largeTitleSemiBold)
                 .foregroundStyle(Color.brandBlack)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .offset(y: -20)
 
-            RoundedRectangle(cornerRadius: 16)
+            Circle()
                 .fill(Color.brandGray300.opacity(0.35))
                 .frame(width: 104, height: 104)
                 .accessibilityHidden(true)
@@ -148,6 +149,16 @@ struct StreakCalendarView: View {
         .padding(.vertical, 20)
         .frame(maxWidth: .infinity)
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    guard abs(value.translation.width) >= 50, abs(value.translation.width) > abs(value.translation.height) else { return }
+                    HapticManager.selection()
+                    store.send(value.translation.width < 0 ? .nextMonthRequested : .previousMonthRequested)
+                }
+        )
+        .accessibilityAction(named: "이전 달") { store.send(.previousMonthRequested) }
+        .accessibilityAction(named: "다음 달") { store.send(.nextMonthRequested) }
     }
 
     private func calendarDay(_ day: Int, calendar: StreakCalendar) -> some View {
@@ -188,7 +199,7 @@ struct StreakCalendarView: View {
 
 #Preview {
     NavigationStack {
-        StreakCalendarView(store: Store(initialState: StreakCalendarFeature.State(calendar: StreakCalendar(month: "2026-09", streakDates: ["2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05"]), status: StreakStatus(currentStreak: 5, daysUntilNextBonus: 3), today: Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 9, day: 5))!)) {
+        StreakCalendarView(store: Store(initialState: StreakCalendarFeature.State(calendar: StreakCalendar(month: "2026-09", streakDates: ["2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05"]), status: StreakStatus(currentStreak: 5, daysUntilNextBonus: 3), today: Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 9, day: 5))!, isTodayCompleted: true)) {
             EmptyReducer()
         })
     }
