@@ -32,8 +32,14 @@ struct HomeFeature {
         case fetchHomeSucceeded(HomeSummary)
         case fetchHomeFailed(String)
         case calendarButtonTapped
+        case questionTapped(HomeQuestion)
         case alertOKButtonTapped
         case path(StackActionOf<Path>)
+        case delegate(Delegate)
+
+        enum Delegate: Equatable {
+            case questionTapped(HomeQuestion)
+        }
     }
     
     var body: some ReducerOf<Self> {
@@ -75,11 +81,14 @@ struct HomeFeature {
                 state.path.append(.streakCalendar(StreakCalendarFeature.State()))
                 return .none
 
+            case let .questionTapped(question):
+                return .send(.delegate(.questionTapped(question)))
+
             case .alertOKButtonTapped:
                 state.errorMessage = nil
                 return .none
 
-            case .path:
+            case .path, .delegate:
                 return .none
             }
         }

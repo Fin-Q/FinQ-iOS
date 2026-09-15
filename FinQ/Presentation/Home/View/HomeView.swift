@@ -117,29 +117,35 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, minHeight: 60)
             } else {
                 ForEach(questions) { question in
-                    HStack(spacing: 16) {
-                        Rectangle()
-                            .fill(Color.brandLightGray)
-                            .frame(width: 60, height: 60)
-                            .accessibilityHidden(true)
+                    Button {
+                        HapticManager.selection()
+                        store.send(.questionTapped(question))
+                    } label: {
+                        HStack(spacing: 16) {
+                            Rectangle()
+                                .fill(Color.brandLightGray)
+                                .frame(width: 60, height: 60)
+                                .accessibilityHidden(true)
 
-                        Text(question.title)
-                            .font(AppDesign.Fonts.body)
-                            .foregroundStyle(Color.brandGray)
-                            .lineSpacing(5)
-                            .lineLimit(2)
-                            .truncationMode(.tail)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(question.title)
+                                .font(AppDesign.Fonts.body)
+                                .foregroundStyle(Color.brandGray)
+                                .lineSpacing(5)
+                                .lineLimit(2)
+                                .truncationMode(.tail)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
-                        // 추천 질문의 지식맵 이동은 추후 연결합니다.
-                        Image(.chevronRight)
-                            .renderingMode(.template)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 8, height: 14)
-                            .foregroundStyle(Color.brandGray300)
-                            .accessibilityHidden(true)
+                            Image(.chevronRight)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 8, height: 14)
+                                .foregroundStyle(Color.brandGray300)
+                                .accessibilityHidden(true)
+                        }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                     .accessibilityElement(children: .combine)
                 }
             }

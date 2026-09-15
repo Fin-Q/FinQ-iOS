@@ -16,16 +16,22 @@ struct MapDetailView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    heroSection
-                    learningListSection
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        heroSection
+                        learningListSection
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .background(Color(red: 0.96, green: 0.97, blue: 0.98).ignoresSafeArea())
+                .allowsHitTesting(!store.isLoading)
+                .onChange(of: store.detail, initial: true) { _, detail in
+                    guard let targetContentID = store.targetContentID, detail?.contents.contains(where: { $0.contentID == targetContentID }) == true else { return }
+                    withAnimation(.easeInOut) { proxy.scrollTo(targetContentID, anchor: .center) }
                 }
             }
-            .scrollIndicators(.hidden)
-            .background(Color(red: 0.96, green: 0.97, blue: 0.98).ignoresSafeArea())
             .ignoresSafeArea(edges: .top)
-            .allowsHitTesting(!store.isLoading)
             
             backButton
                 .padding(.leading, 16)
@@ -173,6 +179,7 @@ struct MapDetailView: View {
                         learningCard(content)
                     }
                     .buttonStyle(.plain)
+                    .id(content.contentID)
                 }
                 
                 ForEach(detail.premiumContents) { content in
