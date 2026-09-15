@@ -98,11 +98,13 @@ struct KnowledgeMapPremiumContentResponse: Decodable, Sendable {
     let keyword: [String]
     let title: String
     let description: String
+    let order: Int
 
     enum CodingKeys: String, CodingKey {
         case contentID = "contentId"
         case keyword
         case title
         case description
+        case order
     }
 }
