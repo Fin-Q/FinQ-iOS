@@ -15,6 +15,7 @@ struct StreakCalendarFeature {
 
     @ObservableState
     struct State: Equatable {
+        var profileImageURL: String?
         var calendar: StreakCalendar?
         var status: StreakStatus?
         var today: Date = Date()
@@ -25,6 +26,7 @@ struct StreakCalendarFeature {
 
     enum Action {
         case onAppear
+        case fetchProfileImageSucceeded(String)
         case fetchSucceeded(StreakCalendar, StreakStatus)
         case fetchCalendarSucceeded(StreakCalendar)
         case fetchCalendarIgnored(String)
@@ -43,18 +45,33 @@ struct StreakCalendarFeature {
                 state.errorMessage = nil
                 state.today = now
 
-                return .run { send in
-                    do {
-                        async let calendar = streakUseCase.fetchCalendar(month: nil)
-                        async let status = streakUseCase.fetchStatus()
-                        let result = try await (calendar, status)
-                        guard !Task.isCancelled else { return }
-                        await send(.fetchSucceeded(result.0, result.1))
-                    } catch {
-                        guard !Task.isCancelled else { return }
-                        await send(.fetchFailed(error.localizedDescription))
+                return .merge(
+                    .run { send in
+                        do {
+                            async let calendar = streakUseCase.fetchCalendar(month: nil)
+                            async let status = streakUseCase.fetchStatus()
+                            let result = try await (calendar, status)
+                            guard !Task.isCancelled else { return }
+                            await send(.fetchSucceeded(result.0, result.1))
+                        } catch {
+                            guard !Task.isCancelled else { return }
+                            await send(.fetchFailed(error.localizedDescription))
+                        }
+                    },
+                    .run { send in
+                        do {
+                            let imageURL = try await streakUseCase.fetchProfileImageURL()
+                            guard !Task.isCancelled else { return }
+                            await send(.fetchProfileImageSucceeded(imageURL))
+                        } catch {
+                            AppLogger.shared.log("프로필 이미지 조회 실패: \(error.localizedDescription)", level: .error)
+                        }
                     }
-                }
+                )
+
+            case let .fetchProfileImageSucceeded(imageURL):
+                state.profileImageURL = imageURL
+                return .none
 
             case let .fetchSucceeded(calendar, status):
                 state.calendar = calendar

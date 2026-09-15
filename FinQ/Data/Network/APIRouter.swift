@@ -28,6 +28,7 @@ enum APIRouter: Sendable {
 
     //MARK: - Home
     case home
+    case profileImage
     case streakCalendar(month: String?)
     case streakStatus
 
@@ -57,6 +58,7 @@ extension APIRouter {
         case .saveInterests: return "/users/me/interests"
         case .completeOnboarding: return "/users/me/onboarding/complete"
         case .home: return "/home"
+        case .profileImage: return "/users/me/profile-image"
         case .streakCalendar: return "/streak/calendar"
         case .streakStatus: return "/streak/status"
         case .knowledgeMap: return "/knowledge-map"
@@ -70,14 +72,14 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
             return [
                 "Content-Type": "application/json"
             ]
@@ -88,7 +90,7 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
             return JSONEncoding.default
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .streakCalendar, .streakStatus:
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
             return URLEncoding.default
         }
     }
@@ -161,7 +163,7 @@ extension APIRouter {
         case let .streakCalendar(month):
             return month.map { ["month": $0] }
 
-        case .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .streakStatus:
+        case .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakStatus:
             return nil
         }
     }

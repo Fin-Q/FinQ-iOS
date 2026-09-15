@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import ComposableArchitecture
+import Kingfisher
 
 struct StreakCalendarView: View {
     @Environment(\.dismiss) private var dismiss
@@ -88,11 +89,21 @@ struct StreakCalendarView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .offset(y: -20)
 
-            Circle()
-                .fill(Color.brandGray300.opacity(0.35))
-                .frame(width: 104, height: 104)
-                .accessibilityHidden(true)
+            profileImage
         }
+    }
+
+    private var profileImage: some View {
+        KFImage(store.profileImageURL.flatMap { URL(string: $0) })
+            .placeholder {
+                Circle()
+                    .fill(Color.brandGray300.opacity(0.35))
+            }
+            .resizable()
+            .scaledToFill()
+            .frame(width: 104, height: 104)
+            .clipShape(Circle())
+            .accessibilityHidden(true)
     }
 
     private func streakCard(_ status: StreakStatus) -> some View {

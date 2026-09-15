@@ -8,6 +8,7 @@
 import Foundation
 
 protocol StreakRepositoryProtocol: Sendable {
+    func fetchProfileImageURL() async throws -> String
     func fetchCalendar(month: String?) async throws -> StreakCalendar
     func fetchStatus() async throws -> StreakStatus
 }

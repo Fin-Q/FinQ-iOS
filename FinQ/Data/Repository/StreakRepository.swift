@@ -14,6 +14,11 @@ struct StreakRepository: StreakRepositoryProtocol {
         self.networkManager = networkManager
     }
 
+    func fetchProfileImageURL() async throws -> String {
+        let response = try await networkManager.perform(api: .profileImage, responseType: APIResponse<ProfileImageResponse>.self)
+        return response.data.profileImageURL
+    }
+
     func fetchCalendar(month: String?) async throws -> StreakCalendar {
         let response = try await networkManager.perform(api: .streakCalendar(month: month), responseType: APIResponse<StreakCalendarResponse>.self)
         return response.data.toDomain()

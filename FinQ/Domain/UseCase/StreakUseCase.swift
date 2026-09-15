@@ -8,6 +8,7 @@
 import Foundation
 
 protocol StreakUseCaseProtocol: Sendable {
+    func fetchProfileImageURL() async throws -> String
     func fetchCalendar(month: String?) async throws -> StreakCalendar
     func fetchStatus() async throws -> StreakStatus
 }
@@ -17,6 +18,10 @@ struct StreakUseCase: StreakUseCaseProtocol {
 
     init(repository: any StreakRepositoryProtocol) {
         self.repository = repository
+    }
+
+    func fetchProfileImageURL() async throws -> String {
+        return try await repository.fetchProfileImageURL()
     }
 
     func fetchCalendar(month: String?) async throws -> StreakCalendar {
