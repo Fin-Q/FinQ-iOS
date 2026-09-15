@@ -33,10 +33,6 @@ struct StreakCalendarView: View {
 
                         calendarCard(calendar)
                             .padding(.top, 40)
-                    } else if !store.isLoading {
-                        Button("다시 불러오기") { store.send(.onAppear) }
-                            .buttonStyle(.customDefault)
-                            .padding(.top, 32)
                     }
                 }
                 .padding(.horizontal, 16)
