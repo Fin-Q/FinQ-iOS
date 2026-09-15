@@ -8,6 +8,7 @@
 import Foundation
 
 protocol OnboardingRepositoryProtocol: Sendable {
+    func isOnboardingCompleted() async throws -> Bool
     func saveInterests(input: InterestSelectionInput) async throws
     func completeOnboarding() async throws
 }

@@ -8,6 +8,7 @@
 import Foundation
 
 protocol OnboardingUseCaseProtocol: Sendable {
+    func isOnboardingCompleted() async throws -> Bool
     func saveInterests(topics: [InterestTopic]) async throws
     func completeOnboarding() async throws
 }
@@ -17,6 +18,10 @@ struct OnboardingUseCase: OnboardingUseCaseProtocol {
 
     init(repository: any OnboardingRepositoryProtocol) {
         self.repository = repository
+    }
+
+    func isOnboardingCompleted() async throws -> Bool {
+        try await repository.isOnboardingCompleted()
     }
 
     func saveInterests(topics: [InterestTopic]) async throws {
