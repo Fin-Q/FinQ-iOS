@@ -22,8 +22,11 @@ struct AppTabBar: View {
         }
         .padding(.horizontal, 55)
         .frame(height: 72)
-        .background(Color.brandWhite)
-        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 16, topTrailingRadius: 16))
+        .background {
+            UnevenRoundedRectangle(topLeadingRadius: 16, topTrailingRadius: 16)
+                .fill(Color.brandWhite)
+                .ignoresSafeArea(edges: .bottom)
+        }
         .overlay { TabBarTopBorder().stroke(Color.brandGray300.opacity(0.35), lineWidth: 1) }
     }
 

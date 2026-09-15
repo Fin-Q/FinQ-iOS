@@ -16,16 +16,22 @@ struct MapDetailView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    heroSection
-                    learningListSection
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        heroSection
+                        learningListSection
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .background(Color(red: 0.96, green: 0.97, blue: 0.98).ignoresSafeArea())
+                .allowsHitTesting(!store.isLoading)
+                .onChange(of: store.detail, initial: true) { _, detail in
+                    guard let targetContentID = store.targetContentID, detail?.contents.contains(where: { $0.contentID == targetContentID }) == true else { return }
+                    withAnimation(.easeInOut) { proxy.scrollTo(targetContentID, anchor: .center) }
                 }
             }
-            .scrollIndicators(.hidden)
-            .background(Color(red: 0.96, green: 0.97, blue: 0.98).ignoresSafeArea())
             .ignoresSafeArea(edges: .top)
-            .allowsHitTesting(!store.isLoading)
             
             backButton
                 .padding(.leading, 16)
@@ -37,7 +43,7 @@ struct MapDetailView: View {
             if store.isLoading {
                 ProgressView()
                     .controlSize(.large)
-                    .tint(AppDesign.Colors.buttonBG)
+                    .tint(AppDesign.Colors.progress)
                     .padding(24)
             }
         }
@@ -166,22 +172,8 @@ struct MapDetailView: View {
                 .padding(.bottom, 10)
             
             if let detail = store.detail {
-                ForEach(detail.contents) { content in
-                    Button {
-                        store.send(.contentCardTapped(content.contentID))
-                    } label: {
-                        learningCard(content)
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                ForEach(detail.premiumContents) { content in
-                    Button {
-                        store.send(.premiumContentTapped(content))
-                    } label: {
-                        premiumCard(content)
-                    }
-                    .buttonStyle(.plain)
+                ForEach(learningListItems(detail)) { item in
+                    learningListItem(item, detail: detail)
                 }
             }
         }
@@ -191,8 +183,38 @@ struct MapDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(red: 0.96, green: 0.97, blue: 0.98))
     }
+
+    @ViewBuilder
+    private func learningListItem(_ item: LearningListItem, detail: KnowledgeMapCategoryDetail) -> some View {
+        switch item {
+        case let .standard(content):
+            Button {
+                store.send(.contentCardTapped(content.contentID))
+            } label: {
+                learningCard(content, cardNumber: standardCardNumber(content, in: detail))
+            }
+            .buttonStyle(.plain)
+            .id(content.contentID)
+
+        case let .premium(content):
+            Button {
+                store.send(.premiumContentTapped(content))
+            } label: {
+                premiumCard(content)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func learningListItems(_ detail: KnowledgeMapCategoryDetail) -> [LearningListItem] {
+        return (detail.contents.map(LearningListItem.standard) + detail.premiumContents.map(LearningListItem.premium)).sorted { $0.order < $1.order }
+    }
+
+    private func standardCardNumber(_ content: KnowledgeMapContent, in detail: KnowledgeMapCategoryDetail) -> Int {
+        return (detail.contents.sorted { $0.order < $1.order }.firstIndex { $0.contentID == content.contentID } ?? 0) + 1
+    }
     
-    private func learningCard(_ content: KnowledgeMapContent) -> some View {
+    private func learningCard(_ content: KnowledgeMapContent, cardNumber: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             let normalizedDescription = content.description
                 .replacingOccurrences(of: "\\n", with: "\n")
@@ -202,7 +224,7 @@ struct MapDetailView: View {
 
             let attributedDescription = (try? AttributedString(markdown: normalizedDescription, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace))) ?? AttributedString(normalizedDescription)
 
-            Text(String(format: "%02d", content.order))
+            Text(String(format: "%02d", cardNumber))
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(Color.brandGray)
             
@@ -326,6 +348,25 @@ struct MapDetailView: View {
     private var totalContentCount: Int { store.detail?.totalContentCount ?? store.category.totalContentCount }
 }
 
+private enum LearningListItem: Identifiable {
+    case standard(KnowledgeMapContent)
+    case premium(KnowledgeMapPremiumContent)
+
+    var id: String {
+        switch self {
+        case let .standard(content): "standard-\(content.contentID)"
+        case let .premium(content): "premium-\(content.contentID)"
+        }
+    }
+
+    var order: Int {
+        switch self {
+        case let .standard(content): content.order
+        case let .premium(content): content.order
+        }
+    }
+}
+
 private struct InteractivePopGestureEnabler: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> Controller {
         return Controller()
@@ -355,7 +396,7 @@ private struct InteractivePopGestureEnabler: UIViewControllerRepresentable {
 }
 
 #Preview {
-    MapDetailView(store: Store(initialState: MapDetailFeature.State(category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", keyword: ["금융소득"], title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", keyword: ["이자", "배당소득세"], title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, keyword: ["세금용어", "절세기초"], title: "세금용어·절세기초", description: "세금과 절세의 핵심 개념을 알아보세요.")])), reducer: {
+    MapDetailView(store: Store(initialState: MapDetailFeature.State(category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", keyword: ["금융소득"], title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", keyword: ["이자", "배당소득세"], title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, keyword: ["세금용어", "절세기초"], title: "세금용어·절세기초", description: "세금과 절세의 핵심 개념을 알아보세요.", order: 3)])), reducer: {
         MapDetailFeature()
     }))
 }

@@ -1,5 +1,5 @@
 //
-//  TabBarView.swift
+//  MainTabBarContainerView.swift
 //  FinQ
 //
 //  Created by 권대윤 on 8/29/26.
@@ -8,20 +8,34 @@
 import SwiftUI
 import ComposableArchitecture
 
-struct TabBarView: View {
+struct MainTabBarContainerView: View {
     @Bindable var store: StoreOf<TabBarFeature>
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             selectedContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            if shouldShowTabBar {
-                AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+
+            bottomBar
+        }
+        .background {
+            Color.brandWhite.ignoresSafeArea()
+            if store.selectedTab == .home {
+                if store.home.path.isEmpty {
+                    Color.brandSkyBlue.ignoresSafeArea(edges: .top)
+                } else {
+                    Color.brandLightGray.ignoresSafeArea(edges: .bottom)
+                }
             }
         }
-        .background(Color.brandWhite.ignoresSafeArea())
         .ignoresSafeArea(.keyboard, edges: .bottom)
+    }
+
+    @ViewBuilder
+    private var bottomBar: some View {
+        if shouldShowTabBar {
+            AppTabBar(selectedTab: store.selectedTab) { store.send(.selectedTabChanged($0)) }
+        }
     }
 
     @ViewBuilder
@@ -43,14 +57,17 @@ struct TabBarView: View {
         case .knowledgeMap:
             return store.knowledgeMap.path.isEmpty
 
-        case .home, .myPage:
+        case .home:
+            return store.home.path.isEmpty
+
+        case .myPage:
             return true
         }
     }
 }
 
 #Preview {
-    TabBarView(
+    MainTabBarContainerView(
         store: Store(initialState: TabBarFeature.State()) {
             TabBarFeature()
         }

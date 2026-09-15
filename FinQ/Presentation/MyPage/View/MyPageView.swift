@@ -32,6 +32,7 @@ struct MyPageView: View {
             .buttonStyle(.plain)
             .padding(.horizontal, 14)
         }
+        .padding(.bottom, 72)
     }
 }
 

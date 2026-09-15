@@ -59,6 +59,17 @@ struct TabBarFeature {
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
 
+            case let .home(.delegate(.questionTapped(question))):
+                return .send(.knowledgeMap(.openContent(categoryCode: question.categoryCode, contentID: question.contentID)))
+
+            case .knowledgeMap(.delegate(.contentDestinationReady)):
+                state.selectedTab = .knowledgeMap
+                return .none
+
+            case let .knowledgeMap(.delegate(.contentDestinationFailed(message))):
+                state.home.errorMessage = message
+                return .none
+
             case .knowledgeMap, .home, .myPage, .delegate:
                 return .none
             }

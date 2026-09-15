@@ -24,8 +24,7 @@ struct AppView: View {
         ZStack {
             switch displayedRoute {
             case .launching:
-                Color.brandBlue
-                    .ignoresSafeArea()
+                SplashView()
 
             case .auth:
                 AuthMainView(store: store.scope(\.auth, action: \.auth))
@@ -36,9 +35,16 @@ struct AppView: View {
                     .transition(.opacity)
                 
             case .tabBar:
-                TabBarView(store: store.scope(\.tabBar, action: \.tabBar))
+                MainTabBarContainerView(store: store.scope(\.tabBar, action: \.tabBar))
                     .transition(.opacity)
             }
+
+            SplashView()
+                .opacity(store.isWaitingForInitialHome ? 1 : 0)
+                .allowsHitTesting(store.isWaitingForInitialHome)
+                .accessibilityHidden(!store.isWaitingForInitialHome)
+                .animation(store.isWaitingForInitialHome ? nil : .easeOut(duration: 0.35), value: store.isWaitingForInitialHome)
+                .zIndex(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.brandWhite.ignoresSafeArea())
@@ -54,7 +60,7 @@ struct AppView: View {
 
     private func transition(from oldRoute: AppFeature.Route, to newRoute: AppFeature.Route) {
         let transitionID = UUID()
-        let shouldAnimate = newRoute == .onboarding || (oldRoute == .onboarding && newRoute == .tabBar)
+        let shouldAnimate = (oldRoute == .launching && newRoute == .auth) || newRoute == .onboarding || (oldRoute == .onboarding && newRoute == .tabBar)
         activeTransitionID = transitionID
 
         withAnimation(shouldAnimate ? .easeInOut(duration: 0.35) : nil, completionCriteria: .removed) {

@@ -15,6 +15,7 @@ struct MapDetailFeature {
     @ObservableState
     struct State: Equatable {
         let category: KnowledgeMapCategory
+        var targetContentID: Int? = nil
         var detail: KnowledgeMapCategoryDetail?
         var isLoading: Bool = false
         var errorMessage: String?

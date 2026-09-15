@@ -44,7 +44,7 @@ struct SignUpView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 24)
                 
-                VStack(spacing: 28) {
+                VStack(spacing: 40) {
                     CustomUnderlineValidTextFieldView(
                         title: "이메일 주소",
                         text: Binding(
@@ -83,6 +83,7 @@ struct SignUpView: View {
                         }
                     )
                 }
+                .padding(.top, 30)
                 
                 Spacer()
                 

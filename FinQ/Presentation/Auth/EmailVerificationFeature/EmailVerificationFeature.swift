@@ -32,7 +32,7 @@ struct EmailVerificationFeature {
 
         var isLoading: Bool { isResending || isConfirming }
         var isResendButtonEnabled: Bool { !isLoading && resendAvailableIn == 0 && !email.isEmpty }
-        var isNextButtonEnabled: Bool { !isLoading && !code.replacingOccurrences(of: " ", with: "").isEmpty }
+        var isNextButtonEnabled: Bool { !isLoading && seconds > 0 && !code.replacingOccurrences(of: " ", with: "").isEmpty }
     }
     
     enum Action {
