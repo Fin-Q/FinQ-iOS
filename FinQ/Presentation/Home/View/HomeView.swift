@@ -113,7 +113,7 @@ struct HomeView: View {
             if questions.isEmpty {
                 Text("추천 질문이 아직 없어요")
                     .font(AppDesign.Fonts.body)
-                    .foregroundStyle(Color.brandGray)
+                    .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                     .frame(maxWidth: .infinity, minHeight: 60)
             } else {
                 ForEach(questions) { question in
@@ -122,14 +122,11 @@ struct HomeView: View {
                         store.send(.questionTapped(question))
                     } label: {
                         HStack(spacing: 16) {
-                            Rectangle()
-                                .fill(Color.brandLightGray)
-                                .frame(width: 60, height: 60)
-                                .accessibilityHidden(true)
+                            questionIcon(categoryCode: question.categoryCode)
 
                             Text(question.title)
                                 .font(AppDesign.Fonts.body)
-                                .foregroundStyle(Color.brandGray)
+                                .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
                                 .lineSpacing(5)
                                 .lineLimit(2)
                                 .truncationMode(.tail)
@@ -153,6 +150,32 @@ struct HomeView: View {
         .padding(20)
         .frame(width: 370, height: 276, alignment: .leading)
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private func questionIcon(categoryCode: String) -> some View {
+        if let imageName = questionIconName(categoryCode: categoryCode) {
+            Image(imageName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .accessibilityHidden(true)
+        } else {
+            Rectangle()
+                .fill(Color.brandLightGray)
+                .frame(width: 60, height: 60)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func questionIconName(categoryCode: String) -> String? {
+        switch categoryCode {
+        case InterestTopic.salaryAndSaving.rawValue: "SALIcon"
+        case InterestTopic.investmentBasics.rawValue: "INVIcon"
+        case InterestTopic.stocksAndETF.rawValue: "STKIcon"
+        case InterestTopic.taxSaving.rawValue: "TAXIcon"
+        default: nil
+        }
     }
 }
 
