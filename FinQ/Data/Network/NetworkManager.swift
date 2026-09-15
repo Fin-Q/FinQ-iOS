@@ -61,6 +61,11 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
             )
             #endif
 
+            if let urlError = error.underlyingError as? URLError,
+               urlError.code == .notConnectedToInternet {
+                throw APIErrorResponse(message: "네트워크 연결 상태를 확인 후 다시 시도해 주세요.")
+            }
+
             if let statusCode = response.response?.statusCode,
                (500..<600).contains(statusCode) {
                 throw APIErrorResponse(message: "일시적인 오류가 발생했어요.\n잠시 후 다시 시도해 주세요.")
