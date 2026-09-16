@@ -31,6 +31,11 @@ struct MapDetailFeature {
         case contentCardTapped(Int)
         case premiumContentTapped(KnowledgeMapPremiumContent)
         case premiumAlertOKButtonTapped
+        case delegate(Delegate)
+
+        enum Delegate: Equatable {
+            case advancedQuizRequested(categoryID: Int)
+        }
     }
     
     var body: some ReducerOf<Self> {
@@ -77,7 +82,10 @@ struct MapDetailFeature {
                 state.isPremiumAlertPresented = false
                 return .none
 
-            case .challengeButtonTapped, .contentCardTapped:
+            case .challengeButtonTapped:
+                return .send(.delegate(.advancedQuizRequested(categoryID: state.category.categoryID)))
+
+            case .contentCardTapped, .delegate:
                 return .none
             }
         }
