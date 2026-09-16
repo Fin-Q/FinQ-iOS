@@ -72,30 +72,18 @@ extension APIRouter {
     
     var method: HTTPMethod {
         switch self {
-<<<<<<< HEAD
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests, .submitAdvancedQuizAnswer:
             return .post
         case .completeOnboarding:
             return .patch
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
-=======
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .submitAdvancedQuizAnswer:
-            return .post
-        case .completeOnboarding:
-            return .patch
-        case .knowledgeMap, .categoryDetail, .advancedQuiz:
->>>>>>> feature/advanced-quiz
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-<<<<<<< HEAD
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
-=======
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz, .submitAdvancedQuizAnswer:
->>>>>>> feature/advanced-quiz
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer:
             return [
                 "Content-Type": "application/json"
             ]
@@ -104,15 +92,10 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-<<<<<<< HEAD
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer:
             return JSONEncoding.default
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
-=======
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer:
-            return JSONEncoding.default
-        case .knowledgeMap, .categoryDetail, .advancedQuiz:
->>>>>>> feature/advanced-quiz
+        
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz:
             return URLEncoding.default
         }
     }

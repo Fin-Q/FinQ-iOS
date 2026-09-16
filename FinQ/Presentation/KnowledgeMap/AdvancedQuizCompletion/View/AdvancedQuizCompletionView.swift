@@ -15,7 +15,7 @@ struct AdvancedQuizCompletionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("학습을 완료했어요!")
-                .font(AppDesign.Fonts.largeTitleSemiBold24)
+                .font(AppDesign.Fonts.largeTitleSemiBold)
                 .foregroundStyle(Color.brandBlack)
                 .padding(.top, 60)
 
@@ -65,7 +65,7 @@ struct AdvancedQuizCompletionView: View {
                 .resizable()
                 .renderingMode(.original)
                 .scaledToFit()
-                .frame(width: 14, height: 18)
+                .frame(width: 24, height: 24)
 
             Text("획득 XP")
                 .font(.system(size: 16, weight: .medium))
