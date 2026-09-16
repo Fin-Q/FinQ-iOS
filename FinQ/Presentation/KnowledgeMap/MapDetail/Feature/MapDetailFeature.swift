@@ -26,6 +26,7 @@ struct MapDetailFeature {
         case onAppear
         case fetchDetailSucceeded(KnowledgeMapCategoryDetail)
         case fetchDetailFailed(String)
+        case targetContentScrollCompleted
         case alertOKButtonTapped
         case challengeButtonTapped
         case contentCardTapped(Int)
@@ -65,6 +66,10 @@ struct MapDetailFeature {
             case let .fetchDetailFailed(message):
                 state.isLoading = false
                 state.errorMessage = message
+                return .none
+
+            case .targetContentScrollCompleted:
+                state.targetContentID = nil
                 return .none
 
             case .alertOKButtonTapped:
