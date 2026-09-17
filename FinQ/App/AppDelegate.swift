@@ -12,6 +12,9 @@ import FirebaseMessaging
 final class AppDelegate: NSObject, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        
+        self.resetKeychainIfNeeded()
+        
         FirebaseApp.configure()
         
         UNUserNotificationCenter.current().delegate = self
@@ -26,6 +29,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         application.registerForRemoteNotifications()
         
         return true
+    }
+    
+    /// 앱 재설치의 경우 키체인 초기화 처리
+    private func resetKeychainIfNeeded() {
+        guard UserDefaultsManager.shared.isFirstLaunch == nil else { return }
+        AppLogger.shared.log("키체인 초기화 진행", level: .debug)
+        KeychainManager.shared.deleteAllItem()
+        
+        UserDefaultsManager.shared.isFirstLaunch = true
     }
 }
 
