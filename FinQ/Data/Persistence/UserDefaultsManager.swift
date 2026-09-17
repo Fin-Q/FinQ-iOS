@@ -30,11 +30,11 @@ final class UserDefaultsManager {
     private init() {}
     
     enum Key: String {
-        case isFirstLaunch
+        case hasLaunchedBefore
     }
     
-    @UserDefaultsPropertyWrapper(key: Key.isFirstLaunch.rawValue, defaultValue: nil, storage: UserDefaults.standard)
-    var isFirstLaunch: Bool?
+    @UserDefaultsPropertyWrapper(key: Key.hasLaunchedBefore.rawValue, defaultValue: false, storage: UserDefaults.standard)
+    var hasLaunchedBefore: Bool
     
     func removeItem(key: Key) {
         UserDefaults.standard.removeObject(forKey: key.rawValue)

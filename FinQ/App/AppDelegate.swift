@@ -31,13 +31,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
     
-    /// 앱 재설치의 경우 키체인 초기화 처리
+    /// 앱 첫 설치 혹은 재설치의 경우 키체인 초기화 처리
     private func resetKeychainIfNeeded() {
-        guard UserDefaultsManager.shared.isFirstLaunch == nil else { return }
+        let hasLaunched = UserDefaultsManager.shared.hasLaunchedBefore
+        AppLogger.shared.log("hasLaunchedBefore: \(String(describing: hasLaunched))", level: .debug)
+        
+        guard !hasLaunched else { return }
+        
         AppLogger.shared.log("키체인 초기화 진행", level: .debug)
         KeychainManager.shared.deleteAllItem()
         
-        UserDefaultsManager.shared.isFirstLaunch = true
+        UserDefaultsManager.shared.hasLaunchedBefore = true
     }
 }
 
