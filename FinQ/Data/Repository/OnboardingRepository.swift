@@ -14,9 +14,9 @@ struct OnboardingRepository: OnboardingRepositoryProtocol {
         self.networkManager = networkManager
     }
 
-    func isOnboardingCompleted() async throws -> Bool {
+    func getOnboardingStatus() async throws -> OnboardingStatus {
         let response = try await networkManager.perform(api: .onboardingStatus, responseType: APIResponse<OnboardingResponse>.self)
-        return response.data.onboardingStatus == .completed
+        return response.data.onboardingStatus.toDomain()
     }
 
     func saveInterests(input: InterestSelectionInput) async throws {

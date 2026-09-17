@@ -12,3 +12,13 @@ extension InterestSelectionInput {
         return InterestSelectionRequest(interestTopicIds: topics.map(\.id).sorted())
     }
 }
+
+extension OnboardingStatusResponse {
+    func toDomain() -> OnboardingStatus {
+        switch self {
+        case .interestSelection: return .interestSelection
+        case .characterGuide: return .characterGuide
+        case .completed: return .completed
+        }
+    }
+}

@@ -22,6 +22,11 @@ struct AppFeature {
         case tabBar
     }
     
+    enum LaunchDestination: Equatable, Sendable {
+        case auth
+        case authenticated(OnboardingStatus)
+    }
+    
     @ObservableState
     struct State: Equatable {
         var route: Route = .launching
@@ -33,7 +38,7 @@ struct AppFeature {
     
     enum Action {
         case onAppear
-        case splashRoutingResolved(Route)
+        case launchDestinationResolved(LaunchDestination)
         case auth(AuthMainFeature.Action)
         case onboarding(OnboardingFeature.Action)
         case tabBar(TabBarFeature.Action)
@@ -60,60 +65,46 @@ struct AppFeature {
                 guard state.route == .launching else { return .none }
 
                 let hasActiveSession = loginUseCase.hasActiveSession()
+                
                 return .run { send in
                     async let minimumDisplay: Void = clock.sleep(for: .seconds(2))
-                    let route: Route
-
+                    let destination: LaunchDestination
+                    
                     if hasActiveSession {
                         do {
-                            let isCompleted = try await onboardingUseCase.isOnboardingCompleted()
-                            route = isCompleted ? .tabBar : .onboarding
+                            let onboardingStatus = try await onboardingUseCase.getOnboardingStatus()
+                            destination = .authenticated(onboardingStatus)
                         } catch {
                             AppLogger.shared.log("온보딩 상태 조회 실패: \(error.localizedDescription)", level: .error)
-                            route = .auth
+                            destination = .auth
                         }
                     } else {
-                        route = .auth
+                        destination = .auth
                     }
-
+                    
                     try await minimumDisplay
-                    await send(.splashRoutingResolved(route))
+                    await send(.launchDestinationResolved(destination))
                 }
 
-            case let .splashRoutingResolved(route):
+            case let .launchDestinationResolved(destination):
                 guard state.route == .launching else { return .none }
 
-                switch route {
-                case .tabBar:
-                    state.tabBar = TabBarFeature.State(selectedTab: .home)
-                    state.isWaitingForInitialHome = true
-                    state.route = .tabBar
-                    return registerPushToken()
-
-                case .onboarding:
-                    state.isWaitingForInitialHome = false
-                    state.onboarding = OnboardingFeature.State()
-                    state.route = .onboarding
-                    return .none
-
-                case .auth, .launching:
+                switch destination {
+                case .auth:
                     state.isWaitingForInitialHome = false
                     state.route = .auth
                     return .none
+                    
+                case let .authenticated(onboardingStatus):
+                    self.routeByOnboardingStatus(onboardingStatus, state: &state, shouldWaitForInitialHome: true)
+                    return onboardingStatus == .completed ? self.registerPushToken() : .none
                 }
 
-            case let .auth(.delegate(.loginSucceeded(isOnboardingCompleted))):
+            case let .auth(.delegate(.loginSucceeded(onboardingStatus))):
                 guard state.route == .auth else { return .none }
-
-                state.isWaitingForInitialHome = false
-                if isOnboardingCompleted {
-                    state.tabBar = TabBarFeature.State(selectedTab: .home)
-                    state.route = .tabBar
-                } else {
-                    state.onboarding = OnboardingFeature.State()
-                    state.route = .onboarding
-                }
-                return registerPushToken()
+                
+                self.routeByOnboardingStatus(onboardingStatus, state: &state, shouldWaitForInitialHome: false)
+                return self.registerPushToken()
                 
             case .onboarding(.delegate(.completed)):
                 guard state.route == .onboarding else { return .none }
@@ -165,6 +156,27 @@ struct AppFeature {
             } catch {
                 AppLogger.shared.log("FCM 토큰 등록 실패: \(error.localizedDescription)", level: .error)
             }
+        }
+    }
+    
+    private func routeByOnboardingStatus(_ onboardingStatus: OnboardingStatus, state: inout State, shouldWaitForInitialHome: Bool) {
+        state.isWaitingForInitialHome = false
+        
+        switch onboardingStatus {
+        case .interestSelection:
+            state.onboarding = OnboardingFeature.State()
+            state.route = .onboarding
+            
+        case .characterGuide:
+            var onboardingState = OnboardingFeature.State()
+            onboardingState.path.append(.characterGuide(CharacterGuideFeature.State()))
+            state.onboarding = onboardingState
+            state.route = .onboarding
+            
+        case .completed:
+            state.tabBar = TabBarFeature.State(selectedTab: .home)
+            state.isWaitingForInitialHome = shouldWaitForInitialHome
+            state.route = .tabBar
         }
     }
 }

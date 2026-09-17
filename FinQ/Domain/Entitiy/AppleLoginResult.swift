@@ -9,5 +9,5 @@ struct AppleLoginResult: Equatable, Sendable {
     let userID: String
     let nickname: String
     let isNewUser: Bool
-    let isOnboardingCompleted: Bool
+    let onboardingStatus: OnboardingStatus
 }

@@ -12,5 +12,5 @@ struct LoginResult: Equatable, Sendable {
     let nickname: String
     let accessToken: String
     let refreshToken: String
-    let isOnboardingCompleted: Bool
+    let onboardingStatus: OnboardingStatus
 }
