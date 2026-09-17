@@ -23,6 +23,10 @@ struct MyPageRepository: MyPageRepositoryProtocol {
         try await networkManager.perform(api: .updateInterests(input.toRequest()))
     }
 
+    func updateProfileImage(code: String) async throws {
+        try await networkManager.perform(api: .updateProfileImage(ProfileImageUpdateRequest(profileImageCode: code)))
+    }
+
     func logout() async throws {
         try await networkManager.perform(api: .logout)
     }

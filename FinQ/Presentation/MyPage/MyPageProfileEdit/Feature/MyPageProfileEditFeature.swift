@@ -20,6 +20,7 @@ struct MyPageProfileEditFeature {
     }
 
     enum Action {
+        case profileImageButtonTapped
         case interestButtonTapped
         case refresh
         case fetchMyPageSucceeded(MyPageSummary)
@@ -28,6 +29,7 @@ struct MyPageProfileEditFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case profileImageSelectionRequested(String)
             case interestSelectionRequested([MyPageInterest])
             case myPageUpdated(MyPageSummary)
         }
@@ -36,6 +38,9 @@ struct MyPageProfileEditFeature {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .profileImageButtonTapped:
+                return .send(.delegate(.profileImageSelectionRequested(state.myPage.profileImageCode)))
+
             case .interestButtonTapped:
                 return .send(.delegate(.interestSelectionRequested(state.myPage.interests)))
 

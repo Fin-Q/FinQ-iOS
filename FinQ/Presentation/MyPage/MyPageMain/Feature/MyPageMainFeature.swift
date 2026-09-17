@@ -16,6 +16,7 @@ struct MyPageMainFeature {
     @Reducer
     enum Path {
         case profileEdit(MyPageProfileEditFeature)
+        case profileImageSelection(MyPageProfileImageSelectionFeature)
         case interestSelection(MyPageInterestSelectionFeature)
         case termsDetail(TermsDetailFeature)
     }
@@ -159,6 +160,11 @@ struct MyPageMainFeature {
                 state.path.append(.interestSelection(MyPageInterestSelectionFeature.State(selectedTopics: selectedTopics)))
                 return .none
 
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.profileImageSelectionRequested(profileImageCode))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.profileImageSelection(MyPageProfileImageSelectionFeature.State(profileImageCode: profileImageCode)))
+                return .none
+
             case let .path(.element(id: _, action: .profileEdit(.delegate(.myPageUpdated(myPage))))):
                 state.myPage = myPage
                 state.isNotificationEnabled = myPage.notificationEnabled
@@ -173,6 +179,11 @@ struct MyPageMainFeature {
                     return .send(.path(.element(id: previousID, action: .profileEdit(.refresh))))
                 }
                 return .send(.onAppear)
+
+            case let .path(.element(id: id, action: .profileImageSelection(.delegate(.completed)))):
+                guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
+                state.path.removeLast()
+                return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))
                 
             case .path, .delegate:
                 return .none

@@ -36,6 +36,7 @@ enum APIRouter: Sendable {
     //MARK: - MyPage
     case myPage
     case updateInterests(InterestSelectionRequest)
+    case updateProfileImage(ProfileImageUpdateRequest)
 
     //MARK: - KnowledgeMap
     case knowledgeMap
@@ -71,6 +72,7 @@ extension APIRouter {
         case .streakStatus: return "/streak/status"
         case .myPage: return "/users/me"
         case .updateInterests: return "/users/me/interests"
+        case .updateProfileImage: return "/users/me/profile-image"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
@@ -82,7 +84,7 @@ extension APIRouter {
         switch self {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .submitAdvancedQuizAnswer:
             return .post
-        case .completeOnboarding:
+        case .completeOnboarding, .updateProfileImage:
             return .patch
         case .updateInterests:
             return .put
@@ -93,7 +95,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage, .updateInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage, .updateInterests, .updateProfileImage:
             return [
                 "Content-Type": "application/json"
             ]
@@ -102,7 +104,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer, .updateInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer, .updateInterests, .updateProfileImage:
             return JSONEncoding.default
         
         case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .myPage:
@@ -177,6 +179,9 @@ extension APIRouter {
 
         case .updateInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
+
+        case .updateProfileImage(let request):
+            return ["profileImageCode": request.profileImageCode]
 
         case let .streakCalendar(month):
             return month.map { ["month": $0] }

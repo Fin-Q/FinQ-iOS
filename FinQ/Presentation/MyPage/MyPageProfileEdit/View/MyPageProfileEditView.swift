@@ -18,9 +18,15 @@ struct MyPageProfileEditView: View {
         VStack(alignment: .leading, spacing: 0) {
             backButton
 
-            profileImage
-                .frame(maxWidth: .infinity)
-                .padding(.top, 40)
+            Button {
+                HapticManager.selection()
+                store.send(.profileImageButtonTapped)
+            } label: {
+                profileImage
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 40)
 
             VStack(spacing: 0) {
                 informationRow(title: "아이디", value: store.myPage.email)
