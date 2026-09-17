@@ -11,6 +11,8 @@ import ComposableArchitecture
 @Reducer
 struct HomeFeature {
     @Dependency(\.homeUseCase) private var homeUseCase
+    @Dependency(\.myPageUseCase) private var myPageUseCase
+    @Dependency(\.permissionManager) private var permissionManager
     private enum CancelID { case fetchHome }
 
     @Reducer
@@ -50,17 +52,29 @@ struct HomeFeature {
                 state.isLoading = true
                 state.errorMessage = nil
 
-                return .run { send in
-                    do {
-                        let home = try await homeUseCase.fetchHome()
-                        guard !Task.isCancelled else { return }
-                        await send(.fetchHomeSucceeded(home))
-                    } catch {
-                        guard !Task.isCancelled else { return }
-                        await send(.fetchHomeFailed(error.localizedDescription))
+                return .merge(
+                    .run { send in
+                        do {
+                            let home = try await homeUseCase.fetchHome()
+                            guard !Task.isCancelled else { return }
+                            await send(.fetchHomeSucceeded(home))
+                        } catch {
+                            guard !Task.isCancelled else { return }
+                            await send(.fetchHomeFailed(error.localizedDescription))
+                        }
                     }
-                }
-                .cancellable(id: CancelID.fetchHome, cancelInFlight: true)
+                    .cancellable(id: CancelID.fetchHome, cancelInFlight: true),
+                    .run { _ in
+                        let status = await permissionManager.notificationPermissionStatus()
+                        guard status == .denied else { return }
+
+                        do {
+                            try await myPageUseCase.updateNotificationSetting(isEnabled: false)
+                        } catch {
+                            AppLogger.shared.log("알림 설정 OFF 동기화 실패: \(error.localizedDescription)", level: .error)
+                        }
+                    }
+                )
 
             case .onDisappear:
                 state.isLoading = false
