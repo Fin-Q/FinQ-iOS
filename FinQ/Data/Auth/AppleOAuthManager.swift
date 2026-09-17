@@ -29,11 +29,13 @@ enum AppleOAuthError: LocalizedError, Sendable {
     case missingAuthorizationCode
     case missingNonce
     case missingPresentationAnchor
+    case authorizationFailed
 
     var errorDescription: String? {
         switch self {
         case .requestAlreadyInProgress: "Apple 로그인이 이미 진행 중이에요. 잠시 기다려 주세요."
         case .missingPresentationAnchor: "Apple 로그인 화면을 열지 못했어요. 다시 시도해 주세요."
+        case .authorizationFailed: "Apple 로그인에 실패했어요.\n네트워크 연결 상태를 확인한 후 다시 시도해 주세요."
         default: "Apple 인증 정보를 받지 못했어요. 다시 시도해 주세요."
         }
     }
@@ -168,11 +170,14 @@ extension AppleOAuthManager: ASAuthorizationControllerDelegate {
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: any Error) {
         guard controller === authorizationController else { return }
-        if let error = error as? ASAuthorizationError, error.code == .canceled {
+        
+        if let authorizationError = error as? ASAuthorizationError, authorizationError.code == .canceled {
             finish(with: .failure(CancellationError()))
-        } else {
-            finish(with: .failure(error))
+            return
         }
+        
+        AppLogger.shared.log("Apple 로그인 에러: \(error)", level: .error)
+        return finish(with: .failure(AppleOAuthError.authorizationFailed))
     }
 }
 
