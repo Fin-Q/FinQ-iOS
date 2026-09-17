@@ -61,7 +61,7 @@ struct MainTabBarContainerView: View {
             return store.home.path.isEmpty
 
         case .myPage:
-            return true
+            return store.myPage.path.isEmpty
         }
     }
 }

@@ -12,9 +12,20 @@ import Kingfisher
 
 struct MyPageView: View {
     @Environment(\.scenePhase) private var scenePhase
-    let store: StoreOf<MyPageFeature>
+    @Bindable var store: StoreOf<MyPageFeature>
 
     var body: some View {
+        NavigationStack(path: $store.scope(\.path, action: \.path)) {
+            myPageContent
+        } destination: { store in
+            switch store.case {
+            case let .termsDetail(store):
+                TermsDetailView(store: store)
+            }
+        }
+    }
+
+    private var myPageContent: some View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {

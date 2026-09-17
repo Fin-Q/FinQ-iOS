@@ -13,8 +13,14 @@ struct MyPageFeature {
     @Dependency(\.myPageUseCase) private var myPageUseCase
     private enum CancelID { case fetchMyPage }
 
+    @Reducer
+    enum Path {
+        case termsDetail(TermsDetailFeature)
+    }
+
     @ObservableState
     struct State: Equatable {
+        var path = StackState<Path.State>()
         var myPage: MyPageSummary?
         var isNotificationEnabled: Bool = false
         var isLoading: Bool = false
@@ -24,6 +30,7 @@ struct MyPageFeature {
     }
     
     enum Action {
+        case path(StackActionOf<Path>)
         case onAppear
         case onDisappear
         case fetchMyPageSucceeded(MyPageSummary)
@@ -82,7 +89,15 @@ struct MyPageFeature {
                 state.errorMessage = message
                 return .none
 
-            case .interestButtonTapped, .profileEditButtonTapped, .serviceTermsButtonTapped, .privacyPolicyButtonTapped:
+            case .interestButtonTapped, .profileEditButtonTapped:
+                return .none
+
+            case .serviceTermsButtonTapped:
+                state.path.append(.termsDetail(TermsDetailFeature.State(term: .serviceTerms, showsAgreementButton: false)))
+                return .none
+
+            case .privacyPolicyButtonTapped:
+                state.path.append(.termsDetail(TermsDetailFeature.State(term: .privacyPolicy, showsAgreementButton: false)))
                 return .none
 
             case let .notificationChanged(isEnabled):
@@ -128,9 +143,12 @@ struct MyPageFeature {
             case .withdrawalButtonTapped:
                 return .none
                 
-            case .delegate:
+            case .path, .delegate:
                 return .none
             }
         }
+        .forEach(\.path, action: \.path)
     }
 }
+
+extension MyPageFeature.Path.State: Equatable { }
