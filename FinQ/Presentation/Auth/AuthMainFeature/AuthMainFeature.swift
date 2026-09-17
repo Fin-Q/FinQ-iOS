@@ -10,10 +10,16 @@ import ComposableArchitecture
 
 @Reducer
 struct AuthMainFeature {
+    @Dependency(\.continuousClock) private var clock
     @Dependency(\.appleOAuthUseCase) private var appleOAuthUseCase
     @Dependency(\.kakaoOAuthUseCase) private var kakaoOAuthUseCase
 
-    private enum CancelID { case appleAuthorization, kakaoAuthorization }
+    private enum CancelID { case appleAuthorization, kakaoAuthorization, kakaoAuthorizationRecovery }
+
+    enum SocialLoginProvider: Equatable {
+        case kakao
+        case apple
+    }
 
     @Reducer
     enum Path {
@@ -32,8 +38,13 @@ struct AuthMainFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var loginIDPendingCleanup: StackElementID?
-        var isSocialAuthorizing: Bool = false
+        var authorizingProvider: SocialLoginProvider?
+        var didReceiveKakaoLoginCallback: Bool = false
         var socialLoginErrorMessage: String?
+
+        var isSocialAuthorizing: Bool {
+            authorizingProvider != nil
+        }
 
         var isLoginLoading: Bool {
             guard let id = path.ids.last, case let .login(loginState) = path[id: id] else { return false }
@@ -50,11 +61,14 @@ struct AuthMainFeature {
         case kakaoLoginSucceeded(KakaoLoginResult)
         case kakaoLoginFailed(String)
         case kakaoLoginCancelled
+        case kakaoLoginCallbackReceived
+        case kakaoAuthorizationRecoveryTimedOut
         case appleLoginButtonTapped
         case appleLoginSucceeded(AppleLoginResult)
         case appleLoginFailed(String)
         case appleLoginCancelled
         case alertOKButtonTapped
+        case appDidBecomeActive
         
         case delegate(Delegate)
         enum Delegate: Equatable {
@@ -82,7 +96,8 @@ struct AuthMainFeature {
 
             case .kakaoLoginButtonTapped:
                 guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
-                state.isSocialAuthorizing = true
+                state.authorizingProvider = .kakao
+                state.didReceiveKakaoLoginCallback = false
                 state.socialLoginErrorMessage = nil
 
                 return .run { send in
@@ -104,8 +119,9 @@ struct AuthMainFeature {
                 .cancellable(id: CancelID.kakaoAuthorization, cancelInFlight: true)
 
             case let .kakaoLoginSucceeded(result):
-                guard state.isSocialAuthorizing else { return .none }
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .kakao else { return .none }
+                state.authorizingProvider = nil
+                state.didReceiveKakaoLoginCallback = false
                 guard state.path.isEmpty else { return .none }
 
                 if result.isNewUser {
@@ -116,17 +132,43 @@ struct AuthMainFeature {
                 return .send(.delegate(.loginSucceeded(result.onboardingStatus)))
 
             case let .kakaoLoginFailed(message):
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .kakao else { return .none }
+                state.authorizingProvider = nil
+                state.didReceiveKakaoLoginCallback = false
                 state.socialLoginErrorMessage = message
                 return .none
 
             case .kakaoLoginCancelled:
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .kakao else { return .none }
+                state.authorizingProvider = nil
+                state.didReceiveKakaoLoginCallback = false
                 return .none
+
+            case .kakaoLoginCallbackReceived:
+                guard state.authorizingProvider == .kakao else { return .none }
+                state.didReceiveKakaoLoginCallback = true
+                return .cancel(id: CancelID.kakaoAuthorizationRecovery)
+
+            case .appDidBecomeActive:
+                guard state.authorizingProvider == .kakao, !state.didReceiveKakaoLoginCallback else { return .none }
+
+                return .run { send in
+                    try await clock.sleep(for: .seconds(2))
+                    await send(.kakaoAuthorizationRecoveryTimedOut)
+                }
+                .cancellable(id: CancelID.kakaoAuthorizationRecovery, cancelInFlight: true)
+
+            case .kakaoAuthorizationRecoveryTimedOut:
+                guard state.authorizingProvider == .kakao, !state.didReceiveKakaoLoginCallback else { return .none }
+                state.authorizingProvider = nil
+                state.didReceiveKakaoLoginCallback = false
+                state.socialLoginErrorMessage = "카카오 로그인에 실패했어요.\n네트워크 연결 상태를 확인한 후 다시 시도해 주세요."
+                return .cancel(id: CancelID.kakaoAuthorization)
 
             case .appleLoginButtonTapped:
                 guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
-                state.isSocialAuthorizing = true
+                state.authorizingProvider = .apple
+                state.didReceiveKakaoLoginCallback = false
                 state.socialLoginErrorMessage = nil
 
                 return .run { send in
@@ -148,8 +190,8 @@ struct AuthMainFeature {
                 .cancellable(id: CancelID.appleAuthorization, cancelInFlight: true)
 
             case let .appleLoginSucceeded(result):
-                guard state.isSocialAuthorizing else { return .none }
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .apple else { return .none }
+                state.authorizingProvider = nil
                 guard state.path.isEmpty else { return .none }
 
                 if result.isNewUser {
@@ -160,12 +202,14 @@ struct AuthMainFeature {
                 return .send(.delegate(.loginSucceeded(result.onboardingStatus)))
 
             case let .appleLoginFailed(message):
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .apple else { return .none }
+                state.authorizingProvider = nil
                 state.socialLoginErrorMessage = message
                 return .none
 
             case .appleLoginCancelled:
-                state.isSocialAuthorizing = false
+                guard state.authorizingProvider == .apple else { return .none }
+                state.authorizingProvider = nil
                 return .none
 
             case .alertOKButtonTapped:
