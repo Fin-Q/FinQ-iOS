@@ -30,8 +30,6 @@ struct KnowledgeMapView: View {
                 AdvancedQuizIntroView(store: store)
             case let .advancedQuizQuestion(store):
                 AdvancedQuizQuestionView(store: store)
-            case let .advancedQuizAnswerResult(store):
-                AdvancedQuizAnswerResultView(store: store)
             case let .advancedQuizCompletionSummary(store):
                 AdvancedQuizCompletionSummaryView(store: store)
             case let .advancedQuizCompletion(store):

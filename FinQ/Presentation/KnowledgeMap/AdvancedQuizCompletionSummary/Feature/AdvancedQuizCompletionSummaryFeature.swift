@@ -17,10 +17,12 @@ struct AdvancedQuizCompletionSummaryFeature {
     }
 
     enum Action {
+        case backButtonTapped
         case nextButtonTapped
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case introRequested
             case completionRequested(AdvancedQuizCategoryResult?)
         }
     }
@@ -28,6 +30,9 @@ struct AdvancedQuizCompletionSummaryFeature {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .backButtonTapped:
+                return .send(.delegate(.introRequested))
+
             case .nextButtonTapped:
                 return .send(.delegate(.completionRequested(state.categoryResult)))
 

@@ -10,7 +10,6 @@ import SwiftUI
 import ComposableArchitecture
 
 struct AdvancedQuizCompletionSummaryView: View {
-    @Environment(\.dismiss) private var dismiss
     let store: StoreOf<AdvancedQuizCompletionSummaryFeature>
 
     var body: some View {
@@ -55,7 +54,8 @@ struct AdvancedQuizCompletionSummaryView: View {
 
     private var backButton: some View {
         Button {
-            dismiss()
+            HapticManager.selection()
+            store.send(.backButtonTapped)
         } label: {
             Image(.chevronLeft)
                 .renderingMode(.template)

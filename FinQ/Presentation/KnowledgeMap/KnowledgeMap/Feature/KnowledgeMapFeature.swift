@@ -20,7 +20,6 @@ struct KnowledgeMapFeature {
         case advancedQuizMain(AdvancedQuizMainFeature)
         case advancedQuizIntro(AdvancedQuizIntroFeature)
         case advancedQuizQuestion(AdvancedQuizQuestionFeature)
-        case advancedQuizAnswerResult(AdvancedQuizAnswerResultFeature)
         case advancedQuizCompletionSummary(AdvancedQuizCompletionSummaryFeature)
         case advancedQuizCompletion(AdvancedQuizCompletionFeature)
     }
@@ -146,21 +145,18 @@ struct KnowledgeMapFeature {
                 state.path.append(.advancedQuizQuestion(AdvancedQuizQuestionFeature.State(quiz: quiz)))
                 return .none
 
-            case let .path(.element(id: id, action: .advancedQuizQuestion(.delegate(.correctAnswerRequested(quiz, questionIndex, result))))):
-                guard state.path.ids.last == id else { return .none }
-                let orderedQuestions = quiz.questions.sorted { $0.order < $1.order }
-                guard orderedQuestions.indices.contains(questionIndex) else { return .none }
-                state.path.append(.advancedQuizAnswerResult(AdvancedQuizAnswerResultFeature.State(quiz: quiz, question: orderedQuestions[questionIndex], questionIndex: questionIndex, result: result, presentation: .correct)))
-                return .none
-
-            case let .path(.element(id: id, action: .advancedQuizAnswerResult(.delegate(.nextQuestionRequested(quiz, questionIndex))))):
-                guard state.path.ids.last == id else { return .none }
-                state.path.append(.advancedQuizQuestion(AdvancedQuizQuestionFeature.State(quiz: quiz, questionIndex: questionIndex)))
-                return .none
-
-            case let .path(.element(id: id, action: .advancedQuizAnswerResult(.delegate(.completionSummaryRequested(quiz, categoryResult))))):
+            case let .path(.element(id: id, action: .advancedQuizQuestion(.delegate(.completionSummaryRequested(quiz, categoryResult))))):
                 guard state.path.ids.last == id else { return .none }
                 state.path.append(.advancedQuizCompletionSummary(AdvancedQuizCompletionSummaryFeature.State(quiz: quiz, categoryResult: categoryResult)))
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizCompletionSummary(.delegate(.introRequested)))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let introElement = pathElements.last(where: { element in
+                    if case .advancedQuizIntro = element.1 { return true }
+                    return false
+                }) else { return .none }
+                state.path.pop(to: introElement.0)
                 return .none
 
             case let .path(.element(id: id, action: .advancedQuizCompletionSummary(.delegate(.completionRequested(categoryResult))))):
