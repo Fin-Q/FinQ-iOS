@@ -29,6 +29,7 @@ struct MyPageMainFeature {
         var path = StackState<Path.State>()
         var myPage: MyPageSummary?
         var isNotificationEnabled: Bool = false
+        var isUpdatingNotification: Bool = false
         var isLoading: Bool = false
         var isLogoutAlertPresented: Bool = false
         var isLoggingOut: Bool = false
@@ -46,6 +47,8 @@ struct MyPageMainFeature {
         case serviceTermsButtonTapped
         case privacyPolicyButtonTapped
         case notificationChanged(Bool)
+        case notificationUpdateSucceeded
+        case notificationUpdateFailed(previousValue: Bool, message: String)
         case alertOKButtonTapped
         case logoutButtonTapped
         case logoutAlertCancelButtonTapped
@@ -116,7 +119,29 @@ struct MyPageMainFeature {
                 return .none
 
             case let .notificationChanged(isEnabled):
+                guard !state.isUpdatingNotification else { return .none }
+                let previousValue = state.isNotificationEnabled
                 state.isNotificationEnabled = isEnabled
+                state.isUpdatingNotification = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        try await myPageUseCase.updateNotificationSetting(isEnabled: isEnabled)
+                        await send(.notificationUpdateSucceeded)
+                    } catch {
+                        await send(.notificationUpdateFailed(previousValue: previousValue, message: error.localizedDescription))
+                    }
+                }
+
+            case .notificationUpdateSucceeded:
+                state.isUpdatingNotification = false
+                return .none
+
+            case let .notificationUpdateFailed(previousValue, message):
+                state.isNotificationEnabled = previousValue
+                state.isUpdatingNotification = false
+                state.errorMessage = message
                 return .none
 
             case .alertOKButtonTapped:

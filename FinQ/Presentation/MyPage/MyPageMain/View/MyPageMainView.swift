@@ -238,6 +238,7 @@ struct MyPageMainView: View {
             Toggle("알림 설정", isOn: Binding(get: { store.isNotificationEnabled }, set: { store.send(.notificationChanged($0)) }))
                 .labelsHidden()
                 .tint(Color.brandBlue)
+                .disabled(store.isUpdatingNotification)
         }
     }
 

@@ -31,6 +31,10 @@ struct MyPageRepository: MyPageRepositoryProtocol {
         try await networkManager.perform(api: .updateNickname(NicknameUpdateRequest(nickname: nickname)))
     }
 
+    func updateNotificationSetting(isEnabled: Bool) async throws {
+        try await networkManager.perform(api: .updateNotificationSetting(NotificationSettingUpdateRequest(notificationEnabled: isEnabled)))
+    }
+
     func withdraw() async throws {
         try await networkManager.perform(api: .withdraw)
     }
