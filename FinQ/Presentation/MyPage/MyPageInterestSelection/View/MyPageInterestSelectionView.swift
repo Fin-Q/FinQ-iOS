@@ -16,7 +16,7 @@ struct MyPageInterestSelectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("관심 있는 주제를 선택해주세요")
+            Text("관심 있는 주제를 선택해 주세요")
                 .font(AppDesign.Fonts.largeTitleSemiBold)
                 .foregroundStyle(AppDesign.Colors.largeTitle)
                 .fixedSize(horizontal: false, vertical: true)

@@ -17,6 +17,7 @@ struct MyPageMainFeature {
     enum Path {
         case profileEdit(MyPageProfileEditFeature)
         case profileImageSelection(MyPageProfileImageSelectionFeature)
+        case nicknameEdit(MyPageNicknameEditFeature)
         case interestSelection(MyPageInterestSelectionFeature)
         case termsDetail(TermsDetailFeature)
     }
@@ -165,6 +166,11 @@ struct MyPageMainFeature {
                 state.path.append(.profileImageSelection(MyPageProfileImageSelectionFeature.State(profileImageCode: profileImageCode)))
                 return .none
 
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.nicknameEditRequested(nickname))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.nicknameEdit(MyPageNicknameEditFeature.State(nickname: nickname)))
+                return .none
+
             case let .path(.element(id: _, action: .profileEdit(.delegate(.myPageUpdated(myPage))))):
                 state.myPage = myPage
                 state.isNotificationEnabled = myPage.notificationEnabled
@@ -181,6 +187,11 @@ struct MyPageMainFeature {
                 return .send(.onAppear)
 
             case let .path(.element(id: id, action: .profileImageSelection(.delegate(.completed)))):
+                guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
+                state.path.removeLast()
+                return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))
+
+            case let .path(.element(id: id, action: .nicknameEdit(.delegate(.completed)))):
                 guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
                 state.path.removeLast()
                 return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))

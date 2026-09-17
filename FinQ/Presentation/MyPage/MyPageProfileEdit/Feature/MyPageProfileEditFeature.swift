@@ -21,6 +21,7 @@ struct MyPageProfileEditFeature {
 
     enum Action {
         case profileImageButtonTapped
+        case nicknameButtonTapped
         case interestButtonTapped
         case refresh
         case fetchMyPageSucceeded(MyPageSummary)
@@ -30,6 +31,7 @@ struct MyPageProfileEditFeature {
 
         enum Delegate: Equatable {
             case profileImageSelectionRequested(String)
+            case nicknameEditRequested(String)
             case interestSelectionRequested([MyPageInterest])
             case myPageUpdated(MyPageSummary)
         }
@@ -40,6 +42,9 @@ struct MyPageProfileEditFeature {
             switch action {
             case .profileImageButtonTapped:
                 return .send(.delegate(.profileImageSelectionRequested(state.myPage.profileImageCode)))
+
+            case .nicknameButtonTapped:
+                return .send(.delegate(.nicknameEditRequested(state.myPage.nickname)))
 
             case .interestButtonTapped:
                 return .send(.delegate(.interestSelectionRequested(state.myPage.interests)))

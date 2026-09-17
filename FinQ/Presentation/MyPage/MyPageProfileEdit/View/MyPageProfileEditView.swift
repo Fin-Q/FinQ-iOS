@@ -30,7 +30,7 @@ struct MyPageProfileEditView: View {
 
             VStack(spacing: 0) {
                 informationRow(title: "아이디", value: store.myPage.email)
-                informationRow(title: "닉네임", value: store.myPage.nickname, showsChevron: true)
+                nicknameRow
                 interestRow
             }
             .padding(.top, 48)
@@ -48,7 +48,7 @@ struct MyPageProfileEditView: View {
             if store.isLoading {
                 ProgressView()
                     .controlSize(.large)
-                    .tint(Color.brandBlue)
+                    .tint(AppDesign.Colors.progress)
             }
         }
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", coversEntireScreen: true, onConfirm: {
@@ -107,6 +107,16 @@ struct MyPageProfileEditView: View {
             store.send(.interestButtonTapped)
         } label: {
             informationRowContent(title: "관심 주제", value: store.myPage.interests.map(\.categoryName).joined(separator: " / "), showsChevron: true)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var nicknameRow: some View {
+        Button {
+            HapticManager.selection()
+            store.send(.nicknameButtonTapped)
+        } label: {
+            informationRowContent(title: "닉네임", value: store.myPage.nickname, showsChevron: true)
         }
         .buttonStyle(.plain)
     }

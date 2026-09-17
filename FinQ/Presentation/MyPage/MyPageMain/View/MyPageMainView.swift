@@ -25,6 +25,9 @@ struct MyPageMainView: View {
             case let .profileImageSelection(store):
                 MyPageProfileImageSelectionView(store: store)
 
+            case let .nicknameEdit(store):
+                MyPageNicknameEditView(store: store)
+
             case let .interestSelection(store):
                 MyPageInterestSelectionView(store: store)
 
