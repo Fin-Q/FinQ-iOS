@@ -19,6 +19,10 @@ struct MyPageRepository: MyPageRepositoryProtocol {
         return response.data.toDomain()
     }
 
+    func updateInterests(input: InterestSelectionInput) async throws {
+        try await networkManager.perform(api: .updateInterests(input.toRequest()))
+    }
+
     func logout() async throws {
         try await networkManager.perform(api: .logout)
     }

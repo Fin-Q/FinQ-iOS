@@ -1,5 +1,5 @@
 //
-//  MyPageFeature.swift
+//  MyPageMainFeature.swift
 //  FinQ
 //
 //  Created by 권대윤 on 8/29/26.
@@ -9,12 +9,13 @@ import Foundation
 import ComposableArchitecture
 
 @Reducer
-struct MyPageFeature {
+struct MyPageMainFeature {
     @Dependency(\.myPageUseCase) private var myPageUseCase
     private enum CancelID { case fetchMyPage }
 
     @Reducer
     enum Path {
+        case interestSelection(MyPageInterestSelectionFeature)
         case termsDetail(TermsDetailFeature)
     }
 
@@ -89,7 +90,13 @@ struct MyPageFeature {
                 state.errorMessage = message
                 return .none
 
-            case .interestButtonTapped, .profileEditButtonTapped:
+            case .interestButtonTapped:
+                guard state.path.isEmpty, let interests = state.myPage?.interests else { return .none }
+                let selectedTopics = Set(interests.compactMap { interest in InterestTopic.allCases.first { $0.id == interest.categoryID } })
+                state.path.append(.interestSelection(MyPageInterestSelectionFeature.State(selectedTopics: selectedTopics)))
+                return .none
+
+            case .profileEditButtonTapped:
                 return .none
 
             case .serviceTermsButtonTapped:
@@ -142,6 +149,11 @@ struct MyPageFeature {
                 
             case .withdrawalButtonTapped:
                 return .none
+
+            case let .path(.element(id: id, action: .interestSelection(.delegate(.completed)))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.removeLast()
+                return .send(.onAppear)
                 
             case .path, .delegate:
                 return .none
@@ -151,4 +163,4 @@ struct MyPageFeature {
     }
 }
 
-extension MyPageFeature.Path.State: Equatable { }
+extension MyPageMainFeature.Path.State: Equatable { }

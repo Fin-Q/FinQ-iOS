@@ -48,7 +48,7 @@ struct MainTabBarContainerView: View {
             KnowledgeMapView(store: store.scope(\.knowledgeMap, action: \.knowledgeMap))
 
         case .myPage:
-            MyPageView(store: store.scope(\.myPage, action: \.myPage))
+            MyPageMainView(store: store.scope(\.myPage, action: \.myPage))
         }
     }
     

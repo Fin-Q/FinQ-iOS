@@ -35,6 +35,7 @@ enum APIRouter: Sendable {
 
     //MARK: - MyPage
     case myPage
+    case updateInterests(InterestSelectionRequest)
 
     //MARK: - KnowledgeMap
     case knowledgeMap
@@ -69,6 +70,7 @@ extension APIRouter {
         case .streakCalendar: return "/streak/calendar"
         case .streakStatus: return "/streak/status"
         case .myPage: return "/users/me"
+        case .updateInterests: return "/users/me/interests"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
@@ -82,6 +84,8 @@ extension APIRouter {
             return .post
         case .completeOnboarding:
             return .patch
+        case .updateInterests:
+            return .put
         case .onboardingStatus, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus, .myPage:
             return .get
         }
@@ -89,7 +93,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage, .updateInterests:
             return [
                 "Content-Type": "application/json"
             ]
@@ -98,7 +102,7 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer, .updateInterests:
             return JSONEncoding.default
         
         case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .myPage:
@@ -169,6 +173,9 @@ extension APIRouter {
             ]
 
         case .saveInterests(let request):
+            return ["interestTopicIds": request.interestTopicIds]
+
+        case .updateInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
         case let .streakCalendar(month):

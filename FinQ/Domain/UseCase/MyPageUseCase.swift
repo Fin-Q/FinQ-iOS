@@ -9,6 +9,7 @@ import Foundation
 
 protocol MyPageUseCaseProtocol: Sendable {
     func fetchMyPage() async throws -> MyPageSummary
+    func updateInterests(topics: [InterestTopic]) async throws
     func logout() async throws
 }
 
@@ -21,6 +22,10 @@ struct MyPageUseCase: MyPageUseCaseProtocol {
 
     func fetchMyPage() async throws -> MyPageSummary {
         return try await repository.fetchMyPage()
+    }
+
+    func updateInterests(topics: [InterestTopic]) async throws {
+        try await repository.updateInterests(input: InterestSelectionInput(topics: topics))
     }
 
     func logout() async throws {

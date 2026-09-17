@@ -1,5 +1,5 @@
 //
-//  MyPageView.swift
+//  MyPageMainView.swift
 //  FinQ
 //
 //  Created by 권대윤 on 8/29/26.
@@ -10,15 +10,18 @@ import SwiftUI
 import ComposableArchitecture
 import Kingfisher
 
-struct MyPageView: View {
+struct MyPageMainView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Bindable var store: StoreOf<MyPageFeature>
+    @Bindable var store: StoreOf<MyPageMainFeature>
 
     var body: some View {
         NavigationStack(path: $store.scope(\.path, action: \.path)) {
             myPageContent
         } destination: { store in
             switch store.case {
+            case let .interestSelection(store):
+                MyPageInterestSelectionView(store: store)
+
             case let .termsDetail(store):
                 TermsDetailView(store: store)
             }
@@ -327,7 +330,7 @@ struct MyPageView: View {
 }
 
 #Preview {
-    MyPageView(store: Store(initialState: MyPageFeature.State(myPage: MyPageSummary(userID: "34", email: "r@r.com", nickname: "월급루팡 2세", profileImageCode: "PROFILE_04", profileImageURL: "https://finq-assets.s3.ap-northeast-2.amazonaws.com/profile-images/profile_04.png", totalXP: 20, currentStreakDays: 2, notificationEnabled: false, interests: [
+    MyPageMainView(store: Store(initialState: MyPageMainFeature.State(myPage: MyPageSummary(userID: "34", email: "r@r.com", nickname: "월급루팡 2세", profileImageCode: "PROFILE_04", profileImageURL: "https://finq-assets.s3.ap-northeast-2.amazonaws.com/profile-images/profile_04.png", totalXP: 20, currentStreakDays: 2, notificationEnabled: false, interests: [
         MyPageInterest(categoryID: 3, categoryCode: "STK", categoryName: "주식·ETF"),
         MyPageInterest(categoryID: 4, categoryCode: "TAX", categoryName: "세금·절세계좌")
     ]), isNotificationEnabled: false)) {
