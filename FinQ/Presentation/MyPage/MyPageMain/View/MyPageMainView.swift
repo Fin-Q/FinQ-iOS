@@ -19,6 +19,9 @@ struct MyPageMainView: View {
             myPageContent
         } destination: { store in
             switch store.case {
+            case let .profileEdit(store):
+                MyPageProfileEditView(store: store)
+
             case let .interestSelection(store):
                 MyPageInterestSelectionView(store: store)
 
@@ -158,7 +161,7 @@ struct MyPageMainView: View {
                             .scaledToFit()
                             .frame(width: 8, height: 14)
                     }
-                    .foregroundStyle(Color.brandGray)
+                    .foregroundStyle(Color.brandGray400)
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 }

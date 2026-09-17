@@ -15,6 +15,7 @@ struct MyPageMainFeature {
 
     @Reducer
     enum Path {
+        case profileEdit(MyPageProfileEditFeature)
         case interestSelection(MyPageInterestSelectionFeature)
         case termsDetail(TermsDetailFeature)
     }
@@ -97,6 +98,8 @@ struct MyPageMainFeature {
                 return .none
 
             case .profileEditButtonTapped:
+                guard state.path.isEmpty, let myPage = state.myPage else { return .none }
+                state.path.append(.profileEdit(MyPageProfileEditFeature.State(myPage: myPage)))
                 return .none
 
             case .serviceTermsButtonTapped:
@@ -150,9 +153,25 @@ struct MyPageMainFeature {
             case .withdrawalButtonTapped:
                 return .none
 
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.interestSelectionRequested(interests))))):
+                guard state.path.ids.last == id else { return .none }
+                let selectedTopics = Set(interests.compactMap { interest in InterestTopic.allCases.first { $0.id == interest.categoryID } })
+                state.path.append(.interestSelection(MyPageInterestSelectionFeature.State(selectedTopics: selectedTopics)))
+                return .none
+
+            case let .path(.element(id: _, action: .profileEdit(.delegate(.myPageUpdated(myPage))))):
+                state.myPage = myPage
+                state.isNotificationEnabled = myPage.notificationEnabled
+                return .none
+
             case let .path(.element(id: id, action: .interestSelection(.delegate(.completed)))):
                 guard state.path.ids.last == id else { return .none }
+                let previousID = state.path.ids.dropLast().last
                 state.path.removeLast()
+
+                if let previousID, case .profileEdit = state.path[id: previousID] {
+                    return .send(.path(.element(id: previousID, action: .profileEdit(.refresh))))
+                }
                 return .send(.onAppear)
                 
             case .path, .delegate:

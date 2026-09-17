@@ -33,6 +33,7 @@ enum AppDesign {
         static let chevron = Color.brandGray300
         static let xmarkGray = Color.brandGray
         static let progress = Color.brandWhite
+        static let borderWhite = Color.brandWhite
     }
     
     //MARK: - Font
@@ -49,6 +50,7 @@ enum AppDesign {
         static let body = Font.system(size: 16, weight: .medium)
         static let body18SemiBold = Font.system(size: 18, weight: .semibold)
         static let body16SemiBold = Font.system(size: 16, weight: .semibold)
+        static let body18Redular = Font.system(size: 18, weight: .regular)
         static let body16Redular = Font.system(size: 16, weight: .regular)
         
         static let caption = Font.system(size: 14, weight: .medium)
