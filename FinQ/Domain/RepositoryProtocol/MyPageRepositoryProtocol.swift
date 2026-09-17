@@ -9,4 +9,5 @@ import Foundation
 
 protocol MyPageRepositoryProtocol: Sendable {
     func fetchMyPage() async throws -> MyPageSummary
+    func logout() async throws
 }

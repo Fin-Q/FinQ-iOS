@@ -71,13 +71,26 @@ struct MyPageView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.send(.onAppear) }
         }
-        .allowsHitTesting(!store.isLoading)
+        .allowsHitTesting(!store.isLoading && !store.isLoggingOut)
         .overlay {
-            if store.isLoading {
+            if store.isLoading || store.isLoggingOut {
                 ProgressView()
                     .controlSize(.large)
                     .tint(AppDesign.Colors.progress)
             }
+        }
+        .background {
+            Color.clear
+                .fullScreenCover(isPresented: Binding(get: { store.isLogoutAlertPresented }, set: { isPresented in
+                    if !isPresented { store.send(.logoutAlertCancelButtonTapped) }
+                })) {
+                    logoutAlertLayer
+                        .presentationBackground(.clear)
+                        .interactiveDismissDisabled()
+                }
+                .transaction { transaction in
+                    transaction.disablesAnimations = true
+                }
         }
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
             store.send(.alertOKButtonTapped)
@@ -247,6 +260,58 @@ struct MyPageView: View {
                 .frame(height: 102)
         }
         .accessibilityHidden(true)
+    }
+
+    private var logoutAlertLayer: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Text("정말 로그아웃하시겠어요?")
+                    .font(AppDesign.Fonts.title20SemiBold)
+                    .foregroundStyle(Color.brandBlack)
+
+                Text("다시 이용하려면 로그인이 필요해요")
+                    .font(AppDesign.Fonts.caption)
+                    .foregroundStyle(Color.brandGray)
+                    .padding(.top, 14)
+
+                HStack(spacing: 20) {
+                    Button {
+                        HapticManager.selection()
+                        store.send(.logoutAlertCancelButtonTapped)
+                    } label: {
+                        Text("취소하기")
+                            .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                            .foregroundStyle(Color.brandDarkGray)
+                            .frame(maxWidth: .infinity, minHeight: 60)
+                            .background(Color.brandLightGray, in: RoundedRectangle(cornerRadius: 16))
+                    }
+
+                    Button {
+                        HapticManager.selection()
+                        store.send(.logoutAlertConfirmButtonTapped)
+                    } label: {
+                        Text("로그아웃")
+                            .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                            .foregroundStyle(Color.brandRed)
+                            .frame(maxWidth: .infinity, minHeight: 60)
+                            .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+                            .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(Color.brandRed, lineWidth: 1.5) }
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 28)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 28)
+            .padding(.bottom, 20)
+            .frame(maxWidth: 370)
+            .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 16)
+            .offset(y: -40)
+        }
     }
 }
 

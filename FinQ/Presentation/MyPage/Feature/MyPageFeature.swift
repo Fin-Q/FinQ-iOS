@@ -18,6 +18,8 @@ struct MyPageFeature {
         var myPage: MyPageSummary?
         var isNotificationEnabled: Bool = false
         var isLoading: Bool = false
+        var isLogoutAlertPresented: Bool = false
+        var isLoggingOut: Bool = false
         var errorMessage: String?
     }
     
@@ -33,6 +35,10 @@ struct MyPageFeature {
         case notificationChanged(Bool)
         case alertOKButtonTapped
         case logoutButtonTapped
+        case logoutAlertCancelButtonTapped
+        case logoutAlertConfirmButtonTapped
+        case logoutSucceeded
+        case logoutFailed(String)
         case withdrawalButtonTapped
         case delegate(Delegate)
         
@@ -88,6 +94,35 @@ struct MyPageFeature {
                 return .none
 
             case .logoutButtonTapped:
+                state.isLogoutAlertPresented = true
+                return .none
+
+            case .logoutAlertCancelButtonTapped:
+                state.isLogoutAlertPresented = false
+                return .none
+
+            case .logoutAlertConfirmButtonTapped:
+                guard !state.isLoggingOut else { return .none }
+                state.isLogoutAlertPresented = false
+                state.isLoggingOut = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        try await myPageUseCase.logout()
+                        await send(.logoutSucceeded)
+                    } catch {
+                        await send(.logoutFailed(error.localizedDescription))
+                    }
+                }
+
+            case .logoutSucceeded:
+                state.isLoggingOut = false
+                return .send(.delegate(.logoutSucceeded))
+
+            case let .logoutFailed(message):
+                state.isLoggingOut = false
+                state.errorMessage = message
                 return .none
                 
             case .withdrawalButtonTapped:

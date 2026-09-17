@@ -18,4 +18,8 @@ struct MyPageRepository: MyPageRepositoryProtocol {
         let response = try await networkManager.perform(api: .myPage, responseType: APIResponse<MyPageResponse>.self)
         return response.data.toDomain()
     }
+
+    func logout() async throws {
+        try await networkManager.perform(api: .logout)
+    }
 }
