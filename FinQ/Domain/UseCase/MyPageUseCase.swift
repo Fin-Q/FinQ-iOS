@@ -12,6 +12,7 @@ protocol MyPageUseCaseProtocol: Sendable {
     func updateInterests(topics: [InterestTopic]) async throws
     func updateProfileImage(code: String) async throws
     func updateNickname(_ nickname: String) async throws
+    func withdraw() async throws
     func logout() async throws
 }
 
@@ -36,6 +37,10 @@ struct MyPageUseCase: MyPageUseCaseProtocol {
 
     func updateNickname(_ nickname: String) async throws {
         try await repository.updateNickname(nickname)
+    }
+
+    func withdraw() async throws {
+        try await repository.withdraw()
     }
 
     func logout() async throws {

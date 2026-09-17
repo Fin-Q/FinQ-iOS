@@ -31,6 +31,10 @@ struct MyPageRepository: MyPageRepositoryProtocol {
         try await networkManager.perform(api: .updateNickname(NicknameUpdateRequest(nickname: nickname)))
     }
 
+    func withdraw() async throws {
+        try await networkManager.perform(api: .withdraw)
+    }
+
     func logout() async throws {
         try await networkManager.perform(api: .logout)
     }

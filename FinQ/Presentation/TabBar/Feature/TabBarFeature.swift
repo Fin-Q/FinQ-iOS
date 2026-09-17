@@ -34,6 +34,7 @@ struct TabBarFeature {
         case delegate(Delegate)
         enum Delegate {
             case logout
+            case withdrawalCompleted
         }
     }
 
@@ -58,6 +59,9 @@ struct TabBarFeature {
                 
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
+
+            case .myPage(.delegate(.withdrawalCompleted)):
+                return .send(.delegate(.withdrawalCompleted))
 
             case let .home(.delegate(.questionTapped(question))):
                 return .send(.knowledgeMap(.openContent(categoryCode: question.categoryCode, contentID: question.contentID)))

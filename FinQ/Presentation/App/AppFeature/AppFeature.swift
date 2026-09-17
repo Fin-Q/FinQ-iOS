@@ -123,6 +123,14 @@ struct AppFeature {
                 state.tabBar = TabBarFeature.State()
                 return .none
 
+            case .tabBar(.delegate(.withdrawalCompleted)):
+                state.isWaitingForInitialHome = false
+                state.route = .auth
+                state.auth = AuthMainFeature.State()
+                state.onboarding = OnboardingFeature.State()
+                state.tabBar = TabBarFeature.State()
+                return .none
+
             case .tokenRefreshFailed:
                 state.isWaitingForInitialHome = false
                 state.route = .auth

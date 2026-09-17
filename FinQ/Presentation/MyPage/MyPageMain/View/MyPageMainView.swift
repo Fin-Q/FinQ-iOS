@@ -31,6 +31,12 @@ struct MyPageMainView: View {
             case let .interestSelection(store):
                 MyPageInterestSelectionView(store: store)
 
+            case let .withdrawal(store):
+                MyPageWithdrawalView(store: store)
+
+            case let .withdrawalCompletion(store):
+                MyPageWithdrawalCompletionView(store: store)
+
             case let .termsDetail(store):
                 TermsDetailView(store: store)
             }

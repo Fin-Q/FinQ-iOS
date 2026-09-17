@@ -19,6 +19,8 @@ struct MyPageMainFeature {
         case profileImageSelection(MyPageProfileImageSelectionFeature)
         case nicknameEdit(MyPageNicknameEditFeature)
         case interestSelection(MyPageInterestSelectionFeature)
+        case withdrawal(MyPageWithdrawalFeature)
+        case withdrawalCompletion(MyPageWithdrawalCompletionFeature)
         case termsDetail(TermsDetailFeature)
     }
 
@@ -55,6 +57,7 @@ struct MyPageMainFeature {
         
         enum Delegate: Equatable {
             case logoutSucceeded
+            case withdrawalCompleted
         }
     }
     
@@ -153,6 +156,8 @@ struct MyPageMainFeature {
                 return .none
                 
             case .withdrawalButtonTapped:
+                guard state.path.isEmpty else { return .none }
+                state.path.append(.withdrawal(MyPageWithdrawalFeature.State()))
                 return .none
 
             case let .path(.element(id: id, action: .profileEdit(.delegate(.interestSelectionRequested(interests))))):
@@ -195,6 +200,15 @@ struct MyPageMainFeature {
                 guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
                 state.path.removeLast()
                 return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))
+
+            case let .path(.element(id: id, action: .withdrawal(.delegate(.completed)))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.withdrawalCompletion(MyPageWithdrawalCompletionFeature.State()))
+                return .none
+
+            case let .path(.element(id: id, action: .withdrawalCompletion(.delegate(.confirmed)))):
+                guard state.path.ids.last == id else { return .none }
+                return .send(.delegate(.withdrawalCompleted))
                 
             case .path, .delegate:
                 return .none

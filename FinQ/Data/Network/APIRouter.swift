@@ -38,6 +38,7 @@ enum APIRouter: Sendable {
     case updateInterests(InterestSelectionRequest)
     case updateProfileImage(ProfileImageUpdateRequest)
     case updateNickname(NicknameUpdateRequest)
+    case withdraw
 
     //MARK: - KnowledgeMap
     case knowledgeMap
@@ -75,6 +76,7 @@ extension APIRouter {
         case .updateInterests: return "/users/me/interests"
         case .updateProfileImage: return "/users/me/profile-image"
         case .updateNickname: return "/users/me/nickname"
+        case .withdraw: return "/users/me"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
         case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
@@ -90,6 +92,8 @@ extension APIRouter {
             return .patch
         case .updateInterests:
             return .put
+        case .withdraw:
+            return .delete
         case .onboardingStatus, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus, .myPage:
             return .get
         }
@@ -97,7 +101,7 @@ extension APIRouter {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage, .updateInterests, .updateProfileImage, .updateNickname:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer, .myPage, .updateInterests, .updateProfileImage, .updateNickname, .withdraw:
             return [
                 "Content-Type": "application/json"
             ]
@@ -109,7 +113,7 @@ extension APIRouter {
         case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer, .updateInterests, .updateProfileImage, .updateNickname:
             return JSONEncoding.default
         
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .myPage:
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .myPage, .withdraw:
             return URLEncoding.default
         }
     }
@@ -194,7 +198,7 @@ extension APIRouter {
         case .submitAdvancedQuizAnswer(_, _, let request):
             return ["selectedOptionId": request.selectedOptionID]
 
-        case .logout, .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakStatus, .myPage:
+        case .logout, .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakStatus, .myPage, .withdraw:
             return nil
         }
     }
