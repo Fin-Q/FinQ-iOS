@@ -11,6 +11,7 @@ import ComposableArchitecture
 @Reducer
 struct MyPageMainFeature {
     @Dependency(\.myPageUseCase) private var myPageUseCase
+    @Dependency(\.permissionManager) private var permissionManager
     private enum CancelID { case fetchMyPage }
 
     @Reducer
@@ -30,6 +31,7 @@ struct MyPageMainFeature {
         var myPage: MyPageSummary?
         var isNotificationEnabled: Bool = false
         var isUpdatingNotification: Bool = false
+        var isNotificationPermissionAlertPresented: Bool = false
         var isLoading: Bool = false
         var isLogoutAlertPresented: Bool = false
         var isLoggingOut: Bool = false
@@ -47,8 +49,12 @@ struct MyPageMainFeature {
         case serviceTermsButtonTapped
         case privacyPolicyButtonTapped
         case notificationChanged(Bool)
+        case notificationPermissionResolved(requestedValue: Bool, isAuthorized: Bool)
+        case notificationPermissionRequestFailed(String)
         case notificationUpdateSucceeded
         case notificationUpdateFailed(previousValue: Bool, message: String)
+        case notificationPermissionAlertCancelButtonTapped
+        case notificationPermissionAlertSettingsButtonTapped
         case alertOKButtonTapped
         case logoutButtonTapped
         case logoutAlertCancelButtonTapped
@@ -120,19 +126,46 @@ struct MyPageMainFeature {
 
             case let .notificationChanged(isEnabled):
                 guard !state.isUpdatingNotification else { return .none }
-                let previousValue = state.isNotificationEnabled
-                state.isNotificationEnabled = isEnabled
                 state.isUpdatingNotification = true
                 state.errorMessage = nil
 
                 return .run { send in
+                    let status = await permissionManager.notificationPermissionStatus()
+
+                    switch status {
+                    case .authorized:
+                        await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: true))
+                    case .denied:
+                        await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: false))
+                    case .notDetermined:
+                        do {
+                            let isAuthorized = try await permissionManager.requestNotificationPermission()
+                            await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: isAuthorized))
+                        } catch {
+                            await send(.notificationPermissionRequestFailed(error.localizedDescription))
+                        }
+                    }
+                }
+
+            case let .notificationPermissionResolved(requestedValue, isAuthorized):
+                let previousValue = isAuthorized ? state.isNotificationEnabled : false
+                let updatedValue = isAuthorized ? requestedValue : false
+                state.isNotificationEnabled = updatedValue
+                state.isNotificationPermissionAlertPresented = !isAuthorized
+
+                return .run { send in
                     do {
-                        try await myPageUseCase.updateNotificationSetting(isEnabled: isEnabled)
+                        try await myPageUseCase.updateNotificationSetting(isEnabled: updatedValue)
                         await send(.notificationUpdateSucceeded)
                     } catch {
                         await send(.notificationUpdateFailed(previousValue: previousValue, message: error.localizedDescription))
                     }
                 }
+
+            case let .notificationPermissionRequestFailed(message):
+                state.isUpdatingNotification = false
+                state.errorMessage = message
+                return .none
 
             case .notificationUpdateSucceeded:
                 state.isUpdatingNotification = false
@@ -142,6 +175,10 @@ struct MyPageMainFeature {
                 state.isNotificationEnabled = previousValue
                 state.isUpdatingNotification = false
                 state.errorMessage = message
+                return .none
+
+            case .notificationPermissionAlertCancelButtonTapped, .notificationPermissionAlertSettingsButtonTapped:
+                state.isNotificationPermissionAlertPresented = false
                 return .none
 
             case .alertOKButtonTapped:

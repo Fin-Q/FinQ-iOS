@@ -7,11 +7,13 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 import ComposableArchitecture
 import Kingfisher
 
 struct MyPageMainView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @Bindable var store: StoreOf<MyPageMainFeature>
 
     var body: some View {
@@ -114,6 +116,13 @@ struct MyPageMainView: View {
                     if !isPresented { store.send(.logoutAlertCancelButtonTapped) }
                 })) {
                     logoutAlertLayer
+                        .presentationBackground(.clear)
+                        .interactiveDismissDisabled()
+                }
+                .fullScreenCover(isPresented: Binding(get: { store.isNotificationPermissionAlertPresented }, set: { isPresented in
+                    if !isPresented { store.send(.notificationPermissionAlertCancelButtonTapped) }
+                })) {
+                    notificationPermissionAlertLayer
                         .presentationBackground(.clear)
                         .interactiveDismissDisabled()
                 }
@@ -337,6 +346,73 @@ struct MyPageMainView: View {
             .padding(.horizontal, 20)
             .padding(.top, 28)
             .padding(.bottom, 20)
+            .frame(maxWidth: 370)
+            .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 16)
+            .offset(y: -40)
+        }
+    }
+
+    private var notificationPermissionAlertLayer: some View {
+        ZStack {
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Image(systemName: "exclamationmark.circle")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(AppDesign.Colors.buttonBG)
+                    .frame(width: 48, height: 48)
+
+                Text("알림 권한이 꺼져 있어요")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(AppDesign.Colors.title)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 32)
+
+                Text("알림을 받으려면 설정에서 알림 권한을 허용해 주세요.")
+                    .font(AppDesign.Fonts.body)
+                    .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 20)
+
+                HStack(spacing: 12) {
+                    Button {
+                        HapticManager.selection()
+                        store.send(.notificationPermissionAlertCancelButtonTapped)
+                    } label: {
+                        Text("취소")
+                            .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                            .foregroundStyle(Color.brandDarkGray)
+                            .frame(maxWidth: .infinity, minHeight: 60)
+                            .background(Color.brandLightGray, in: RoundedRectangle(cornerRadius: 16))
+                    }
+
+                    Button {
+                        HapticManager.selection()
+                        store.send(.notificationPermissionAlertSettingsButtonTapped)
+
+                        if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                            openURL(settingsURL)
+                        }
+                    } label: {
+                        Text("설정으로 이동")
+                            .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                            .foregroundStyle(Color.brandWhite)
+                            .frame(maxWidth: .infinity, minHeight: 60)
+                            .background(Color.brandBlue, in: RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 40)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 32)
+            .padding(.bottom, 24)
             .frame(maxWidth: 370)
             .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
