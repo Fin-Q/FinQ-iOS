@@ -58,7 +58,7 @@ struct AuthMainFeature {
         
         case delegate(Delegate)
         enum Delegate: Equatable {
-            case loginSucceeded(isOnboardingCompleted: Bool)
+            case loginSucceeded(OnboardingStatus)
         }
     }
     
@@ -113,7 +113,7 @@ struct AuthMainFeature {
                     return .none
                 }
 
-                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted)))
+                return .send(.delegate(.loginSucceeded(result.onboardingStatus)))
 
             case let .kakaoLoginFailed(message):
                 state.isSocialAuthorizing = false
@@ -157,7 +157,7 @@ struct AuthMainFeature {
                     return .none
                 }
 
-                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted)))
+                return .send(.delegate(.loginSucceeded(result.onboardingStatus)))
 
             case let .appleLoginFailed(message):
                 state.isSocialAuthorizing = false
@@ -193,7 +193,7 @@ struct AuthMainFeature {
 
             case let .path(.element(id: id, action: .signUpTerms(.delegate(.pushToSignUpDoneView)))):
                 guard state.path.ids.last == id, case let .signUpTerms(terms) = state.path[id: id], terms.flow != .email else { return .none }
-                state.path.append(.signUpDone(SignUpDoneFeature.State(isOnboardingCompleted: false)))
+                state.path.append(.signUpDone(SignUpDoneFeature.State()))
                 return .none
                 
             case let .path(.element(id: id, action: .signUp(.delegate(.pushToSignUpDoneView)))):
@@ -244,20 +244,20 @@ struct AuthMainFeature {
                 
                 return .none
 
-            case let .path(.element(id: id, action: .login(.delegate(.loginSucceeded(isOnboardingCompleted))))):
+            case let .path(.element(id: id, action: .login(.delegate(.loginSucceeded(status))))):
                 guard state.path.ids.last == id else { return .none }
 
-                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: isOnboardingCompleted)))
+                return .send(.delegate(.loginSucceeded(status)))
                 
             case .path(.popFrom(id: _)):
                 // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소
                 state.loginIDPendingCleanup = nil
                 return .none
                 
-            case let .path(.element(id: id, action: .signUpDone(.delegate(.start(isOnboardingCompleted))))):
+            case let .path(.element(id: id, action: .signUpDone(.delegate(.start)))):
                 guard state.path.ids.last == id else { return .none }
 
-                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: isOnboardingCompleted)))
+                return .send(.delegate(.loginSucceeded(OnboardingStatus.interestSelection)))
                 
             case .path:
                 return .none

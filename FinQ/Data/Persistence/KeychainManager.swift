@@ -12,9 +12,10 @@ protocol KeychainManagerProtocol: Sendable {
     func saveItem(item: String, forKey key: KeyType) -> Bool
     func getItem(forKey key: KeyType) -> String?
     func deleteItem(forKey key: KeyType) -> Bool
+    func deleteAllItem()
 }
 
-enum KeyType: String, Sendable {
+enum KeyType: String, Sendable, CaseIterable {
     case accessToken
     case refreshToken
     case fcmToken
@@ -91,9 +92,12 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         var item: AnyObject?
         let status = SecItemCopyMatching(query, &item)
         
-        guard status == errSecSuccess,
-              let data = item as? Data else {
-            AppLogger.shared.log("\(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
+        if status == errSecItemNotFound {
+            return nil
+        }
+        
+        guard status == errSecSuccess, let data = item as? Data else {
+            AppLogger.shared.log("키체인 조회 실패: \(key) \(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
             return nil
         }
         
@@ -116,5 +120,11 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         }
         
         return status == errSecSuccess
+    }
+    
+    func deleteAllItem() {
+        KeyType.allCases.forEach {
+            _ = self.deleteItem(forKey: $0)
+        }
     }
 }

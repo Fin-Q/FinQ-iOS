@@ -21,6 +21,11 @@ extension KakaoLoginInput {
 
 extension KakaoLoginResponse {
     func toDomain() -> KakaoLoginResult {
-        return KakaoLoginResult(userID: userID, nickname: nickname, isNewUser: isNewUser, isOnboardingCompleted: onboardingStatus == .completed)
+        return KakaoLoginResult(
+            userID: userID,
+            nickname: nickname,
+            isNewUser: isNewUser,
+            onboardingStatus: onboardingStatus.toDomain()
+        )
     }
 }
