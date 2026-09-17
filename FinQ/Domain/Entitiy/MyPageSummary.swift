@@ -9,7 +9,7 @@ import Foundation
 
 struct MyPageSummary: Equatable, Sendable {
     let userID: String
-    let email: String
+    let email: String?
     let nickname: String
     let profileImageCode: String
     let profileImageURL: String

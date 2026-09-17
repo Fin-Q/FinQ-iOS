@@ -9,7 +9,7 @@ import Foundation
 
 struct MyPageResponse: Decodable, Sendable {
     let userID: String
-    let email: String
+    let email: String?
     let nickname: String
     let profileImageCode: String
     let profileImageURL: String

@@ -29,7 +29,10 @@ struct MyPageProfileEditView: View {
             .padding(.top, 40)
 
             VStack(spacing: 0) {
-                informationRow(title: "아이디", value: store.myPage.email)
+                if let email = store.myPage.email {
+                    informationRow(title: "아이디", value: email)
+                }
+
                 nicknameRow
                 interestRow
             }
