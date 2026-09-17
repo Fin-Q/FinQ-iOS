@@ -10,6 +10,8 @@ import Foundation
 protocol KnowledgeMapUseCaseProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
+    func fetchContent(contentID: Int) async throws -> LearningContent
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz
     func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async
@@ -28,6 +30,14 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
 
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail {
         return try await repository.fetchCategoryDetail(topic: topic)
+    }
+
+    func fetchContent(contentID: Int) async throws -> LearningContent {
+        return try await repository.fetchContent(contentID: contentID)
+    }
+
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult {
+        return try await repository.submitContentAnswer(contentID: contentID, questionID: questionID, selectedOptionID: selectedOptionID)
     }
 
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz {

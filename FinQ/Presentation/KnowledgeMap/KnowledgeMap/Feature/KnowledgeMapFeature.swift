@@ -15,6 +15,8 @@ struct KnowledgeMapFeature {
     @Reducer
     enum Path {
         case mapDetail(MapDetailFeature)
+        case contentLearning(ContentLearningFeature)
+        case contentLearningCompletion(ContentLearningCompletionFeature)
         case advancedQuizMain(AdvancedQuizMainFeature)
         case advancedQuizIntro(AdvancedQuizIntroFeature)
         case advancedQuizQuestion(AdvancedQuizQuestionFeature)
@@ -113,6 +115,26 @@ struct KnowledgeMapFeature {
                 guard state.path.ids.last == id else { return .none }
                 state.path.append(.advancedQuizMain(AdvancedQuizMainFeature.State(categoryID: categoryID)))
                 return .none
+
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID)))
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(completionResult: completionResult)))
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearningCompletion(.delegate(.completed)))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let mapDetailElement = pathElements.last(where: { element in
+                    if case .mapDetail = element.1 { return true }
+                    return false
+                }) else { return .none }
+                let mapDetailID = mapDetailElement.0
+                state.path.pop(to: mapDetailID)
+                return .send(.path(.element(id: mapDetailID, action: .mapDetail(.onAppear))))
 
             case let .path(.element(id: id, action: .advancedQuizMain(.delegate(.advancedQuizIntroRequested(quiz))))):
                 guard state.path.ids.last == id else { return .none }

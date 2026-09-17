@@ -20,6 +20,10 @@ struct KnowledgeMapView: View {
             switch store.case {
             case let .mapDetail(store):
                 MapDetailView(store: store)
+            case let .contentLearning(store):
+                ContentLearningView(store: store)
+            case let .contentLearningCompletion(store):
+                ContentLearningCompletionView(store: store)
             case let .advancedQuizMain(store):
                 AdvancedQuizMainView(store: store)
             case let .advancedQuizIntro(store):

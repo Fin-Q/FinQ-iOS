@@ -35,6 +35,7 @@ struct MapDetailFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case contentRequested(contentID: Int)
             case advancedQuizRequested(categoryID: Int)
         }
     }
@@ -90,7 +91,10 @@ struct MapDetailFeature {
             case .challengeButtonTapped:
                 return .send(.delegate(.advancedQuizRequested(categoryID: state.category.categoryID)))
 
-            case .contentCardTapped, .delegate:
+            case let .contentCardTapped(contentID):
+                return .send(.delegate(.contentRequested(contentID: contentID)))
+
+            case .delegate:
                 return .none
             }
         }

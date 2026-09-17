@@ -10,6 +10,8 @@ import Foundation
 protocol KnowledgeMapRepositoryProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
+    func fetchContent(contentID: Int) async throws -> LearningContent
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz
     func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async
