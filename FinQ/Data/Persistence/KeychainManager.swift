@@ -92,9 +92,12 @@ final class KeychainManager: KeychainManagerProtocol, Sendable {
         var item: AnyObject?
         let status = SecItemCopyMatching(query, &item)
         
-        guard status == errSecSuccess,
-              let data = item as? Data else {
-            AppLogger.shared.log("\(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
+        if status == errSecItemNotFound {
+            return nil
+        }
+        
+        guard status == errSecSuccess, let data = item as? Data else {
+            AppLogger.shared.log("키체인 조회 실패: \(key) \(SecCopyErrorMessageString(status, nil) as String? ?? "")", level: .error)
             return nil
         }
         
