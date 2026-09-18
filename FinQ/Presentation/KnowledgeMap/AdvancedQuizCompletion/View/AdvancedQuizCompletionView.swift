@@ -25,18 +25,18 @@ struct AdvancedQuizCompletionView: View {
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: 400)
                 .padding(.top, 36)
-                .overlay(alignment: .bottom) {
-                    if let categoryResult = store.categoryResult, categoryResult.levelUp {
-                        levelUpMessage(categoryResult)
-                            .padding(.bottom, 8)
-                    }
-                }
 
             Spacer(minLength: 24)
 
             if let categoryResult = store.categoryResult {
-                xpCard(categoryResult)
-                    .padding(.bottom, 20)
+                VStack(spacing: 12) {
+                    if categoryResult.levelUp {
+                        levelUpMessage(categoryResult)
+                    }
+
+                    xpCard(categoryResult)
+                }
+                .padding(.bottom, 20)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -83,20 +83,28 @@ struct AdvancedQuizCompletionView: View {
     }
 
     private func levelUpMessage(_ categoryResult: AdvancedQuizCategoryResult) -> some View {
-        VStack(spacing: 6) {
-            if let newLevel = categoryResult.newLevel {
-                Text("축하합니다! Lv.\(newLevel)을 달성했어요🎉")
-            } else {
-                Text("축하합니다! 레벨업을 달성했어요🎉")
-            }
+        VStack(spacing: 0) {
+            VStack(spacing: 6) {
+                if let newLevel = categoryResult.newLevel {
+                    Text("축하합니다! Lv.\(newLevel)을 달성했어요🎉")
+                } else {
+                    Text("축하합니다! 레벨업을 달성했어요🎉")
+                }
 
-            Text("금융 지식이 차곡차곡 쌓이고 있어요!")
+                Text("금융 지식이 차곡차곡 쌓이고 있어요!")
+            }
+            .font(.system(size: 14, weight: .regular))
+            .foregroundStyle(Color.brandGray)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.brandLightGray, in: RoundedRectangle(cornerRadius: 16))
+
+            Image(.polygon)
+                .renderingMode(.template)
+                .resizable()
+                .foregroundStyle(Color.brandLightGray)
+                .frame(width: 25, height: 14)
         }
-        .font(.system(size: 14, weight: .regular))
-        .foregroundStyle(Color.brandGray)
-        .multilineTextAlignment(.center)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.brandWhite.opacity(0.9), in: RoundedRectangle(cornerRadius: 8))
     }
 }
