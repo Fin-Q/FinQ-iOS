@@ -18,7 +18,13 @@ extension String {
         }
 
         let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        return (try? AttributedString(markdown: normalizedText, options: options)) ?? AttributedString(normalizedText)
+        guard var attributedString = try? AttributedString(markdown: normalizedText.normalizedMarkdownStrongBoundaries, options: options) else { return AttributedString(normalizedText) }
+
+        while let markerIndex = attributedString.characters.firstIndex(of: "\u{E000}") {
+            attributedString.removeSubrange(markerIndex..<attributedString.characters.index(after: markerIndex))
+        }
+
+        return attributedString
     }
 
     func markdownBulletList() -> (introduction: String, items: [String]) {
@@ -34,5 +40,11 @@ extension String {
             .replacingOccurrences(of: "\\n", with: "\n")
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
+    }
+
+    private var normalizedMarkdownStrongBoundaries: String {
+        let pattern = #"\*\*([^*\r\n]*\p{P})\*\*(?=[\p{L}\p{N}])"#
+        guard let regularExpression = try? NSRegularExpression(pattern: pattern) else { return self }
+        return regularExpression.stringByReplacingMatches(in: self, range: NSRange(startIndex..<endIndex, in: self), withTemplate: "**$1**&#xE000;")
     }
 }

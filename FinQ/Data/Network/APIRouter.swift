@@ -210,7 +210,7 @@ extension APIRouter {
         case .submitAdvancedQuizAnswer(_, _, let request):
             return ["selectedOptionId": request.selectedOptionID]
 
-        case .logout, .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakStatus. .myPage, .withdraw:
+        case .logout, .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakStatus, .myPage, .withdraw:
             return nil
         }
     }
