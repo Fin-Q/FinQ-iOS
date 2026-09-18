@@ -10,9 +10,17 @@ import Foundation
 protocol KnowledgeMapUseCaseProtocol: Sendable {
     func fetchCategories() async throws -> [KnowledgeMapCategory]
     func fetchCategoryDetail(topic: InterestTopic) async throws -> KnowledgeMapCategoryDetail
+    func fetchContent(contentID: Int) async throws -> LearningContent
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz
     func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logLearningComplete(contentID: Int, categoryCode: String) async
 }
 
 struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
@@ -30,6 +38,14 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
         return try await repository.fetchCategoryDetail(topic: topic)
     }
 
+    func fetchContent(contentID: Int) async throws -> LearningContent {
+        return try await repository.fetchContent(contentID: contentID)
+    }
+
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult {
+        return try await repository.submitContentAnswer(contentID: contentID, questionID: questionID, selectedOptionID: selectedOptionID)
+    }
+
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz {
         return try await repository.fetchAdvancedQuiz(categoryID: categoryID)
     }
@@ -40,5 +56,29 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
     
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
         return await repository.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async {
+        return await repository.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async {
+        return await repository.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logDifferentLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logSameLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logLearningComplete(contentID: contentID, categoryCode: categoryCode)
     }
 }

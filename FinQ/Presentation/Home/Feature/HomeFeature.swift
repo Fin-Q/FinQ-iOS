@@ -82,7 +82,12 @@ struct HomeFeature {
                 return .none
 
             case let .questionTapped(question):
-                return .send(.delegate(.questionTapped(question)))
+                return .merge(
+                    .send(.delegate(.questionTapped(question))),
+                    .run { _ in
+                        await homeUseCase.logHomeQuestionTapped(contentID: question.contentID, categoryCode: question.categoryCode)
+                    }
+                )
 
             case .alertOKButtonTapped:
                 state.errorMessage = nil

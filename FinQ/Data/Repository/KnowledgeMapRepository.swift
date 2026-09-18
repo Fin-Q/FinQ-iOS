@@ -29,6 +29,17 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
         return try response.data.toDomain()
     }
 
+    func fetchContent(contentID: Int) async throws -> LearningContent {
+        let response = try await networkManager.perform(api: .content(contentID), responseType: APIResponse<LearningContentResponse>.self)
+        return try response.data.toDomain()
+    }
+
+    func submitContentAnswer(contentID: Int, questionID: Int, selectedOptionID: String) async throws -> ContentAnswerResult {
+        let request = ContentAnswerRequest(selectedOptionID: selectedOptionID)
+        let response = try await networkManager.perform(api: .submitContentAnswer(contentID: contentID, questionID: questionID, request: request), responseType: APIResponse<ContentAnswerResponse>.self)
+        return try response.data.toDomain()
+    }
+
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz {
         let response = try await networkManager.perform(api: .advancedQuiz(categoryID), responseType: APIResponse<AdvancedQuizResponse>.self)
         return response.data.toDomain()
@@ -42,5 +53,29 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
     
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
         firebaseAnalyticsManager.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logDifferentLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logSameLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logLearningComplete(contentID: contentID, categoryCode: categoryCode)
     }
 }

@@ -9,4 +9,5 @@ import Foundation
 
 protocol HomeRepositoryProtocol: Sendable {
     func fetchHome() async throws -> HomeSummary
+    func logHomeQuestionTapped(contentID: Int, categoryCode: String) async
 }

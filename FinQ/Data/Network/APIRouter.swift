@@ -35,6 +35,8 @@ enum APIRouter: Sendable {
     //MARK: - KnowledgeMap
     case knowledgeMap
     case categoryDetail(String)
+    case content(Int)
+    case submitContentAnswer(contentID: Int, questionID: Int, request: ContentAnswerRequest)
     case advancedQuiz(Int)
     case submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, request: AdvancedQuizAnswerRequest)
 }
@@ -65,6 +67,8 @@ extension APIRouter {
         case .streakStatus: return "/streak/status"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
+        case .content(let contentID): return "/contents/\(contentID)"
+        case let .submitContentAnswer(contentID, questionID, _): return "/contents/\(contentID)/questions/\(questionID)/answers"
         case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
         case let .submitAdvancedQuizAnswer(categoryID, questionID, _): return "/categories/\(categoryID)/quiz/questions/\(questionID)/answers"
         }
@@ -72,18 +76,18 @@ extension APIRouter {
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests, .submitAdvancedQuizAnswer:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests, .submitContentAnswer, .submitAdvancedQuizAnswer:
             return .post
         case .completeOnboarding:
             return .patch
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus:
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitAdvancedQuizAnswer:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitContentAnswer, .submitAdvancedQuizAnswer:
             return [
                 "Content-Type": "application/json"
             ]
@@ -92,10 +96,10 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .submitAdvancedQuizAnswer:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding, .submitContentAnswer, .submitAdvancedQuizAnswer:
             return JSONEncoding.default
         
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz:
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .content, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz:
             return URLEncoding.default
         }
     }
@@ -167,11 +171,14 @@ extension APIRouter {
 
         case let .streakCalendar(month):
             return month.map { ["month": $0] }
+
+        case .submitContentAnswer(_, _, let request):
+            return ["selectedOptionId": request.selectedOptionID]
             
         case .submitAdvancedQuizAnswer(_, _, let request):
             return ["selectedOptionId": request.selectedOptionID]
 
-        case .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .advancedQuiz, .home, .profileImage, .streakStatus:
+        case .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakStatus:
             return nil
         }
     }

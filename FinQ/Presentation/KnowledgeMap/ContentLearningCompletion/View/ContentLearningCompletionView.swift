@@ -1,23 +1,23 @@
 //
-//  AdvancedQuizCompletionView.swift
+//  ContentLearningCompletionView.swift
 //  FinQ
 //
-//  Created by 권대윤 on 9/14/26.
+//  Created by 권대윤 on 9/16/26.
 //
 
 import Foundation
 import SwiftUI
 import ComposableArchitecture
 
-struct AdvancedQuizCompletionView: View {
-    let store: StoreOf<AdvancedQuizCompletionFeature>
+struct ContentLearningCompletionView: View {
+    let store: StoreOf<ContentLearningCompletionFeature>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("학습을 완료했어요!")
-                .font(AppDesign.Fonts.largeTitleSemiBold)
+                .font(AppDesign.Fonts.largeTitleSemiBold24)
                 .foregroundStyle(Color.brandBlack)
-                .padding(.top, 60)
+                .padding(.top, 74)
 
             Image(.advancedQuizDone)
                 .resizable()
@@ -28,38 +28,28 @@ struct AdvancedQuizCompletionView: View {
 
             Spacer(minLength: 24)
 
-            if let categoryResult = store.categoryResult {
+            if let result = store.completionResult {
                 VStack(spacing: 12) {
-                    if categoryResult.levelUp {
-                        levelUpMessage(categoryResult)
+                    if result.levelUp {
+                        levelUpMessage(result)
                     }
 
-                    xpCard(categoryResult)
+                    xpCard(result)
                 }
-                .padding(.bottom, 20)
+                .padding(.bottom, 24)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, 16)
-        .background(Color.brandWhite.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            Button {
-                HapticManager.selection()
-                store.send(.completeButtonTapped)
-            } label: {
-                Text("완료")
-            }
-            .buttonStyle(.customDefault)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 30)
-            .background(Color.brandWhite)
+            ContentLearningNavigationButtons(title: "완료", onNext: { store.send(.completeButtonTapped) })
         }
-        .enableInteractivePopGesture()
+        .background(Color.brandWhite.ignoresSafeArea())
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
     }
 
-    private func xpCard(_ categoryResult: AdvancedQuizCategoryResult) -> some View {
+    private func xpCard(_ result: ContentCompletionResult) -> some View {
         HStack(spacing: 8) {
             Image(.xp)
                 .resizable()
@@ -68,13 +58,13 @@ struct AdvancedQuizCompletionView: View {
                 .frame(width: 24, height: 24)
 
             Text("획득 XP")
-                .font(.system(size: 16, weight: .medium))
+                .font(AppDesign.Fonts.subTitle16)
                 .foregroundStyle(Color.brandDarkGray)
 
             Spacer(minLength: 0)
 
-            Text("\(categoryResult.earnedXP)")
-                .font(.system(size: 18, weight: .semibold))
+            Text("\(result.earnedXP)")
+                .font(AppDesign.Fonts.body18SemiBold)
                 .foregroundStyle(Color.brandDarkGray)
         }
         .padding(.horizontal, 24)
@@ -82,10 +72,10 @@ struct AdvancedQuizCompletionView: View {
         .background(Color.brandLightGray, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func levelUpMessage(_ categoryResult: AdvancedQuizCategoryResult) -> some View {
+    private func levelUpMessage(_ result: ContentCompletionResult) -> some View {
         VStack(spacing: 0) {
             VStack(spacing: 6) {
-                if let newLevel = categoryResult.newLevel {
+                if let newLevel = result.newLevel {
                     Text("축하합니다! Lv.\(newLevel)을 달성했어요🎉")
                 } else {
                     Text("축하합니다! 레벨업을 달성했어요🎉")
@@ -93,7 +83,7 @@ struct AdvancedQuizCompletionView: View {
 
                 Text("금융 지식이 차곡차곡 쌓이고 있어요!")
             }
-            .font(.system(size: 14, weight: .regular))
+            .font(AppDesign.Fonts.caption)
             .foregroundStyle(Color.brandGray)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 16)

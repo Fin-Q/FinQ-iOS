@@ -15,11 +15,11 @@ struct AdvancedQuizQuestionFeature {
     @ObservableState
     struct State: Equatable {
         let quiz: AdvancedQuiz
-        let questionIndex: Int
+        var questionIndex: Int
         var selectedOptionID: String?
         var isSubmittingAnswer: Bool = false
         var errorMessage: String?
-        @Presents var incorrectAnswer: AdvancedQuizAnswerResultFeature.State?
+        var answerResult: AdvancedQuizAnswerResultFeature.State?
 
         init(quiz: AdvancedQuiz, questionIndex: Int = 0, selectedOptionID: String? = nil, isSubmittingAnswer: Bool = false, errorMessage: String? = nil) {
             self.quiz = quiz
@@ -43,11 +43,11 @@ struct AdvancedQuizQuestionFeature {
         case submitAnswerSucceeded(AdvancedQuizAnswerResult)
         case submitAnswerFailed(String)
         case alertOKButtonTapped
-        case incorrectAnswer(PresentationAction<AdvancedQuizAnswerResultFeature.Action>)
+        case answerResult(AdvancedQuizAnswerResultFeature.Action)
         case delegate(Delegate)
 
         enum Delegate: Equatable {
-            case correctAnswerRequested(quiz: AdvancedQuiz, questionIndex: Int, result: AdvancedQuizAnswerResult)
+            case completionSummaryRequested(quiz: AdvancedQuiz, categoryResult: AdvancedQuizCategoryResult?)
         }
     }
 
@@ -78,13 +78,8 @@ struct AdvancedQuizQuestionFeature {
 
             case let .submitAnswerSucceeded(result):
                 state.isSubmittingAnswer = false
-
-                if result.correct {
-                    return .send(.delegate(.correctAnswerRequested(quiz: state.quiz, questionIndex: state.questionIndex, result: result)))
-                }
-
                 guard let question = state.question else { return .none }
-                state.incorrectAnswer = AdvancedQuizAnswerResultFeature.State(quiz: state.quiz, question: question, questionIndex: state.questionIndex, result: result, presentation: .incorrect)
+                state.answerResult = AdvancedQuizAnswerResultFeature.State(quiz: state.quiz, question: question, questionIndex: state.questionIndex, result: result, presentation: result.correct ? .correct : .incorrect)
                 return .none
 
             case let .submitAnswerFailed(message):
@@ -96,16 +91,25 @@ struct AdvancedQuizQuestionFeature {
                 state.errorMessage = nil
                 return .none
 
-            case .incorrectAnswer(.presented(.delegate(.retryRequested))), .incorrectAnswer(.dismiss):
-                state.incorrectAnswer = nil
+            case .answerResult(.delegate(.retryRequested)):
+                state.answerResult = nil
                 state.selectedOptionID = nil
                 return .none
 
-            case .incorrectAnswer, .delegate:
+            case let .answerResult(.delegate(.nextQuestionRequested(_, questionIndex))):
+                state.questionIndex = questionIndex
+                state.answerResult = nil
+                state.selectedOptionID = nil
+                return .none
+
+            case let .answerResult(.delegate(.completionSummaryRequested(quiz, categoryResult))):
+                return .send(.delegate(.completionSummaryRequested(quiz: quiz, categoryResult: categoryResult)))
+
+            case .answerResult, .delegate:
                 return .none
             }
         }
-        .ifLet(\.$incorrectAnswer, action: \.incorrectAnswer) {
+        .ifLet(\.answerResult, action: \.answerResult) {
             AdvancedQuizAnswerResultFeature()
         }
     }

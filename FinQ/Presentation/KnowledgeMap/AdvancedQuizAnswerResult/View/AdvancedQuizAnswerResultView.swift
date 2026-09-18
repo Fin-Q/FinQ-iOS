@@ -100,29 +100,29 @@ struct AdvancedQuizAnswerResultView: View {
     }
 
     private var answerCard: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             if isCorrect {
                 Image(.circle)
                     .resizable()
                     .renderingMode(.original)
                     .scaledToFit()
-                    .frame(width: 18, height: 18)
+                    .frame(width: 24, height: 24)
             } else {
                 Image(.x)
                     .resizable()
                     .renderingMode(.original)
                     .scaledToFit()
-                    .frame(width: 16, height: 16)
+                    .frame(width: 24, height: 24)
             }
 
             Text(answerDescription)
-                .font(.system(size: 14, weight: .regular))
+                .font(AppDesign.Fonts.caption16)
                 .foregroundStyle(Color.brandDarkGray)
                 .fixedSize(horizontal: false, vertical: true)
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 14)
         .padding(.vertical, 14)
         .frame(maxWidth: .infinity, minHeight: 50)
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))

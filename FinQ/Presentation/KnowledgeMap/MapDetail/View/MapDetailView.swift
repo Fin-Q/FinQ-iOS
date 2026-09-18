@@ -28,6 +28,7 @@ struct MapDetailView: View {
                 .onChange(of: store.detail, initial: true) { _, detail in
                     guard let targetContentID = store.targetContentID, detail?.contents.contains(where: { $0.contentID == targetContentID }) == true else { return }
                     withAnimation(.easeInOut) { proxy.scrollTo(targetContentID, anchor: .center) }
+                    store.send(.targetContentScrollCompleted)
                 }
             }
             .ignoresSafeArea(edges: .top)

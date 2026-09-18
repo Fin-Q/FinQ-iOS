@@ -11,9 +11,35 @@ import ComposableArchitecture
 
 struct AdvancedQuizQuestionView: View {
     @Environment(\.dismiss) private var dismiss
-    @Bindable var store: StoreOf<AdvancedQuizQuestionFeature>
+    let store: StoreOf<AdvancedQuizQuestionFeature>
 
     var body: some View {
+        Group {
+            if let answerResultStore = store.scope(state: \.answerResult, action: \.answerResult) {
+                AdvancedQuizAnswerResultView(store: answerResultStore)
+            } else {
+                questionContent
+            }
+        }
+        .background(Color.brandWhite.ignoresSafeArea())
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
+        .allowsHitTesting(!store.isSubmittingAnswer)
+        .overlay {
+            if store.isSubmittingAnswer {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(AppDesign.Colors.progress)
+                    .padding(24)
+            }
+        }
+        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", coversEntireScreen: true, onConfirm: {
+            HapticManager.selection()
+            store.send(.alertOKButtonTapped)
+        })
+    }
+
+    private var questionContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             backButton
 
@@ -41,7 +67,6 @@ struct AdvancedQuizQuestionView: View {
             .scrollIndicators(.hidden)
         }
         .padding(.horizontal, 16)
-        .background(Color.brandWhite.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
             Button {
                 HapticManager.selection()
@@ -56,24 +81,6 @@ struct AdvancedQuizQuestionView: View {
             .background(Color.brandWhite)
         }
         .enableInteractivePopGesture()
-        .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
-        .allowsHitTesting(!store.isSubmittingAnswer)
-        .overlay {
-            if store.isSubmittingAnswer {
-                ProgressView()
-                    .controlSize(.large)
-                    .tint(AppDesign.Colors.progress)
-                    .padding(24)
-            }
-        }
-        .fullScreenCover(item: $store.scope(\.incorrectAnswer, action: \.incorrectAnswer)) { store in
-            AdvancedQuizAnswerResultView(store: store)
-        }
-        .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
-            HapticManager.selection()
-            store.send(.alertOKButtonTapped)
-        })
     }
 
     private var backButton: some View {

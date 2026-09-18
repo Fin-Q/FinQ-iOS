@@ -16,6 +16,7 @@ struct MapDetailFeature {
     struct State: Equatable {
         let category: KnowledgeMapCategory
         var targetContentID: Int? = nil
+        var homeQuestionTargetContentID: Int? = nil
         var detail: KnowledgeMapCategoryDetail?
         var isLoading: Bool = false
         var errorMessage: String?
@@ -26,6 +27,7 @@ struct MapDetailFeature {
         case onAppear
         case fetchDetailSucceeded(KnowledgeMapCategoryDetail)
         case fetchDetailFailed(String)
+        case targetContentScrollCompleted
         case alertOKButtonTapped
         case challengeButtonTapped
         case contentCardTapped(Int)
@@ -34,6 +36,7 @@ struct MapDetailFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case contentRequested(contentID: Int, categoryCode: String, isHomeQuestionTarget: Bool)
             case advancedQuizRequested(categoryID: Int)
         }
     }
@@ -67,6 +70,10 @@ struct MapDetailFeature {
                 state.errorMessage = message
                 return .none
 
+            case .targetContentScrollCompleted:
+                state.targetContentID = nil
+                return .none
+
             case .alertOKButtonTapped:
                 state.errorMessage = nil
                 return .none
@@ -85,7 +92,10 @@ struct MapDetailFeature {
             case .challengeButtonTapped:
                 return .send(.delegate(.advancedQuizRequested(categoryID: state.category.categoryID)))
 
-            case .contentCardTapped, .delegate:
+            case let .contentCardTapped(contentID):
+                return .send(.delegate(.contentRequested(contentID: contentID, categoryCode: state.category.topic.rawValue, isHomeQuestionTarget: state.homeQuestionTargetContentID == contentID)))
+
+            case .delegate:
                 return .none
             }
         }

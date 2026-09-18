@@ -9,7 +9,7 @@ import Foundation
 import ComposableArchitecture
 
 private enum HomeUseCaseKey: DependencyKey {
-    static let liveValue: any HomeUseCaseProtocol = HomeUseCase(repository: HomeRepository(networkManager: NetworkManager.shared))
+    static let liveValue: any HomeUseCaseProtocol = HomeUseCase(repository: HomeRepository(networkManager: NetworkManager.shared, firebaseAnalyticsManager: FirebaseAnalyticsManager.shared))
 }
 
 private enum StreakUseCaseKey: DependencyKey {
