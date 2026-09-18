@@ -1,0 +1,283 @@
+//
+//  MyPageMainFeature.swift
+//  FinQ
+//
+//  Created by 권대윤 on 8/29/26.
+//
+
+import Foundation
+import ComposableArchitecture
+
+@Reducer
+struct MyPageMainFeature {
+    @Dependency(\.myPageUseCase) private var myPageUseCase
+    @Dependency(\.permissionManager) private var permissionManager
+    private enum CancelID { case fetchMyPage }
+
+    @Reducer
+    enum Path {
+        case profileEdit(MyPageProfileEditFeature)
+        case profileImageSelection(MyPageProfileImageSelectionFeature)
+        case nicknameEdit(MyPageNicknameEditFeature)
+        case interestSelection(MyPageInterestSelectionFeature)
+        case withdrawal(MyPageWithdrawalFeature)
+        case withdrawalCompletion(MyPageWithdrawalCompletionFeature)
+        case termsDetail(TermsDetailFeature)
+    }
+
+    @ObservableState
+    struct State: Equatable {
+        var path = StackState<Path.State>()
+        var myPage: MyPageSummary?
+        var isNotificationEnabled: Bool = false
+        var isUpdatingNotification: Bool = false
+        var isNotificationPermissionAlertPresented: Bool = false
+        var isLoading: Bool = false
+        var isLogoutAlertPresented: Bool = false
+        var isLoggingOut: Bool = false
+        var errorMessage: String?
+    }
+    
+    enum Action {
+        case path(StackActionOf<Path>)
+        case onAppear
+        case onDisappear
+        case fetchMyPageSucceeded(MyPageSummary)
+        case fetchMyPageFailed(String)
+        case interestButtonTapped(MyPageInterest)
+        case profileEditButtonTapped
+        case serviceTermsButtonTapped
+        case privacyPolicyButtonTapped
+        case notificationChanged(Bool)
+        case notificationPermissionResolved(requestedValue: Bool, isAuthorized: Bool)
+        case notificationPermissionRequestFailed(String)
+        case notificationUpdateSucceeded
+        case notificationUpdateFailed(previousValue: Bool, message: String)
+        case notificationPermissionAlertCancelButtonTapped
+        case notificationPermissionAlertSettingsButtonTapped
+        case alertOKButtonTapped
+        case logoutButtonTapped
+        case logoutAlertCancelButtonTapped
+        case logoutAlertConfirmButtonTapped
+        case logoutSucceeded
+        case logoutFailed(String)
+        case withdrawalButtonTapped
+        case delegate(Delegate)
+        
+        enum Delegate: Equatable {
+            case logoutSucceeded
+            case withdrawalCompleted
+        }
+    }
+    
+    var body: some ReducerOf<Self> {
+        Reduce { state, action in
+            switch action {
+            case .onAppear:
+                guard !state.isLoading else { return .none }
+                state.isLoading = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        let myPage = try await myPageUseCase.fetchMyPage()
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchMyPageSucceeded(myPage))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchMyPageFailed(error.localizedDescription))
+                    }
+                }
+                .cancellable(id: CancelID.fetchMyPage, cancelInFlight: true)
+
+            case .onDisappear:
+                state.isLoading = false
+                return .cancel(id: CancelID.fetchMyPage)
+
+            case let .fetchMyPageSucceeded(myPage):
+                state.myPage = myPage
+                state.isNotificationEnabled = myPage.notificationEnabled
+                state.isLoading = false
+                return .none
+
+            case let .fetchMyPageFailed(message):
+                state.isLoading = false
+                state.errorMessage = message
+                return .none
+
+            case .interestButtonTapped:
+                guard state.path.isEmpty, let interests = state.myPage?.interests else { return .none }
+                let selectedTopics = Set(interests.compactMap { interest in InterestTopic.allCases.first { $0.id == interest.categoryID } })
+                state.path.append(.interestSelection(MyPageInterestSelectionFeature.State(selectedTopics: selectedTopics)))
+                return .none
+
+            case .profileEditButtonTapped:
+                guard state.path.isEmpty, let myPage = state.myPage else { return .none }
+                state.path.append(.profileEdit(MyPageProfileEditFeature.State(myPage: myPage)))
+                return .none
+
+            case .serviceTermsButtonTapped:
+                state.path.append(.termsDetail(TermsDetailFeature.State(term: .serviceTerms, showsAgreementButton: false)))
+                return .none
+
+            case .privacyPolicyButtonTapped:
+                state.path.append(.termsDetail(TermsDetailFeature.State(term: .privacyPolicy, showsAgreementButton: false)))
+                return .none
+
+            case let .notificationChanged(isEnabled):
+                guard !state.isUpdatingNotification else { return .none }
+                state.isUpdatingNotification = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    let status = await permissionManager.notificationPermissionStatus()
+
+                    switch status {
+                    case .authorized:
+                        await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: true))
+                    case .denied:
+                        await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: false))
+                    case .notDetermined:
+                        do {
+                            let isAuthorized = try await permissionManager.requestNotificationPermission()
+                            await send(.notificationPermissionResolved(requestedValue: isEnabled, isAuthorized: isAuthorized))
+                        } catch {
+                            await send(.notificationPermissionRequestFailed(error.localizedDescription))
+                        }
+                    }
+                }
+
+            case let .notificationPermissionResolved(requestedValue, isAuthorized):
+                let previousValue = isAuthorized ? state.isNotificationEnabled : false
+                let updatedValue = isAuthorized ? requestedValue : false
+                state.isNotificationEnabled = updatedValue
+                state.isNotificationPermissionAlertPresented = !isAuthorized
+
+                return .run { send in
+                    do {
+                        try await myPageUseCase.updateNotificationSetting(isEnabled: updatedValue)
+                        await send(.notificationUpdateSucceeded)
+                    } catch {
+                        await send(.notificationUpdateFailed(previousValue: previousValue, message: error.localizedDescription))
+                    }
+                }
+
+            case let .notificationPermissionRequestFailed(message):
+                state.isUpdatingNotification = false
+                state.errorMessage = message
+                return .none
+
+            case .notificationUpdateSucceeded:
+                state.isUpdatingNotification = false
+                return .none
+
+            case let .notificationUpdateFailed(previousValue, message):
+                state.isNotificationEnabled = previousValue
+                state.isUpdatingNotification = false
+                state.errorMessage = message
+                return .none
+
+            case .notificationPermissionAlertCancelButtonTapped, .notificationPermissionAlertSettingsButtonTapped:
+                state.isNotificationPermissionAlertPresented = false
+                return .none
+
+            case .alertOKButtonTapped:
+                state.errorMessage = nil
+                return .none
+
+            case .logoutButtonTapped:
+                state.isLogoutAlertPresented = true
+                return .none
+
+            case .logoutAlertCancelButtonTapped:
+                state.isLogoutAlertPresented = false
+                return .none
+
+            case .logoutAlertConfirmButtonTapped:
+                guard !state.isLoggingOut else { return .none }
+                state.isLogoutAlertPresented = false
+                state.isLoggingOut = true
+                state.errorMessage = nil
+
+                return .run { send in
+                    do {
+                        try await myPageUseCase.logout()
+                        await send(.logoutSucceeded)
+                    } catch {
+                        await send(.logoutFailed(error.localizedDescription))
+                    }
+                }
+
+            case .logoutSucceeded:
+                state.isLoggingOut = false
+                return .send(.delegate(.logoutSucceeded))
+
+            case let .logoutFailed(message):
+                state.isLoggingOut = false
+                state.errorMessage = message
+                return .none
+                
+            case .withdrawalButtonTapped:
+                guard state.path.isEmpty else { return .none }
+                state.path.append(.withdrawal(MyPageWithdrawalFeature.State()))
+                return .none
+
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.interestSelectionRequested(interests))))):
+                guard state.path.ids.last == id else { return .none }
+                let selectedTopics = Set(interests.compactMap { interest in InterestTopic.allCases.first { $0.id == interest.categoryID } })
+                state.path.append(.interestSelection(MyPageInterestSelectionFeature.State(selectedTopics: selectedTopics)))
+                return .none
+
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.profileImageSelectionRequested(profileImageCode))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.profileImageSelection(MyPageProfileImageSelectionFeature.State(profileImageCode: profileImageCode)))
+                return .none
+
+            case let .path(.element(id: id, action: .profileEdit(.delegate(.nicknameEditRequested(nickname))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.nicknameEdit(MyPageNicknameEditFeature.State(nickname: nickname)))
+                return .none
+
+            case let .path(.element(id: _, action: .profileEdit(.delegate(.myPageUpdated(myPage))))):
+                state.myPage = myPage
+                state.isNotificationEnabled = myPage.notificationEnabled
+                return .none
+
+            case let .path(.element(id: id, action: .interestSelection(.delegate(.completed)))):
+                guard state.path.ids.last == id else { return .none }
+                let previousID = state.path.ids.dropLast().last
+                state.path.removeLast()
+
+                if let previousID, case .profileEdit = state.path[id: previousID] {
+                    return .send(.path(.element(id: previousID, action: .profileEdit(.refresh))))
+                }
+                return .send(.onAppear)
+
+            case let .path(.element(id: id, action: .profileImageSelection(.delegate(.completed)))):
+                guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
+                state.path.removeLast()
+                return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))
+
+            case let .path(.element(id: id, action: .nicknameEdit(.delegate(.completed)))):
+                guard state.path.ids.last == id, let profileEditID = state.path.ids.dropLast().last else { return .none }
+                state.path.removeLast()
+                return .send(.path(.element(id: profileEditID, action: .profileEdit(.refresh))))
+
+            case let .path(.element(id: id, action: .withdrawal(.delegate(.completed)))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.withdrawalCompletion(MyPageWithdrawalCompletionFeature.State()))
+                return .none
+
+            case let .path(.element(id: id, action: .withdrawalCompletion(.delegate(.confirmed)))):
+                guard state.path.ids.last == id else { return .none }
+                return .send(.delegate(.withdrawalCompleted))
+                
+            case .path, .delegate:
+                return .none
+            }
+        }
+        .forEach(\.path, action: \.path)
+    }
+}
+
+extension MyPageMainFeature.Path.State: Equatable { }

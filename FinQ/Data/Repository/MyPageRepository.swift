@@ -1,0 +1,45 @@
+//
+//  MyPageRepository.swift
+//  FinQ
+//
+//  Created by 권대윤 on 9/18/26.
+//
+
+import Foundation
+
+struct MyPageRepository: MyPageRepositoryProtocol {
+    private let networkManager: any NetworkManagerProtocol
+
+    init(networkManager: any NetworkManagerProtocol) {
+        self.networkManager = networkManager
+    }
+
+    func fetchMyPage() async throws -> MyPageSummary {
+        let response = try await networkManager.perform(api: .myPage, responseType: APIResponse<MyPageResponse>.self)
+        return response.data.toDomain()
+    }
+
+    func updateInterests(input: InterestSelectionInput) async throws {
+        try await networkManager.perform(api: .updateInterests(input.toRequest()))
+    }
+
+    func updateProfileImage(code: String) async throws {
+        try await networkManager.perform(api: .updateProfileImage(ProfileImageUpdateRequest(profileImageCode: code)))
+    }
+
+    func updateNickname(_ nickname: String) async throws {
+        try await networkManager.perform(api: .updateNickname(NicknameUpdateRequest(nickname: nickname)))
+    }
+
+    func updateNotificationSetting(isEnabled: Bool) async throws {
+        try await networkManager.perform(api: .updateNotificationSetting(NotificationSettingUpdateRequest(notificationEnabled: isEnabled)))
+    }
+
+    func withdraw() async throws {
+        try await networkManager.perform(api: .withdraw)
+    }
+
+    func logout() async throws {
+        try await networkManager.perform(api: .logout)
+    }
+}

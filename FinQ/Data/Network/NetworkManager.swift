@@ -10,6 +10,7 @@ import Alamofire
 
 protocol NetworkManagerProtocol: Sendable {
     func perform<Response: Decodable & Sendable>(api: APIRouter, responseType: Response.Type) async throws -> Response
+    func perform(api: APIRouter) async throws
 }
 
 final class NetworkManager: NetworkManagerProtocol, Sendable {
@@ -77,6 +78,59 @@ final class NetworkManager: NetworkManagerProtocol, Sendable {
                let serverError = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
                 throw serverError
             }
+            throw error
+        }
+    }
+
+    func perform(api: APIRouter) async throws {
+        let url = api.baseURL + api.path
+
+        let response = await AF.request(url, method: api.method, parameters: api.parameters, encoding: api.encoding, headers: api.headers, interceptor: api.requiresAuthorization ? authInterceptor : nil)
+            .validate(statusCode: 200..<300)
+            .serializingData(emptyResponseCodes: Set(200..<300))
+            .response
+
+        switch response.result {
+        case .success:
+            AppLogger.shared.log("\(api.method.rawValue) \(api.path) 호출 응답 성공", level: .debug)
+
+        case let .failure(error):
+            if case let .requestRetryFailed(retryError, _) = error { throw retryError }
+            if case let .requestAdaptationFailed(underlyingError) = error { throw underlyingError }
+
+            let responseBody = response.data.flatMap { String(data: $0, encoding: .utf8) }
+            let requestURL = response.request?.url?.absoluteString ?? url
+            let requestMethod = response.request?.httpMethod ?? api.method.rawValue
+            let requestJSON = prettyJSON(parameters: api.parameters)
+
+            #if DEBUG
+            AppLogger.shared.log(
+                """
+                requestURL: \(requestURL)
+                requestMethod: \(requestMethod)
+                requestParameters:
+                \(requestJSON)
+                statusCode: \(response.response?.statusCode ?? 0)
+                responseBody:
+                \(responseBody ?? "없음")
+                error: \(error)
+                """,
+                level: .error
+            )
+            #endif
+
+            if let urlError = error.underlyingError as? URLError, urlError.code == .notConnectedToInternet {
+                throw APIErrorResponse(message: "네트워크 연결 상태를 확인 후 다시 시도해 주세요.")
+            }
+
+            if let statusCode = response.response?.statusCode, (500..<600).contains(statusCode) {
+                throw APIErrorResponse(message: "일시적인 오류가 발생했어요.\n잠시 후 다시 시도해 주세요.")
+            }
+
+            if let statusCode = response.response?.statusCode, !(200..<300).contains(statusCode), let data = response.data, let serverError = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
+                throw serverError
+            }
+
             throw error
         }
     }

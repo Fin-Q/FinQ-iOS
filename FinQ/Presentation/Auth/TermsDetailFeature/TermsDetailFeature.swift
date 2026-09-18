@@ -14,13 +14,15 @@ struct TermsDetailFeature {
     struct State: Equatable {
         let term: SignUpTerm
         let url: URL
+        let showsAgreementButton: Bool
         
         var navigationTitle: String {
             term.navigationTitle
         }
         
-        init(term: SignUpTerm) {
+        init(term: SignUpTerm, showsAgreementButton: Bool = true) {
             self.term = term
+            self.showsAgreementButton = showsAgreementButton
             
             switch term {
             case .serviceTerms:
