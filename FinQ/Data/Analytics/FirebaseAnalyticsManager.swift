@@ -12,6 +12,8 @@ protocol FirebaseAnalyticsManagerProtocol: Sendable {
     func logPremiumContentTapped(contentID: Int, categoryCode: String)
     func logFirstLearningStart(contentID: Int, categoryCode: String)
     func logFirstLearningComplete(contentID: Int, categoryCode: String)
+    func logHomeQuestionTapped(contentID: Int, categoryCode: String)
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String)
 }
 
 final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable {
@@ -35,6 +37,20 @@ final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable
     func logFirstLearningComplete(contentID: Int, categoryCode: String) {
         Analytics.logEvent("first_learning_complete", parameters: [
             "first_learning_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 홈에서 관심 주제 질문을 선택
+    func logHomeQuestionTapped(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("home_question_tapped", parameters: [
+            "home_question_tap_info": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 홈에서 선택한 관심주제를 학습 시작까지 함
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("home_tap_target_learning_start", parameters: [
+            "home_tap_target_learning_start": "\(categoryCode): \(contentID)",
         ])
     }
 }

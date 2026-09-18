@@ -16,6 +16,7 @@ struct MapDetailFeature {
     struct State: Equatable {
         let category: KnowledgeMapCategory
         var targetContentID: Int? = nil
+        var homeQuestionTargetContentID: Int? = nil
         var detail: KnowledgeMapCategoryDetail?
         var isLoading: Bool = false
         var errorMessage: String?
@@ -35,7 +36,7 @@ struct MapDetailFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
-            case contentRequested(contentID: Int, categoryCode: String)
+            case contentRequested(contentID: Int, categoryCode: String, isHomeQuestionTarget: Bool)
             case advancedQuizRequested(categoryID: Int)
         }
     }
@@ -92,7 +93,7 @@ struct MapDetailFeature {
                 return .send(.delegate(.advancedQuizRequested(categoryID: state.category.categoryID)))
 
             case let .contentCardTapped(contentID):
-                return .send(.delegate(.contentRequested(contentID: contentID, categoryCode: state.category.topic.rawValue)))
+                return .send(.delegate(.contentRequested(contentID: contentID, categoryCode: state.category.topic.rawValue, isHomeQuestionTarget: state.homeQuestionTargetContentID == contentID)))
 
             case .delegate:
                 return .none

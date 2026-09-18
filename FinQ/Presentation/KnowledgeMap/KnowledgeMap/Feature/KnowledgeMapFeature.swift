@@ -117,9 +117,18 @@ struct KnowledgeMapFeature {
                 state.path.append(.advancedQuizMain(AdvancedQuizMainFeature.State(categoryID: categoryID)))
                 return .none
 
-            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID, categoryCode))))):
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID, categoryCode, isHomeQuestionTarget))))):
                 guard state.path.ids.last == id else { return .none }
-                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent)))
+                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget)))
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.homeTapTargetLearningStartLogged(contentID))))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let mapDetailElement = pathElements.last(where: { element in
+                    if case let .mapDetail(mapDetailState) = element.1 { return mapDetailState.homeQuestionTargetContentID == contentID }
+                    return false
+                }) else { return .none }
+                state.path[id: mapDetailElement.0, case: \.mapDetail]?.homeQuestionTargetContentID = nil
                 return .none
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
@@ -187,7 +196,7 @@ struct KnowledgeMapFeature {
     private func navigate(to destination: ContentDestination, state: inout State) -> Bool {
         guard let category = state.categories.first(where: { $0.topic.rawValue == destination.categoryCode }) else { return false }
         state.path.removeAll()
-        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID)))
+        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
         return true
     }
 }

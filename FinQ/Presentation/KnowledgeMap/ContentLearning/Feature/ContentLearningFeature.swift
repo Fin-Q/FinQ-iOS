@@ -22,6 +22,7 @@ struct ContentLearningFeature {
         let contentID: Int
         let categoryCode: String
         let isFirstLearning: Bool // 신규 사용자가 첫 학습 진행 여부(모든 카테고리 모든 콘텐츠 중 하나도 완료한게 없는 경우)
+        let isHomeQuestionTarget: Bool
         var content: LearningContent?
         var currentBlockIndex: Int = 0
         var selectedOptionID: String?
@@ -90,6 +91,7 @@ struct ContentLearningFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case homeTapTargetLearningStartLogged(contentID: Int)
             case completionRequested(ContentCompletionResult?)
         }
     }
@@ -129,10 +131,16 @@ struct ContentLearningFeature {
                 state.answerResult = nil
                 state.phase = .learning
 
-                guard state.isFirstLearning else { return .none }
-                return .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
+                let firstLearningEffect: Effect<Action> = state.isFirstLearning ? .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
                     await knowledgeMapUseCase.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
-                }
+                } : .none
+                let homeTapTargetEffect: Effect<Action> = state.isHomeQuestionTarget ? .merge(
+                    .send(.delegate(.homeTapTargetLearningStartLogged(contentID: state.contentID))),
+                    .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
+                        await knowledgeMapUseCase.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
+                    }
+                ) : .none
+                return .merge(firstLearningEffect, homeTapTargetEffect)
 
             case let .fetchFailed(message):
                 state.isLoading = false
