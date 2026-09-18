@@ -66,4 +66,16 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async {
         firebaseAnalyticsManager.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
     }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logDifferentLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logSameLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logLearningComplete(contentID: contentID, categoryCode: categoryCode)
+    }
 }

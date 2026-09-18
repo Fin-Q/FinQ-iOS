@@ -34,6 +34,8 @@ struct KnowledgeMapFeature {
         var path = StackState<Path.State>()
         var categories: [KnowledgeMapCategory] = []
         var hasCompletedAnyContent: Bool = false
+        var pendingCompletedContentID: Int?
+        var didLogSameLearningStartAfterComplete: Bool = false
         var pendingContentDestination: ContentDestination?
         var isLoading: Bool = false
         var errorMessage: String?
@@ -119,7 +121,8 @@ struct KnowledgeMapFeature {
 
             case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID, categoryCode, isHomeQuestionTarget))))):
                 guard state.path.ids.last == id else { return .none }
-                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget)))
+                let learningStartAfterCompleteType = learningStartAfterCompleteType(contentID: contentID, state: state)
+                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget, learningStartAfterCompleteType: learningStartAfterCompleteType)))
                 return .none
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.homeTapTargetLearningStartLogged(contentID))))):
@@ -129,6 +132,25 @@ struct KnowledgeMapFeature {
                     return false
                 }) else { return .none }
                 state.path[id: mapDetailElement.0, case: \.mapDetail]?.homeQuestionTargetContentID = nil
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.learningStartAfterCompleteLogged(contentID, type))))):
+                guard state.path.ids.last == id, let pendingCompletedContentID = state.pendingCompletedContentID else { return .none }
+                switch type {
+                case .same:
+                    guard pendingCompletedContentID == contentID else { return .none }
+                    state.didLogSameLearningStartAfterComplete = true
+                case .different:
+                    guard pendingCompletedContentID != contentID else { return .none }
+                    state.pendingCompletedContentID = nil
+                    state.didLogSameLearningStartAfterComplete = false
+                }
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.learningCompleted(contentID))))):
+                guard state.path.ids.last == id else { return .none }
+                state.pendingCompletedContentID = contentID
+                state.didLogSameLearningStartAfterComplete = false
                 return .none
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
@@ -198,6 +220,12 @@ struct KnowledgeMapFeature {
         state.path.removeAll()
         state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
         return true
+    }
+
+    private func learningStartAfterCompleteType(contentID: Int, state: State) -> ContentLearningFeature.LearningStartAfterCompleteType? {
+        guard let pendingCompletedContentID = state.pendingCompletedContentID else { return nil }
+        if pendingCompletedContentID != contentID { return .different }
+        return state.didLogSameLearningStartAfterComplete ? nil : .same
     }
 }
 

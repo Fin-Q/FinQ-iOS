@@ -17,12 +17,18 @@ struct ContentLearningFeature {
         case answerResult
     }
 
+    enum LearningStartAfterCompleteType: Equatable, Sendable {
+        case same
+        case different
+    }
+
     @ObservableState
     struct State: Equatable {
         let contentID: Int
         let categoryCode: String
         let isFirstLearning: Bool // 신규 사용자가 첫 학습 진행 여부(모든 카테고리 모든 콘텐츠 중 하나도 완료한게 없는 경우)
         let isHomeQuestionTarget: Bool
+        let learningStartAfterCompleteType: LearningStartAfterCompleteType?
         var content: LearningContent?
         var currentBlockIndex: Int = 0
         var selectedOptionID: String?
@@ -92,6 +98,8 @@ struct ContentLearningFeature {
 
         enum Delegate: Equatable {
             case homeTapTargetLearningStartLogged(contentID: Int)
+            case learningStartAfterCompleteLogged(contentID: Int, type: LearningStartAfterCompleteType)
+            case learningCompleted(contentID: Int)
             case completionRequested(ContentCompletionResult?)
         }
     }
@@ -140,7 +148,22 @@ struct ContentLearningFeature {
                         await knowledgeMapUseCase.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
                     }
                 ) : .none
-                return .merge(firstLearningEffect, homeTapTargetEffect)
+                let learningStartAfterCompleteEffect: Effect<Action>
+                switch state.learningStartAfterCompleteType {
+                case .same:
+                    learningStartAfterCompleteEffect = .run { [contentID = state.contentID, categoryCode = state.categoryCode] send in
+                        await knowledgeMapUseCase.logSameLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+                        await send(.delegate(.learningStartAfterCompleteLogged(contentID: contentID, type: .same)))
+                    }
+                case .different:
+                    learningStartAfterCompleteEffect = .run { [contentID = state.contentID, categoryCode = state.categoryCode] send in
+                        await knowledgeMapUseCase.logDifferentLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+                        await send(.delegate(.learningStartAfterCompleteLogged(contentID: contentID, type: .different)))
+                    }
+                case nil:
+                    learningStartAfterCompleteEffect = .none
+                }
+                return .merge(firstLearningEffect, homeTapTargetEffect, learningStartAfterCompleteEffect)
 
             case let .fetchFailed(message):
                 state.isLoading = false
@@ -191,10 +214,15 @@ struct ContentLearningFeature {
                 state.answerResult = result
                 state.phase = .answerResult
 
-                guard state.isFirstLearning, result.nextAction == .contentCompleted else { return .none }
-                return .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
-                    await knowledgeMapUseCase.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+                guard result.nextAction == .contentCompleted else { return .none }
+                let learningCompleteEffect: Effect<Action> = .run { [contentID = state.contentID, categoryCode = state.categoryCode] send in
+                    await knowledgeMapUseCase.logLearningComplete(contentID: contentID, categoryCode: categoryCode)
+                    await send(.delegate(.learningCompleted(contentID: contentID)))
                 }
+                let firstLearningCompleteEffect: Effect<Action> = state.isFirstLearning ? .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
+                    await knowledgeMapUseCase.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+                } : .none
+                return .merge(learningCompleteEffect, firstLearningCompleteEffect)
 
             case let .submitAnswerFailed(message):
                 state.isSubmittingAnswer = false

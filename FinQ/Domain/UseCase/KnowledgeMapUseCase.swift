@@ -18,6 +18,9 @@ protocol KnowledgeMapUseCaseProtocol: Sendable {
     func logFirstLearningStart(contentID: Int, categoryCode: String) async
     func logFirstLearningComplete(contentID: Int, categoryCode: String) async
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logLearningComplete(contentID: Int, categoryCode: String) async
 }
 
 struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
@@ -65,5 +68,17 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
 
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async {
         return await repository.logHomeTapTargetLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logDifferentLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logSameLearningStartAfterComplete(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logLearningComplete(contentID: contentID, categoryCode: categoryCode)
     }
 }

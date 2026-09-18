@@ -18,4 +18,7 @@ protocol KnowledgeMapRepositoryProtocol: Sendable {
     func logFirstLearningStart(contentID: Int, categoryCode: String) async
     func logFirstLearningComplete(contentID: Int, categoryCode: String) async
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) async
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) async
+    func logLearningComplete(contentID: Int, categoryCode: String) async
 }

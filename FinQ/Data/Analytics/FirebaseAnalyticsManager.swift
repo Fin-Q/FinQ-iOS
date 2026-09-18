@@ -14,6 +14,9 @@ protocol FirebaseAnalyticsManagerProtocol: Sendable {
     func logFirstLearningComplete(contentID: Int, categoryCode: String)
     func logHomeQuestionTapped(contentID: Int, categoryCode: String)
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String)
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String)
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String)
+    func logLearningComplete(contentID: Int, categoryCode: String)
 }
 
 final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable {
@@ -51,6 +54,24 @@ final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable
     func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) {
         Analytics.logEvent("home_tap_target_learning_start", parameters: [
             "home_tap_target_learning_start": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("different_learning_start_after_complete", parameters: [
+            "different_learning_start_after_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("same_learning_start_after_complete", parameters: [
+            "same_learning_start_after_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("learning_complete", parameters: [
+            "learning_complete": "\(categoryCode): \(contentID)",
         ])
     }
 }
