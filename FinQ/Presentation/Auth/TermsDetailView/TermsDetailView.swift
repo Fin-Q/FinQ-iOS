@@ -18,15 +18,17 @@ struct TermsDetailView: View {
         .navigationTitle(store.navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            Button {
-                HapticManager.selection()
-                store.send(.agreeButtonTapped)
-            } label: {
-                Text("동의")
+            if store.showsAgreementButton {
+                Button {
+                    HapticManager.selection()
+                    store.send(.agreeButtonTapped)
+                } label: {
+                    Text("동의")
+                }
+                .buttonStyle(.customDefault)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
             }
-            .buttonStyle(.customDefault)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
         }
         .fullScreenLoadingIndicator(isPresented: $isLoading)
     }

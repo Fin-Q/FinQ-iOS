@@ -21,7 +21,7 @@ struct TabBarFeature {
 
         var knowledgeMap = KnowledgeMapFeature.State()
         var home = HomeFeature.State()
-        var myPage = MyPageFeature.State()
+        var myPage = MyPageMainFeature.State()
     }
 
     enum Action {
@@ -29,11 +29,12 @@ struct TabBarFeature {
 
         case knowledgeMap(KnowledgeMapFeature.Action)
         case home(HomeFeature.Action)
-        case myPage(MyPageFeature.Action)
+        case myPage(MyPageMainFeature.Action)
         
         case delegate(Delegate)
         enum Delegate {
             case logout
+            case withdrawalCompleted
         }
     }
 
@@ -47,7 +48,7 @@ struct TabBarFeature {
         }
 
         Scope(state: \.myPage, action: \.myPage) {
-            MyPageFeature()
+            MyPageMainFeature()
         }
 
         Reduce { state, action in
@@ -58,6 +59,9 @@ struct TabBarFeature {
                 
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
+
+            case .myPage(.delegate(.withdrawalCompleted)):
+                return .send(.delegate(.withdrawalCompleted))
 
             case let .home(.delegate(.questionTapped(question))):
                 return .send(.knowledgeMap(.openContent(categoryCode: question.categoryCode, contentID: question.contentID)))

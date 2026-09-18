@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import UIKit
 import ComposableArchitecture
 
 struct MapDetailView: View {
@@ -29,6 +28,7 @@ struct MapDetailView: View {
                 .onChange(of: store.detail, initial: true) { _, detail in
                     guard let targetContentID = store.targetContentID, detail?.contents.contains(where: { $0.contentID == targetContentID }) == true else { return }
                     withAnimation(.easeInOut) { proxy.scrollTo(targetContentID, anchor: .center) }
+                    store.send(.targetContentScrollCompleted)
                 }
             }
             .ignoresSafeArea(edges: .top)
@@ -36,7 +36,7 @@ struct MapDetailView: View {
             backButton
                 .padding(.leading, 16)
         }
-        .background(InteractivePopGestureEnabler())
+        .enableInteractivePopGesture()
         .toolbar(.hidden, for: .navigationBar)
         .task { store.send(.onAppear) }
         .overlay {
@@ -100,11 +100,12 @@ struct MapDetailView: View {
     private var heroInformation: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(categoryName)
-                .font(.system(size: 24, weight: .semibold))
+                .font(AppDesign.Fonts.largeTitleSemiBold)
                 .foregroundStyle(Color.brandBlack)
+                .padding(.top, 24)
             
             Text(store.category.topic.knowledgeMapDescription.replacingOccurrences(of: "\n", with: " "))
-                .font(.system(size: 14, weight: .regular))
+                .font(AppDesign.Fonts.subTitle16)
                 .foregroundStyle(Color.brandDarkGray)
                 .padding(.top, 12)
             
@@ -120,9 +121,9 @@ struct MapDetailView: View {
                         .foregroundStyle(Color.brandGray300)
                 }
             }
-            .font(.system(size: 12, weight: .medium))
+            .font(AppDesign.Fonts.caption)
             .padding(.horizontal, 12)
-            .frame(height: 28)
+            .frame(height: 32)
             .background(Color.brandWhite, in: Capsule())
             .padding(.top, 16)
         }
@@ -133,29 +134,30 @@ struct MapDetailView: View {
             Image(.trophy)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 40, height: 40)
+                .frame(width: 48, height: 48)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("최종보스 도전")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(AppDesign.Fonts.body18SemiBold)
                     .foregroundStyle(Color.brandBlack)
                 
                 Text("심화퀴즈 3문제 도전")
-                    .font(.system(size: 12, weight: .regular))
+                    .font(AppDesign.Fonts.caption16)
                     .foregroundStyle(Color.brandGray)
             }
             
             Spacer(minLength: 8)
             
             Button {
+                HapticManager.selection()
                 store.send(.challengeButtonTapped)
             } label: {
-                Text("도전하기")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.brandBlue)
+                Text(isAdvancedQuizCompleted ? "도전완료" : "도전하기")
+                    .font(AppDesign.Fonts.buttonTitle16)
+                    .foregroundStyle(isAdvancedQuizCompleted ? Color.brandGray400 : Color.brandBlue)
                     .padding(.horizontal, 16)
                     .frame(height: 36)
-                    .background(Color.brandBlue.opacity(0.12), in: Capsule())
+                    .background(isAdvancedQuizCompleted ? Color.brandLightGray : Color.brandBlue.opacity(0.12), in: Capsule())
             }
             .buttonStyle(.plain)
         }
@@ -167,7 +169,7 @@ struct MapDetailView: View {
     private var learningListSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("학습 목록")
-                .font(.system(size: 22, weight: .semibold))
+                .font(AppDesign.Fonts.largeTitleSemiBold24)
                 .foregroundStyle(Color.brandBlack)
                 .padding(.bottom, 10)
             
@@ -229,7 +231,7 @@ struct MapDetailView: View {
                 .foregroundStyle(Color.brandGray)
             
             Text(content.title)
-                .font(.system(size: 20, weight: .semibold))
+                .font(AppDesign.Fonts.title20SemiBold)
                 .foregroundStyle(Color.brandBlack)
                 .multilineTextAlignment(.leading)
                 .padding(.top, 15)
@@ -243,7 +245,7 @@ struct MapDetailView: View {
             keywordCapsules(content.keyword)
             
             Text(attributedDescription)
-                .font(.system(size: 16, weight: .regular))
+                .font(AppDesign.Fonts.body16Redular)
                 .foregroundStyle(Color.brandGray)
                 .multilineTextAlignment(.leading)
                 .lineSpacing(3)
@@ -273,14 +275,14 @@ struct MapDetailView: View {
                     .frame(width: 15, height: 15)
                 Text("Premium")
             }
-            .font(.system(size: 12, weight: .semibold))
+            .font(AppDesign.Fonts.caption)
             .foregroundStyle(Color.orange)
             .padding(.horizontal, 10)
             .frame(height: 28)
             .overlay { Capsule().stroke(Color.orange, lineWidth: 1) }
             
             Text(content.title)
-                .font(.system(size: 20, weight: .semibold))
+                .font(AppDesign.Fonts.title20SemiBold)
                 .foregroundStyle(Color.brandBlack)
                 .multilineTextAlignment(.leading)
                 .padding(.top, 14)
@@ -334,11 +336,11 @@ struct MapDetailView: View {
                 Image(.checkCircle)
                 Text("학습 완료")
             }
-            .font(.system(size: 18, weight: .medium))
+            .font(AppDesign.Fonts.largeBody)
             .foregroundStyle(Color.brandBlue)
         } else {
             Text("학습 전")
-                .font(.system(size: 18, weight: .medium))
+                .font(AppDesign.Fonts.largeBody)
                 .foregroundStyle(Color.brandGray)
         }
     }
@@ -346,6 +348,7 @@ struct MapDetailView: View {
     private var categoryName: String { store.detail?.categoryName ?? store.category.categoryName }
     private var completedContentCount: Int { store.detail?.completedContentCount ?? store.category.completedContentCount }
     private var totalContentCount: Int { store.detail?.totalContentCount ?? store.category.totalContentCount }
+    private var isAdvancedQuizCompleted: Bool { store.detail?.advancedQuizStatus.isCompleted ?? false }
 }
 
 private enum LearningListItem: Identifiable {

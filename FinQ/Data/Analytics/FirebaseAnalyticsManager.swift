@@ -10,6 +10,13 @@ import FirebaseAnalytics
 
 protocol FirebaseAnalyticsManagerProtocol: Sendable {
     func logPremiumContentTapped(contentID: Int, categoryCode: String)
+    func logFirstLearningStart(contentID: Int, categoryCode: String)
+    func logFirstLearningComplete(contentID: Int, categoryCode: String)
+    func logHomeQuestionTapped(contentID: Int, categoryCode: String)
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String)
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String)
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String)
+    func logLearningComplete(contentID: Int, categoryCode: String)
 }
 
 final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable {
@@ -19,6 +26,52 @@ final class FirebaseAnalyticsManager: FirebaseAnalyticsManagerProtocol, Sendable
     func logPremiumContentTapped(contentID: Int, categoryCode: String) {
         Analytics.logEvent("premium_content_tapped", parameters: [
             "premium_content_tap_info": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 모든 카테고리 모든 콘텐츠 중 완료한게 없는 경우 -> 첫 학습 진행으로 판단하여 수집
+    func logFirstLearningStart(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("first_learning_start", parameters: [
+            "first_learning_start": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 모든 카테고리 모든 콘텐츠 중 완료한게 없는 첫 학습 진행자가 학습 완료할 경우 수집
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("first_learning_complete", parameters: [
+            "first_learning_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 홈에서 관심 주제 질문을 선택
+    func logHomeQuestionTapped(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("home_question_tapped", parameters: [
+            "home_question_tap_info": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    /// 홈에서 선택한 관심주제를 학습 시작까지 함
+    func logHomeTapTargetLearningStart(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("home_tap_target_learning_start", parameters: [
+            "home_tap_target_learning_start": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logDifferentLearningStartAfterComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("different_learning_start_after_complete", parameters: [
+            "different_learning_start_after_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logSameLearningStartAfterComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("same_learning_start_after_complete", parameters: [
+            "same_learning_start_after_complete": "\(categoryCode): \(contentID)",
+        ])
+    }
+
+    func logLearningComplete(contentID: Int, categoryCode: String) {
+        Analytics.logEvent("learning_complete", parameters: [
+            "learning_complete": "\(categoryCode): \(contentID)",
         ])
     }
 }

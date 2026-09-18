@@ -48,7 +48,7 @@ struct MainTabBarContainerView: View {
             KnowledgeMapView(store: store.scope(\.knowledgeMap, action: \.knowledgeMap))
 
         case .myPage:
-            MyPageView(store: store.scope(\.myPage, action: \.myPage))
+            MyPageMainView(store: store.scope(\.myPage, action: \.myPage))
         }
     }
     
@@ -61,7 +61,7 @@ struct MainTabBarContainerView: View {
             return store.home.path.isEmpty
 
         case .myPage:
-            return true
+            return store.myPage.path.isEmpty
         }
     }
 }

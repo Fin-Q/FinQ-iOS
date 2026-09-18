@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 struct AuthMainView: View {
     @Bindable var store: StoreOf<AuthMainFeature>
+    @Environment(\.scenePhase) private var scenePhase
     
     private enum SocialLoginProvider {
         case kakao
@@ -63,6 +64,10 @@ struct AuthMainView: View {
             }
         }
         .fullScreenLoadingIndicator(isPresented: Binding(get: { store.isSocialAuthorizing }, set: { _ in }))
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            store.send(.appDidBecomeActive)
+        }
     }
     
     private var authMainContent: some View {

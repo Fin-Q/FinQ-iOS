@@ -19,6 +19,11 @@ extension AppleLoginInput {
 
 extension AppleLoginResponse {
     func toDomain() -> AppleLoginResult {
-        return AppleLoginResult(userID: userID, nickname: nickname, isNewUser: isNewUser, isOnboardingCompleted: onboardingStatus == .completed)
+        return AppleLoginResult(
+            userID: userID,
+            nickname: nickname,
+            isNewUser: isNewUser,
+            onboardingStatus: onboardingStatus.toDomain()
+        )
     }
 }

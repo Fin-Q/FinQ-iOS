@@ -20,7 +20,7 @@ extension LoginResponse {
             nickname: self.nickname,
             accessToken: self.accessToken,
             refreshToken: self.refreshToken,
-            isOnboardingCompleted: self.onboardingStatus == .completed
+            onboardingStatus: self.onboardingStatus.toDomain()
         )
     }
 }

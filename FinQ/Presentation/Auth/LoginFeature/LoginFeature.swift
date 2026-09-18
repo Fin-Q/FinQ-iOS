@@ -29,13 +29,13 @@ struct LoginFeature {
         case passwordChanged(String)
         case didAppear
         case loginButtonTapped
-        case loginSucceeded(isOnboardingCompleted: Bool)
+        case loginSucceeded(OnboardingStatus)
         case loginFailed(String)
         case alertOKButtonTapped
         case delegate(Delegate)
 
         enum Delegate: Equatable {
-            case loginSucceeded(isOnboardingCompleted: Bool)
+            case loginSucceeded(OnboardingStatus)
         }
     }
     
@@ -67,17 +67,17 @@ struct LoginFeature {
                         let result = try await loginUseCase.login(email: email, password: password)
                         guard !Task.isCancelled else { return }
 
-                        await send(.loginSucceeded(isOnboardingCompleted: result.isOnboardingCompleted))
+                        await send(.loginSucceeded(result.onboardingStatus))
                     } catch {
                         guard !Task.isCancelled else { return }
                         await send(.loginFailed(error.localizedDescription))
                     }
                 }
 
-            case let .loginSucceeded(isOnboardingCompleted):
+            case let .loginSucceeded(status):
                 state.isLoading = false
                 state.loginErrorMessage = nil
-                return .send(.delegate(.loginSucceeded(isOnboardingCompleted: isOnboardingCompleted)))
+                return .send(.delegate(.loginSucceeded(status)))
 
             case let .loginFailed(message):
                 state.isLoading = false

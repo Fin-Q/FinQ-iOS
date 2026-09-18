@@ -20,6 +20,7 @@ enum APIRouter: Sendable {
     case verificationCodeConfirm(VerificationCodeConfirmRequest)
     case passwordReset(PasswordResetConfirmRequest)
     case registerFCMToken(RegisterFCMTokenRequest)
+    case logout
 
     //MARK: - Onboarding
     case onboardingStatus
@@ -32,9 +33,21 @@ enum APIRouter: Sendable {
     case streakCalendar(month: String?)
     case streakStatus
 
+    //MARK: - MyPage
+    case myPage
+    case updateInterests(InterestSelectionRequest)
+    case updateProfileImage(ProfileImageUpdateRequest)
+    case updateNickname(NicknameUpdateRequest)
+    case updateNotificationSetting(NotificationSettingUpdateRequest)
+    case withdraw
+
     //MARK: - KnowledgeMap
     case knowledgeMap
     case categoryDetail(String)
+    case content(Int)
+    case submitContentAnswer(contentID: Int, questionID: Int, request: ContentAnswerRequest)
+    case advancedQuiz(Int)
+    case submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, request: AdvancedQuizAnswerRequest)
 }
 
 extension APIRouter {
@@ -53,6 +66,7 @@ extension APIRouter {
         case .verificationCodeConfirm: return "/auth/password-reset/verifications/confirm"
         case .passwordReset: return "/auth/password-reset"
         case .registerFCMToken(let request): return "/users/me/push-tokens/\(request.deviceID)"
+        case .logout: return "/auth/logout"
         
         case .onboardingStatus: return "/users/me/onboarding"
         case .saveInterests: return "/users/me/interests"
@@ -61,25 +75,39 @@ extension APIRouter {
         case .profileImage: return "/users/me/profile-image"
         case .streakCalendar: return "/streak/calendar"
         case .streakStatus: return "/streak/status"
+        case .myPage: return "/users/me"
+        case .updateInterests: return "/users/me/interests"
+        case .updateProfileImage: return "/users/me/profile-image"
+        case .updateNickname: return "/users/me/nickname"
+        case .updateNotificationSetting: return "/users/me/notification-settings"
+        case .withdraw: return "/users/me"
         case .knowledgeMap: return "/knowledge-map"
         case .categoryDetail(let categoryCode): return "/categories/\(categoryCode)"
+        case .content(let contentID): return "/contents/\(contentID)"
+        case let .submitContentAnswer(contentID, questionID, _): return "/contents/\(contentID)/questions/\(questionID)/answers"
+        case .advancedQuiz(let categoryID): return "/categories/\(categoryID)/quiz"
+        case let .submitAdvancedQuizAnswer(categoryID, questionID, _): return "/categories/\(categoryID)/quiz/questions/\(questionID)/answers"
         }
     }
     
     var method: HTTPMethod {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken ,.saveInterests, .submitContentAnswer, .submitAdvancedQuizAnswer, .logout:
             return .post
-        case .completeOnboarding:
+        case .completeOnboarding, .updateProfileImage, .updateNickname, .updateNotificationSetting:
             return .patch
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
+        case .updateInterests:
+            return .put
+        case .withdraw:
+            return .delete
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakCalendar, .streakStatus, .myPage:
             return .get
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .onboardingStatus, .saveInterests, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .submitContentAnswer, .submitAdvancedQuizAnswer, .myPage, .updateInterests, .updateProfileImage, .updateNickname, .updateNotificationSetting, .withdraw:
             return [
                 "Content-Type": "application/json"
             ]
@@ -88,9 +116,10 @@ extension APIRouter {
 
     var encoding: any ParameterEncoding {
         switch self {
-        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .saveInterests, .completeOnboarding:
+        case .signUp, .login, .appleLogin, .kakaoLogin, .tokenRefresh, .sendPasswordResetVerification, .verificationCodeConfirm, .passwordReset, .registerFCMToken, .logout, .saveInterests, .completeOnboarding, .submitContentAnswer, .submitAdvancedQuizAnswer, .updateInterests, .updateProfileImage, .updateNickname, .updateNotificationSetting:
             return JSONEncoding.default
-        case .onboardingStatus, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakCalendar, .streakStatus:
+        
+        case .onboardingStatus, .knowledgeMap, .categoryDetail, .content, .home, .profileImage, .streakCalendar, .streakStatus, .advancedQuiz, .myPage, .withdraw:
             return URLEncoding.default
         }
     }
@@ -160,18 +189,43 @@ extension APIRouter {
         case .saveInterests(let request):
             return ["interestTopicIds": request.interestTopicIds]
 
+        case .updateInterests(let request):
+            return ["interestTopicIds": request.interestTopicIds]
+
+        case .updateProfileImage(let request):
+            return ["profileImageCode": request.profileImageCode]
+
+        case .updateNickname(let request):
+            return ["nickname": request.nickname]
+
+        case .updateNotificationSetting(let request):
+            return ["notificationEnabled": request.notificationEnabled]
+
         case let .streakCalendar(month):
             return month.map { ["month": $0] }
 
-        case .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .home, .profileImage, .streakStatus:
+        case .submitContentAnswer(_, _, let request):
+            return ["selectedOptionId": request.selectedOptionID]
+            
+        case .submitAdvancedQuizAnswer(_, _, let request):
+            return ["selectedOptionId": request.selectedOptionID]
+
+        case .logout, .onboardingStatus, .completeOnboarding, .knowledgeMap, .categoryDetail, .content, .advancedQuiz, .home, .profileImage, .streakStatus, .myPage, .withdraw:
             return nil
         }
     }
 
     var requiresAuthorization: Bool {
-        // 토큰 갱신 API를 제외한 모든 API에 인증 인터셉터를 적용
+        // 토큰 갱신 및 로그인 API 제외한 모든 API에 인증 인터셉터를 적용
         switch self {
-        case .tokenRefresh:
+        case .tokenRefresh,
+                .signUp,
+                .login,
+                .appleLogin,
+                .kakaoLogin,
+                .sendPasswordResetVerification,
+                .verificationCodeConfirm,
+                .passwordReset:
             return false
         default:
             return true

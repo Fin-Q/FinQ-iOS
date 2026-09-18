@@ -15,6 +15,13 @@ struct KnowledgeMapFeature {
     @Reducer
     enum Path {
         case mapDetail(MapDetailFeature)
+        case contentLearning(ContentLearningFeature)
+        case contentLearningCompletion(ContentLearningCompletionFeature)
+        case advancedQuizMain(AdvancedQuizMainFeature)
+        case advancedQuizIntro(AdvancedQuizIntroFeature)
+        case advancedQuizQuestion(AdvancedQuizQuestionFeature)
+        case advancedQuizCompletionSummary(AdvancedQuizCompletionSummaryFeature)
+        case advancedQuizCompletion(AdvancedQuizCompletionFeature)
     }
 
     struct ContentDestination: Equatable {
@@ -26,6 +33,9 @@ struct KnowledgeMapFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var categories: [KnowledgeMapCategory] = []
+        var hasCompletedAnyContent: Bool = false
+        var pendingCompletedContentID: Int?
+        var didLogSameLearningStartAfterComplete: Bool = false
         var pendingContentDestination: ContentDestination?
         var isLoading: Bool = false
         var errorMessage: String?
@@ -68,6 +78,7 @@ struct KnowledgeMapFeature {
 
             case let .fetchCategoriesSucceeded(categories):
                 state.categories = categories
+                state.hasCompletedAnyContent = categories.contains { $0.completedContentCount > 0 }
                 state.isLoading = false
 
                 if let destination = state.pendingContentDestination {
@@ -102,7 +113,101 @@ struct KnowledgeMapFeature {
                 guard !navigate(to: destination, state: &state) else { return .send(.delegate(.contentDestinationReady)) }
                 state.pendingContentDestination = destination
                 return .send(.onAppear)
+                
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.advancedQuizRequested(categoryID))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizMain(AdvancedQuizMainFeature.State(categoryID: categoryID)))
+                return .none
 
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID, categoryCode, isHomeQuestionTarget))))):
+                guard state.path.ids.last == id else { return .none }
+                let learningStartAfterCompleteType = learningStartAfterCompleteType(contentID: contentID, state: state)
+                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget, learningStartAfterCompleteType: learningStartAfterCompleteType)))
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.homeTapTargetLearningStartLogged(contentID))))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let mapDetailElement = pathElements.last(where: { element in
+                    if case let .mapDetail(mapDetailState) = element.1 { return mapDetailState.homeQuestionTargetContentID == contentID }
+                    return false
+                }) else { return .none }
+                state.path[id: mapDetailElement.0, case: \.mapDetail]?.homeQuestionTargetContentID = nil
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.learningStartAfterCompleteLogged(contentID, type))))):
+                guard state.path.ids.last == id, let pendingCompletedContentID = state.pendingCompletedContentID else { return .none }
+                switch type {
+                case .same:
+                    guard pendingCompletedContentID == contentID else { return .none }
+                    state.didLogSameLearningStartAfterComplete = true
+                case .different:
+                    guard pendingCompletedContentID != contentID else { return .none }
+                    state.pendingCompletedContentID = nil
+                    state.didLogSameLearningStartAfterComplete = false
+                }
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.learningCompleted(contentID))))):
+                guard state.path.ids.last == id else { return .none }
+                state.pendingCompletedContentID = contentID
+                state.didLogSameLearningStartAfterComplete = false
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
+                guard state.path.ids.last == id else { return .none }
+                state.hasCompletedAnyContent = true
+                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(completionResult: completionResult)))
+                return .none
+
+            case let .path(.element(id: id, action: .contentLearningCompletion(.delegate(.completed)))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let mapDetailElement = pathElements.last(where: { element in
+                    if case .mapDetail = element.1 { return true }
+                    return false
+                }) else { return .none }
+                let mapDetailID = mapDetailElement.0
+                state.path.pop(to: mapDetailID)
+                return .send(.path(.element(id: mapDetailID, action: .mapDetail(.onAppear))))
+
+            case let .path(.element(id: id, action: .advancedQuizMain(.delegate(.advancedQuizIntroRequested(quiz))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizIntro(AdvancedQuizIntroFeature.State(quiz: quiz)))
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizIntro(.delegate(.advancedQuizQuestionRequested(quiz))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizQuestion(AdvancedQuizQuestionFeature.State(quiz: quiz)))
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizQuestion(.delegate(.completionSummaryRequested(quiz, categoryResult))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizCompletionSummary(AdvancedQuizCompletionSummaryFeature.State(quiz: quiz, categoryResult: categoryResult)))
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizCompletionSummary(.delegate(.introRequested)))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let introElement = pathElements.last(where: { element in
+                    if case .advancedQuizIntro = element.1 { return true }
+                    return false
+                }) else { return .none }
+                state.path.pop(to: introElement.0)
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizCompletionSummary(.delegate(.completionRequested(categoryResult))))):
+                guard state.path.ids.last == id else { return .none }
+                state.path.append(.advancedQuizCompletion(AdvancedQuizCompletionFeature.State(categoryResult: categoryResult)))
+                return .none
+
+            case let .path(.element(id: id, action: .advancedQuizCompletion(.delegate(.completed)))):
+                let pathElements = Array(zip(state.path.ids, state.path))
+                guard state.path.ids.last == id, let mapDetailElement = pathElements.last(where: { element in
+                    if case .mapDetail = element.1 { return true }
+                    return false
+                }) else { return .none }
+                let mapDetailID = mapDetailElement.0
+                state.path.pop(to: mapDetailID)
+                return .send(.path(.element(id: mapDetailID, action: .mapDetail(.onAppear))))
+                
             case .path, .delegate:
                 return .none
             }
@@ -113,8 +218,14 @@ struct KnowledgeMapFeature {
     private func navigate(to destination: ContentDestination, state: inout State) -> Bool {
         guard let category = state.categories.first(where: { $0.topic.rawValue == destination.categoryCode }) else { return false }
         state.path.removeAll()
-        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID)))
+        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
         return true
+    }
+
+    private func learningStartAfterCompleteType(contentID: Int, state: State) -> ContentLearningFeature.LearningStartAfterCompleteType? {
+        guard let pendingCompletedContentID = state.pendingCompletedContentID else { return nil }
+        if pendingCompletedContentID != contentID { return .different }
+        return state.didLogSameLearningStartAfterComplete ? nil : .same
     }
 }
 

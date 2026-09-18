@@ -30,7 +30,8 @@ struct FinQApp: App {
             AppView(store: Self.store)
                 .onOpenURL(perform: { url in
                     if AuthApi.isKakaoTalkLoginUrl(url) {
-                        _ = AuthController.handleOpenUrl(url: url)
+                        let didHandleKakaoLogin = AuthController.handleOpenUrl(url: url)
+                        if didHandleKakaoLogin { Self.store.send(.auth(.kakaoLoginCallbackReceived)) }
                     }
                 })
         }
