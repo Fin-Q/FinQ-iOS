@@ -20,6 +20,8 @@ struct ContentLearningFeature {
     @ObservableState
     struct State: Equatable {
         let contentID: Int
+        let categoryCode: String
+        let isFirstLearning: Bool // 신규 사용자가 첫 학습 진행 여부(모든 카테고리 모든 콘텐츠 중 하나도 완료한게 없는 경우)
         var content: LearningContent?
         var currentBlockIndex: Int = 0
         var selectedOptionID: String?
@@ -126,7 +128,11 @@ struct ContentLearningFeature {
                 state.selectedOptionID = nil
                 state.answerResult = nil
                 state.phase = .learning
-                return .none
+
+                guard state.isFirstLearning else { return .none }
+                return .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
+                    await knowledgeMapUseCase.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
+                }
 
             case let .fetchFailed(message):
                 state.isLoading = false
@@ -176,7 +182,11 @@ struct ContentLearningFeature {
                 state.isSubmittingAnswer = false
                 state.answerResult = result
                 state.phase = .answerResult
-                return .none
+
+                guard state.isFirstLearning, result.nextAction == .contentCompleted else { return .none }
+                return .run { [contentID = state.contentID, categoryCode = state.categoryCode] _ in
+                    await knowledgeMapUseCase.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+                }
 
             case let .submitAnswerFailed(message):
                 state.isSubmittingAnswer = false

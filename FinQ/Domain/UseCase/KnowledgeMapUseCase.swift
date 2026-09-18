@@ -15,6 +15,8 @@ protocol KnowledgeMapUseCaseProtocol: Sendable {
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz
     func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async
 }
 
 struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
@@ -50,5 +52,13 @@ struct KnowledgeMapUseCase: KnowledgeMapUseCaseProtocol {
     
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
         return await repository.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async {
+        return await repository.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async {
+        return await repository.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
     }
 }

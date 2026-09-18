@@ -54,4 +54,12 @@ struct KnowledgeMapRepository: KnowledgeMapRepositoryProtocol {
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async {
         firebaseAnalyticsManager.logPremiumContentTapped(contentID: contentID, categoryCode: categoryCode)
     }
+
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logFirstLearningStart(contentID: contentID, categoryCode: categoryCode)
+    }
+
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async {
+        firebaseAnalyticsManager.logFirstLearningComplete(contentID: contentID, categoryCode: categoryCode)
+    }
 }

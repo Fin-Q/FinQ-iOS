@@ -15,4 +15,6 @@ protocol KnowledgeMapRepositoryProtocol: Sendable {
     func fetchAdvancedQuiz(categoryID: Int) async throws -> AdvancedQuiz
     func submitAdvancedQuizAnswer(categoryID: Int, questionID: Int, selectedOptionID: String) async throws -> AdvancedQuizAnswerResult
     func logPremiumContentTapped(contentID: Int, categoryCode: String) async
+    func logFirstLearningStart(contentID: Int, categoryCode: String) async
+    func logFirstLearningComplete(contentID: Int, categoryCode: String) async
 }

@@ -33,6 +33,7 @@ struct KnowledgeMapFeature {
     struct State: Equatable {
         var path = StackState<Path.State>()
         var categories: [KnowledgeMapCategory] = []
+        var hasCompletedAnyContent: Bool = false
         var pendingContentDestination: ContentDestination?
         var isLoading: Bool = false
         var errorMessage: String?
@@ -75,6 +76,7 @@ struct KnowledgeMapFeature {
 
             case let .fetchCategoriesSucceeded(categories):
                 state.categories = categories
+                state.hasCompletedAnyContent = categories.contains { $0.completedContentCount > 0 }
                 state.isLoading = false
 
                 if let destination = state.pendingContentDestination {
@@ -115,13 +117,14 @@ struct KnowledgeMapFeature {
                 state.path.append(.advancedQuizMain(AdvancedQuizMainFeature.State(categoryID: categoryID)))
                 return .none
 
-            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID))))):
+            case let .path(.element(id: id, action: .mapDetail(.delegate(.contentRequested(contentID, categoryCode))))):
                 guard state.path.ids.last == id else { return .none }
-                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID)))
+                state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent)))
                 return .none
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
                 guard state.path.ids.last == id else { return .none }
+                state.hasCompletedAnyContent = true
                 state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(completionResult: completionResult)))
                 return .none
 
