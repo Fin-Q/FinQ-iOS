@@ -102,7 +102,7 @@ struct ContentLearningAnswerResultView: View {
         let correctOption = question.options.first(where: { $0.optionID == result.correctOptionID })
         guard !result.correct else { return correctOption?.optionText ?? "" }
 
-        if question.isOX { return "오답! 정답은 \(correctOption?.optionText ?? result.correctOptionID)이에요" }
+        if question.isOX { return "오답! 정답은 \(correctOption?.optionText ?? result.correctOptionID)에요" }
         guard let correctOptionIndex = question.options.firstIndex(where: { $0.optionID == result.correctOptionID }) else { return "오답이에요" }
         return "오답! 정답은 \(correctOptionIndex + 1)번이에요"
     }
