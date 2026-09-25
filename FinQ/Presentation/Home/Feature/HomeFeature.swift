@@ -26,6 +26,7 @@ struct HomeFeature {
         var home: HomeSummary?
         var isLoading: Bool = false
         var errorMessage: String?
+        var isGuestMode: Bool = false
     }
     
     enum Action {
@@ -48,6 +49,10 @@ struct HomeFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                if state.isGuestMode {
+                    return .none
+                }
+                
                 guard !state.isLoading, state.path.isEmpty else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil

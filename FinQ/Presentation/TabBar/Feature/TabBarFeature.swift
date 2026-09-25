@@ -17,11 +17,19 @@ struct TabBarFeature {
 
     @ObservableState
     struct State: Equatable {
+        let isGuestMode: Bool
         var selectedTab: Tab = .home
 
-        var knowledgeMap = KnowledgeMapFeature.State()
-        var home = HomeFeature.State()
-        var myPage = MyPageMainFeature.State()
+        var knowledgeMap: KnowledgeMapFeature.State
+        var home: HomeFeature.State
+        var myPage: MyPageMainFeature.State
+        
+        init(selectedTab: Tab = .home, isGuestMode: Bool = false) {
+            self.isGuestMode = isGuestMode
+            self.home = HomeFeature.State(isGuestMode: isGuestMode)
+            self.knowledgeMap = KnowledgeMapFeature.State(isGuestMode: isGuestMode)
+            self.myPage = MyPageMainFeature.State()
+        }
     }
 
     enum Action {

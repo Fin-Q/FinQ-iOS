@@ -99,6 +99,13 @@ struct AppFeature {
                     self.routeByOnboardingStatus(onboardingStatus, state: &state, shouldWaitForInitialHome: true)
                     return onboardingStatus == .completed ? self.registerPushToken() : .none
                 }
+                
+            case .auth(.delegate(.guestModeStarted)):
+                loginUseCase.clearSession()
+                state.isWaitingForInitialHome = false
+                state.tabBar = TabBarFeature.State(selectedTab: .home, isGuestMode: true)
+                state.route = .tabBar
+                return .none
 
             case let .auth(.delegate(.loginSucceeded(onboardingStatus))):
                 guard state.route == .auth else { return .none }

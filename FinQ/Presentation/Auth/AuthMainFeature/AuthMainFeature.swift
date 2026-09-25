@@ -57,6 +57,7 @@ struct AuthMainFeature {
         case loginButtonTapped
         case signUpButtonTapped
         case findPasswordButtonTapped
+        case guestModeButtonTapped
         case kakaoLoginButtonTapped
         case kakaoLoginSucceeded(KakaoLoginResult)
         case kakaoLoginFailed(String)
@@ -73,6 +74,7 @@ struct AuthMainFeature {
         case delegate(Delegate)
         enum Delegate: Equatable {
             case loginSucceeded(OnboardingStatus)
+            case guestModeStarted
         }
     }
     
@@ -93,6 +95,10 @@ struct AuthMainFeature {
                 guard !state.isSocialAuthorizing else { return .none }
                 state.path.append(.findPassword(FindPasswordFeature.State()))
                 return .none
+                
+            case .guestModeButtonTapped:
+                guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
+                return .send(.delegate(.guestModeStarted))
 
             case .kakaoLoginButtonTapped:
                 guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }

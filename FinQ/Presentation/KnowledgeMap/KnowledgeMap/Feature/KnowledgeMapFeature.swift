@@ -31,6 +31,7 @@ struct KnowledgeMapFeature {
 
     @ObservableState
     struct State: Equatable {
+        let isGuestMode: Bool
         var path = StackState<Path.State>()
         var categories: [KnowledgeMapCategory] = []
         var hasCompletedAnyContent: Bool = false
@@ -39,6 +40,12 @@ struct KnowledgeMapFeature {
         var pendingContentDestination: ContentDestination?
         var isLoading: Bool = false
         var errorMessage: String?
+        
+        init(isGuestMode: Bool = false, categories: [KnowledgeMapCategory] = []) {
+            self.isGuestMode = isGuestMode
+            self.categories = categories
+            self.hasCompletedAnyContent = categories.contains { $0.completedContentCount > 0 }
+        }
     }
     
     enum Action {
