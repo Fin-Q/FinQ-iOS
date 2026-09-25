@@ -59,6 +59,7 @@ struct KnowledgeMapFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case loginRequested
             case contentDestinationReady
             case contentDestinationFailed(String)
         }
@@ -163,8 +164,11 @@ struct KnowledgeMapFeature {
             case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
                 guard state.path.ids.last == id else { return .none }
                 state.hasCompletedAnyContent = true
-                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(completionResult: completionResult)))
+                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(isGuestMode: state.isGuestMode, completionResult: completionResult)))
                 return .none
+                
+            case .path(.element(_, action: .contentLearningCompletion(.delegate(.loginRequested)))):
+                return .send(.delegate(.loginRequested))
 
             case let .path(.element(id: id, action: .contentLearningCompletion(.delegate(.completed)))):
                 let pathElements = Array(zip(state.path.ids, state.path))

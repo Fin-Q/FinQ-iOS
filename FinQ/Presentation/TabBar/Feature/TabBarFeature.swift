@@ -102,6 +102,9 @@ struct TabBarFeature {
             case let .knowledgeMap(.delegate(.contentDestinationFailed(message))):
                 state.home.errorMessage = message
                 return .none
+                
+            case .knowledgeMap(.delegate(.loginRequested)):
+                return .send(.delegate(.loginRequested))
 
             case .knowledgeMap, .home, .myPage, .delegate:
                 return .none

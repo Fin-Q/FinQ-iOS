@@ -27,8 +27,11 @@ struct ContentLearningCompletionView: View {
                 .padding(.top, 36)
 
             Spacer(minLength: 24)
-
-            if let result = store.completionResult {
+            
+            if store.isGuestMode {
+                guestLoginCard()
+                    .padding(.bottom, 24)
+            } else if let result = store.completionResult {
                 VStack(spacing: 12) {
                     if result.levelUp {
                         levelUpMessage(result)
@@ -96,5 +99,31 @@ struct ContentLearningCompletionView: View {
                 .foregroundStyle(Color.brandLightGray)
                 .frame(width: 25, height: 14)
         }
+    }
+    
+    private func guestLoginCard() -> some View {
+        HStack(spacing: 12) {
+            Text("로그인하고 성장 기록을 쌓기")
+                .font(AppDesign.Fonts.body16SemiBold)
+                .foregroundStyle(Color.brandBlack)
+            
+            Spacer(minLength: 0)
+            
+            Button {
+                HapticManager.selection()
+                store.send(.guestLoginButtonTapped)
+            } label: {
+                Text("로그인하기")
+                    .font(AppDesign.Fonts.buttonTitle16SemiBold)
+                    .foregroundStyle(Color.brandBlue)
+                    .padding(.horizontal, 20)
+                    .frame(height: 40)
+                    .background(Color.brandBlue.opacity(0.1), in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity, minHeight: 82)
+        .background(Color.brandLightGray, in: RoundedRectangle(cornerRadius: 12))
     }
 }
