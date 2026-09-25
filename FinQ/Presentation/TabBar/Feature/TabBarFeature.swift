@@ -19,6 +19,7 @@ struct TabBarFeature {
     struct State: Equatable {
         let isGuestMode: Bool
         var selectedTab: Tab = .home
+        var isGuestMyPageAlertPresented: Bool = false
 
         var knowledgeMap: KnowledgeMapFeature.State
         var home: HomeFeature.State
@@ -34,6 +35,8 @@ struct TabBarFeature {
 
     enum Action {
         case selectedTabChanged(Tab)
+        case guestMyPageAlertPresentedChanged(Bool)
+        case guestLoginButtonTapped
 
         case knowledgeMap(KnowledgeMapFeature.Action)
         case home(HomeFeature.Action)
@@ -63,8 +66,22 @@ struct TabBarFeature {
         Reduce { state, action in
             switch action {
             case let .selectedTabChanged(tab):
+                guard !state.isGuestMode || tab != .myPage else {
+                    state.isGuestMyPageAlertPresented = true
+                    return .none
+                }
+
                 state.selectedTab = tab
                 return .none
+
+            case let .guestMyPageAlertPresentedChanged(isPresented):
+                state.isGuestMyPageAlertPresented = isPresented
+                return .none
+
+            case .guestLoginButtonTapped:
+                guard state.isGuestMode else { return .none }
+                state.isGuestMyPageAlertPresented = false
+                return .send(.delegate(.loginRequested))
                 
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
