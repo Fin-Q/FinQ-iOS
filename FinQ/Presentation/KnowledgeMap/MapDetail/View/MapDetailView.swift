@@ -38,7 +38,10 @@ struct MapDetailView: View {
         }
         .enableInteractivePopGesture()
         .toolbar(.hidden, for: .navigationBar)
-        .task { store.send(.onAppear) }
+        .task {
+            guard store.detail == nil else { return }
+            await store.send(.onAppear).finish()
+        }
         .overlay {
             if store.isLoading {
                 ProgressView()
@@ -59,6 +62,20 @@ struct MapDetailView: View {
             onConfirm: {
                 HapticManager.selection()
                 store.send(.premiumAlertOKButtonTapped)
+            }
+        )
+        .customGuestLoginAlert(
+            isPresented: Binding(
+                get: { store.isGuestAlertPresented },
+                set: { store.send(.guestAlertPresentedChanged($0)) }
+            ),
+            title: "로그인하고 심화퀴즈에\n도전해보세요",
+            onPrimary: {
+                HapticManager.selection()
+                store.send(.guestLoginButtonTapped)
+            },
+            onCancel: {
+                HapticManager.selection()
             }
         )
     }
@@ -399,7 +416,7 @@ private struct InteractivePopGestureEnabler: UIViewControllerRepresentable {
 }
 
 #Preview {
-    MapDetailView(store: Store(initialState: MapDetailFeature.State(category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", keyword: ["금융소득"], title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", keyword: ["이자", "배당소득세"], title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, keyword: ["세금용어", "절세기초"], title: "세금용어·절세기초", description: "세금과 절세의 핵심 개념을 알아보세요.", order: 3)])), reducer: {
+    MapDetailView(store: Store(initialState: MapDetailFeature.State(isGuestMode: false, category: KnowledgeMapCategory(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false), detail: KnowledgeMapCategoryDetail(categoryID: 4, topic: .taxSaving, categoryName: "세금·절세계좌", completedContentCount: 2, totalContentCount: 9, progressRate: 22, categoryCompleted: false, advancedQuizStatus: .incomplete, contents: [KnowledgeMapContent(contentID: 18, contentCode: "TAX-01", keyword: ["금융소득"], title: "금융소득", description: "이자, 배당 등 금융소득의 개념을 알아보세요.", completionStatus: .completed, order: 1), KnowledgeMapContent(contentID: 19, contentCode: "TAX-02", keyword: ["이자", "배당소득세"], title: "이자·배당소득세", description: "세전과 세후의 차이를 이해해보세요.", completionStatus: .incomplete, order: 2)], premiumContents: [KnowledgeMapPremiumContent(contentID: 30, keyword: ["세금용어", "절세기초"], title: "세금용어·절세기초", description: "세금과 절세의 핵심 개념을 알아보세요.", order: 3)])), reducer: {
         MapDetailFeature()
     }))
 }

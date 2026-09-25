@@ -56,7 +56,7 @@ struct AuthMainFeature {
         case path(StackActionOf<Path>)
         case loginButtonTapped
         case signUpButtonTapped
-        case findPasswordButtonTapped
+        case guestModeButtonTapped
         case kakaoLoginButtonTapped
         case kakaoLoginSucceeded(KakaoLoginResult)
         case kakaoLoginFailed(String)
@@ -73,6 +73,7 @@ struct AuthMainFeature {
         case delegate(Delegate)
         enum Delegate: Equatable {
             case loginSucceeded(OnboardingStatus)
+            case guestModeStarted
         }
     }
     
@@ -89,10 +90,9 @@ struct AuthMainFeature {
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
                 return .none
                 
-            case .findPasswordButtonTapped:
-                guard !state.isSocialAuthorizing else { return .none }
-                state.path.append(.findPassword(FindPasswordFeature.State()))
-                return .none
+            case .guestModeButtonTapped:
+                guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
+                return .send(.delegate(.guestModeStarted))
 
             case .kakaoLoginButtonTapped:
                 guard !state.isSocialAuthorizing, state.path.isEmpty else { return .none }
@@ -292,6 +292,12 @@ struct AuthMainFeature {
                 guard state.path.ids.last == id else { return .none }
 
                 return .send(.delegate(.loginSucceeded(status)))
+
+            case let .path(.element(id: id, action: .login(.delegate(.findPasswordRequested)))):
+                guard state.path.ids.last == id else { return .none }
+
+                state.path.append(.findPassword(FindPasswordFeature.State()))
+                return .none
                 
             case .path(.popFrom(id: _)):
                 // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소

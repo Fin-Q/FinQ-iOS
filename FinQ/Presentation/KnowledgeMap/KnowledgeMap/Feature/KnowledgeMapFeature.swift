@@ -31,6 +31,7 @@ struct KnowledgeMapFeature {
 
     @ObservableState
     struct State: Equatable {
+        let isGuestMode: Bool
         var path = StackState<Path.State>()
         var categories: [KnowledgeMapCategory] = []
         var hasCompletedAnyContent: Bool = false
@@ -39,6 +40,12 @@ struct KnowledgeMapFeature {
         var pendingContentDestination: ContentDestination?
         var isLoading: Bool = false
         var errorMessage: String?
+        
+        init(isGuestMode: Bool = false, categories: [KnowledgeMapCategory] = []) {
+            self.isGuestMode = isGuestMode
+            self.categories = categories
+            self.hasCompletedAnyContent = categories.contains { $0.completedContentCount > 0 }
+        }
     }
     
     enum Action {
@@ -52,6 +59,7 @@ struct KnowledgeMapFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case loginRequested
             case contentDestinationReady
             case contentDestinationFailed(String)
         }
@@ -104,7 +112,7 @@ struct KnowledgeMapFeature {
                 
             case .categoryTapped(let category):
                 state.pendingContentDestination = nil
-                state.path.append(.mapDetail(MapDetailFeature.State(category: category)))
+                state.path.append(.mapDetail(MapDetailFeature.State(isGuestMode: state.isGuestMode, category: category)))
                 return .none
 
             case let .openContent(categoryCode, contentID):
@@ -124,6 +132,9 @@ struct KnowledgeMapFeature {
                 let learningStartAfterCompleteType = learningStartAfterCompleteType(contentID: contentID, state: state)
                 state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget, learningStartAfterCompleteType: learningStartAfterCompleteType)))
                 return .none
+                
+            case .path(.element(_, action: .mapDetail(.delegate(.loginRequested)))):
+                return .send(.delegate(.loginRequested))
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.homeTapTargetLearningStartLogged(contentID))))):
                 let pathElements = Array(zip(state.path.ids, state.path))
@@ -156,8 +167,11 @@ struct KnowledgeMapFeature {
             case let .path(.element(id: id, action: .contentLearning(.delegate(.completionRequested(completionResult))))):
                 guard state.path.ids.last == id else { return .none }
                 state.hasCompletedAnyContent = true
-                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(completionResult: completionResult)))
+                state.path.append(.contentLearningCompletion(ContentLearningCompletionFeature.State(isGuestMode: state.isGuestMode, completionResult: completionResult)))
                 return .none
+                
+            case .path(.element(_, action: .contentLearningCompletion(.delegate(.loginRequested)))):
+                return .send(.delegate(.loginRequested))
 
             case let .path(.element(id: id, action: .contentLearningCompletion(.delegate(.completed)))):
                 let pathElements = Array(zip(state.path.ids, state.path))
@@ -218,7 +232,7 @@ struct KnowledgeMapFeature {
     private func navigate(to destination: ContentDestination, state: inout State) -> Bool {
         guard let category = state.categories.first(where: { $0.topic.rawValue == destination.categoryCode }) else { return false }
         state.path.removeAll()
-        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
+        state.path.append(.mapDetail(MapDetailFeature.State(isGuestMode: state.isGuestMode, category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
         return true
     }
 

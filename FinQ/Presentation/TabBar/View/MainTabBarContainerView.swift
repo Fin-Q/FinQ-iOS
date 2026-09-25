@@ -29,6 +29,12 @@ struct MainTabBarContainerView: View {
             }
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .customGuestLoginAlert(isPresented: Binding(get: { store.isGuestMyPageAlertPresented }, set: { store.send(.guestMyPageAlertPresentedChanged($0)) }), title: "로그인하고 나만의 마이페이지를\n만들어보세요", onPrimary: {
+            HapticManager.selection()
+            store.send(.guestLoginButtonTapped)
+        }, onCancel: {
+            HapticManager.selection()
+        })
     }
 
     @ViewBuilder

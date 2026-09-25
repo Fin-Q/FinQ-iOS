@@ -46,6 +46,18 @@ struct LoginView: View {
                 }
             )
             .textContentType(.password)
+
+            Button {
+                dismissKeyboard()
+                HapticManager.selection()
+                store.send(.findPasswordButtonTapped)
+            } label: {
+                Text("비밀번호 찾기")
+                    .font(AppDesign.Fonts.body)
+                    .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 24)
             
             Spacer()
             
