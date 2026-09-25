@@ -34,17 +34,34 @@ struct HomeView: View {
                 profileHeader(home)
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
-
-                characterImage(urlString: home.characterImageURL)
-                    .padding(.top, 24)
-                    .zIndex(0)
+                
+                if store.isGuestMode {
+                    Image(.guestCharacter)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 402, height: 250)
+                        .accessibilityHidden(true)
+                        .padding(.top, 24)
+                        .zIndex(0)
+                } else {
+                    characterImage(urlString: home.characterImageURL)
+                        .padding(.top, 24)
+                        .zIndex(0)
+                }
 
                 Spacer(minLength: 0)
 
-                recommendedQuestions(home.questions)
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 24)
-                    .zIndex(1)
+                if store.isGuestMode {
+                    guestRecommendedQuestions(home.questions)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 24)
+                        .zIndex(1)
+                } else {
+                    recommendedQuestions(home.questions)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 24)
+                        .zIndex(1)
+                }
             } else {
                 profileHeaderPlaceholder
                     .padding(.horizontal, 32)
@@ -76,6 +93,12 @@ struct HomeView: View {
         }
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
             store.send(.alertOKButtonTapped)
+        })
+        .customGuestLoginAlert(isPresented: Binding(get: { store.isGuestCalendarAlertPresented }, set: { store.send(.guestCalendarAlertPresentedChanged($0)) }), title: "로그인하고 연속 학습 기록을\n확인해보세요", onPrimary: {
+            HapticManager.selection()
+            store.send(.guestLoginButtonTapped)
+        }, onCancel: {
+            HapticManager.selection()
         })
     }
 
@@ -193,6 +216,76 @@ struct HomeView: View {
         .padding(20)
         .frame(width: 370, height: 276, alignment: .leading)
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func guestRecommendedQuestions(_ questions: [HomeQuestion]) -> some View {
+        ZStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 28) {
+                ForEach(Array(questions.enumerated()), id: \.offset) { index, item in
+                    let opacityValue: Double = switch index {
+                    case 0: 0.5
+                    case 1: 0.4
+                    default: 0.1
+                    }
+                    
+                    guestQuestionRow(title: item.title)
+                        .opacity(opacityValue)
+                }
+            }
+            .padding(20)
+            .frame(width: 370, height: 276, alignment: .topLeading)
+            .accessibilityHidden(true)
+
+            VStack(spacing: 20) {
+                Text("로그인하고\n관심 질문을 받아보세요")
+                    .font(AppDesign.Fonts.largeTitleSemiBold24)
+                    .foregroundStyle(Color.brandBlack)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity)
+
+                Button {
+                    HapticManager.selection()
+                    store.send(.guestLoginButtonTapped)
+                } label: {
+                    Text("3초만에 로그인 하기")
+                }
+                .buttonStyle(.customDefault)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 52)
+            .padding(.bottom, 20)
+            .background {
+                LinearGradient(colors: [Color.brandWhite.opacity(0), Color.brandWhite, Color.brandWhite], startPoint: .top, endPoint: .bottom)
+            }
+        }
+        .frame(width: 370, height: 276)
+        .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func guestQuestionRow(title: String) -> some View {
+        HStack(spacing: 16) {
+            Image("SALIcon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+
+            Text(title)
+                .font(AppDesign.Fonts.body)
+                .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
+                .lineSpacing(5)
+                .lineLimit(2)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(.chevronRight)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 8, height: 14)
+                .foregroundStyle(Color.brandGray300)
+        }
     }
 
     @ViewBuilder

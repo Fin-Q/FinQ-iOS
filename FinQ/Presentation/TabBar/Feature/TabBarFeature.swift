@@ -17,15 +17,26 @@ struct TabBarFeature {
 
     @ObservableState
     struct State: Equatable {
+        let isGuestMode: Bool
         var selectedTab: Tab = .home
+        var isGuestMyPageAlertPresented: Bool = false
 
-        var knowledgeMap = KnowledgeMapFeature.State()
-        var home = HomeFeature.State()
-        var myPage = MyPageMainFeature.State()
+        var knowledgeMap: KnowledgeMapFeature.State
+        var home: HomeFeature.State
+        var myPage: MyPageMainFeature.State
+        
+        init(selectedTab: Tab = .home, isGuestMode: Bool = false) {
+            self.isGuestMode = isGuestMode
+            self.home = HomeFeature.State(isGuestMode: isGuestMode)
+            self.knowledgeMap = KnowledgeMapFeature.State(isGuestMode: isGuestMode)
+            self.myPage = MyPageMainFeature.State()
+        }
     }
 
     enum Action {
         case selectedTabChanged(Tab)
+        case guestMyPageAlertPresentedChanged(Bool)
+        case guestLoginButtonTapped
 
         case knowledgeMap(KnowledgeMapFeature.Action)
         case home(HomeFeature.Action)
@@ -33,6 +44,7 @@ struct TabBarFeature {
         
         case delegate(Delegate)
         enum Delegate {
+            case loginRequested
             case logout
             case withdrawalCompleted
         }
@@ -54,14 +66,30 @@ struct TabBarFeature {
         Reduce { state, action in
             switch action {
             case let .selectedTabChanged(tab):
+                guard !state.isGuestMode || tab != .myPage else {
+                    state.isGuestMyPageAlertPresented = true
+                    return .none
+                }
+
                 state.selectedTab = tab
                 return .none
+
+            case let .guestMyPageAlertPresentedChanged(isPresented):
+                state.isGuestMyPageAlertPresented = isPresented
+                return .none
+
+            case .guestLoginButtonTapped:
+                guard state.isGuestMode else { return .none }
+                return .send(.delegate(.loginRequested))
                 
             case .myPage(.delegate(.logoutSucceeded)):
                 return .send(.delegate(.logout))
 
             case .myPage(.delegate(.withdrawalCompleted)):
                 return .send(.delegate(.withdrawalCompleted))
+
+            case .home(.delegate(.loginRequested)):
+                return .send(.delegate(.loginRequested))
 
             case let .home(.delegate(.questionTapped(question))):
                 return .send(.knowledgeMap(.openContent(categoryCode: question.categoryCode, contentID: question.contentID)))
@@ -73,6 +101,9 @@ struct TabBarFeature {
             case let .knowledgeMap(.delegate(.contentDestinationFailed(message))):
                 state.home.errorMessage = message
                 return .none
+                
+            case .knowledgeMap(.delegate(.loginRequested)):
+                return .send(.delegate(.loginRequested))
 
             case .knowledgeMap, .home, .myPage, .delegate:
                 return .none

@@ -87,16 +87,6 @@ struct AuthMainView: View {
                 .scaledToFit()
                 .frame(height: 300)
             
-            Button {
-                store.send(.loginButtonTapped)
-            } label: {
-                Text("회원 로그인")
-            }
-            .buttonStyle(
-                .customDefault(activeBackgroundColor: AppDesign.Colors.buttonBGDisabled, activeForegroundColor: AppDesign.Colors.buttonTitleBlack)
-            )
-            .padding(.bottom, 16)
-            
             self.socialLoginButton(.kakao) {
                 HapticManager.selection()
                 store.send(.kakaoLoginButtonTapped)
@@ -107,19 +97,19 @@ struct AuthMainView: View {
                 HapticManager.selection()
                 store.send(.appleLoginButtonTapped)
             }
-            .padding(.bottom, 31)
+            .padding(.bottom, 16)
             
-            HStack(spacing: 40) {
-                
-                Button {
-                    store.send(.findPasswordButtonTapped)
-                } label: {
-                    Text("비밀번호 찾기")
-                        .font(AppDesign.Fonts.body)
-                        .tint(AppDesign.Colors.buttonTitleDarkGray)
-                        .lineLimit(1)
-                }
-
+            Button {
+                store.send(.loginButtonTapped)
+            } label: {
+                Text("회원 로그인")
+            }
+            .buttonStyle(
+                .customDefault(activeBackgroundColor: AppDesign.Colors.buttonBGDisabled, activeForegroundColor: AppDesign.Colors.buttonTitleBlack)
+            )
+            .padding(.bottom, 32)
+            
+            HStack(spacing: 16) {
                 Button {
                     store.send(.signUpButtonTapped)
                 } label: {
@@ -128,6 +118,17 @@ struct AuthMainView: View {
                         .tint(AppDesign.Colors.buttonTitleDarkGray)
                         .lineLimit(1)
                 }
+                .frame(width: 161)
+                
+                Button {
+                    store.send(.guestModeButtonTapped)
+                } label: {
+                    Text("비회원으로 시작하기")
+                        .font(AppDesign.Fonts.body)
+                        .tint(AppDesign.Colors.buttonTitleDarkGray)
+                        .lineLimit(1)
+                }
+                .frame(width: 161)
             }
             .frame(maxWidth: .infinity)
         }

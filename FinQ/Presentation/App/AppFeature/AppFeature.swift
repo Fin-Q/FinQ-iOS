@@ -99,6 +99,13 @@ struct AppFeature {
                     self.routeByOnboardingStatus(onboardingStatus, state: &state, shouldWaitForInitialHome: true)
                     return onboardingStatus == .completed ? self.registerPushToken() : .none
                 }
+                
+            case .auth(.delegate(.guestModeStarted)):
+                loginUseCase.clearSession()
+                state.isWaitingForInitialHome = false
+                state.tabBar = TabBarFeature.State(selectedTab: .home, isGuestMode: true)
+                state.route = .tabBar
+                return .none
 
             case let .auth(.delegate(.loginSucceeded(onboardingStatus))):
                 guard state.route == .auth else { return .none }
@@ -113,6 +120,15 @@ struct AppFeature {
                 state.tabBar = TabBarFeature.State(selectedTab: .home)
                 state.route = .tabBar
                 return .none
+
+            case .tabBar(.delegate(.loginRequested)):
+                guard state.route == .tabBar else { return .none }
+
+                state.isWaitingForInitialHome = false
+                state.route = .auth
+                state.auth = AuthMainFeature.State()
+                state.onboarding = OnboardingFeature.State()
+                return .none
                 
             case .tabBar(.delegate(.logout)):
                 loginUseCase.clearSession()
@@ -120,7 +136,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
 
             case .tabBar(.delegate(.withdrawalCompleted)):
@@ -128,7 +143,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
 
             case .tokenRefreshFailed:
@@ -136,7 +150,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
                 
             case .tabBar(.home(.fetchHomeSucceeded)), .tabBar(.home(.fetchHomeFailed)):
@@ -152,6 +165,7 @@ struct AppFeature {
                 // 페이드가 끝나기 전에는 사라지는 화면의 스택을 유지합니다.
                 if route != .auth { state.auth = AuthMainFeature.State() }
                 if route != .onboarding { state.onboarding = OnboardingFeature.State() }
+                if route != .tabBar { state.tabBar = TabBarFeature.State() }
                 return .none
             }
         }

@@ -28,6 +28,7 @@ struct LoginFeature {
         case emailChanged(String)
         case passwordChanged(String)
         case didAppear
+        case findPasswordButtonTapped
         case loginButtonTapped
         case loginSucceeded(OnboardingStatus)
         case loginFailed(String)
@@ -35,6 +36,7 @@ struct LoginFeature {
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case findPasswordRequested
             case loginSucceeded(OnboardingStatus)
         }
     }
@@ -52,6 +54,10 @@ struct LoginFeature {
                 
             case .didAppear:
                 return .none
+
+            case .findPasswordButtonTapped:
+                guard !state.isLoading else { return .none }
+                return .send(.delegate(.findPasswordRequested))
 
             case .loginButtonTapped:
                 guard state.isLoginButtonEnabled else { return .none }
