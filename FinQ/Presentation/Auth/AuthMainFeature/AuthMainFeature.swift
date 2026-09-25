@@ -56,7 +56,6 @@ struct AuthMainFeature {
         case path(StackActionOf<Path>)
         case loginButtonTapped
         case signUpButtonTapped
-        case findPasswordButtonTapped
         case guestModeButtonTapped
         case kakaoLoginButtonTapped
         case kakaoLoginSucceeded(KakaoLoginResult)
@@ -89,11 +88,6 @@ struct AuthMainFeature {
             case .signUpButtonTapped:
                 guard !state.isSocialAuthorizing else { return .none }
                 state.path.append(.signUpTerms(SignUpTermsFeature.State()))
-                return .none
-                
-            case .findPasswordButtonTapped:
-                guard !state.isSocialAuthorizing else { return .none }
-                state.path.append(.findPassword(FindPasswordFeature.State()))
                 return .none
                 
             case .guestModeButtonTapped:
@@ -298,6 +292,12 @@ struct AuthMainFeature {
                 guard state.path.ids.last == id else { return .none }
 
                 return .send(.delegate(.loginSucceeded(status)))
+
+            case let .path(.element(id: id, action: .login(.delegate(.findPasswordRequested)))):
+                guard state.path.ids.last == id else { return .none }
+
+                state.path.append(.findPassword(FindPasswordFeature.State()))
+                return .none
                 
             case .path(.popFrom(id: _)):
                 // 정리 전에 뒤로 이동했다면 대기 중인 정리를 취소
