@@ -35,12 +35,14 @@ struct HomeFeature {
         case fetchHomeSucceeded(HomeSummary)
         case fetchHomeFailed(String)
         case calendarButtonTapped
+        case guestLoginButtonTapped
         case questionTapped(HomeQuestion)
         case alertOKButtonTapped
         case path(StackActionOf<Path>)
         case delegate(Delegate)
 
         enum Delegate: Equatable {
+            case loginRequested
             case questionTapped(HomeQuestion)
         }
     }
@@ -49,37 +51,39 @@ struct HomeFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                if state.isGuestMode {
-                    return .none
-                }
-                
                 guard !state.isLoading, state.path.isEmpty else { return .none }
                 state.isLoading = true
                 state.errorMessage = nil
+                let isGuestMode = state.isGuestMode
 
-                return .merge(
-                    .run { send in
-                        do {
-                            let home = try await homeUseCase.fetchHome()
-                            guard !Task.isCancelled else { return }
-                            await send(.fetchHomeSucceeded(home))
-                        } catch {
-                            guard !Task.isCancelled else { return }
-                            await send(.fetchHomeFailed(error.localizedDescription))
-                        }
+                let fetchHomeEffect: Effect<Action> = .run { send in
+                    do {
+                        let home = try await homeUseCase.fetchHome(isGuestMode: isGuestMode)
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchHomeSucceeded(home))
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        await send(.fetchHomeFailed(error.localizedDescription))
                     }
-                    .cancellable(id: CancelID.fetchHome, cancelInFlight: true),
-                    .run { _ in
-                        let status = await permissionManager.notificationPermissionStatus()
-                        guard status == .denied else { return }
+                }
+                    .cancellable(id: CancelID.fetchHome, cancelInFlight: true)
 
-                        do {
-                            try await myPageUseCase.updateNotificationSetting(isEnabled: false)
-                        } catch {
-                            AppLogger.shared.log("알림 설정 OFF 동기화 실패: \(error.localizedDescription)", level: .error)
-                        }
+                if isGuestMode {
+                    return fetchHomeEffect
+                }
+
+                let notificationSyncEffect: Effect<Action> = .run { _ in
+                    let status = await permissionManager.notificationPermissionStatus()
+                    guard status == .denied else { return }
+
+                    do {
+                        try await myPageUseCase.updateNotificationSetting(isEnabled: false)
+                    } catch {
+                        AppLogger.shared.log("알림 설정 OFF 동기화 실패: \(error.localizedDescription)", level: .error)
                     }
-                )
+                }
+
+                return .merge(fetchHomeEffect, notificationSyncEffect)
 
             case .onDisappear:
                 state.isLoading = false
@@ -99,6 +103,10 @@ struct HomeFeature {
                 guard state.path.isEmpty else { return .none }
                 state.path.append(.streakCalendar(StreakCalendarFeature.State()))
                 return .none
+
+            case .guestLoginButtonTapped:
+                guard state.isGuestMode else { return .none }
+                return .send(.delegate(.loginRequested))
 
             case let .questionTapped(question):
                 return .merge(

@@ -8,6 +8,6 @@
 import Foundation
 
 protocol HomeRepositoryProtocol: Sendable {
-    func fetchHome() async throws -> HomeSummary
+    func fetchHome(isGuestMode: Bool) async throws -> HomeSummary
     func logHomeQuestionTapped(contentID: Int, categoryCode: String) async
 }

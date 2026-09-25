@@ -28,7 +28,7 @@ enum APIRouter: Sendable {
     case completeOnboarding
 
     //MARK: - Home
-    case home
+    case home(isGuestMode: Bool)
     case profileImage
     case streakCalendar(month: String?)
     case streakStatus
@@ -218,6 +218,9 @@ extension APIRouter {
     var requiresAuthorization: Bool {
         // 토큰 갱신 및 로그인 API 제외한 모든 API에 인증 인터셉터를 적용
         switch self {
+        case .home(let isGuestMode):
+            return !isGuestMode
+            
         case .tokenRefresh,
                 .signUp,
                 .login,

@@ -41,10 +41,17 @@ struct HomeView: View {
 
                 Spacer(minLength: 0)
 
-                recommendedQuestions(home.questions)
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 24)
-                    .zIndex(1)
+                if store.isGuestMode {
+                    guestRecommendedQuestions
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 24)
+                        .zIndex(1)
+                } else {
+                    recommendedQuestions(home.questions)
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 24)
+                        .zIndex(1)
+                }
             } else {
                 profileHeaderPlaceholder
                     .padding(.horizontal, 32)
@@ -193,6 +200,78 @@ struct HomeView: View {
         .padding(20)
         .frame(width: 370, height: 276, alignment: .leading)
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var guestRecommendedQuestions: some View {
+        ZStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 28) {
+                let guestQuestionTitles = ["월급은 들어왔는데 왜 매달 남는 돈이 없을까요?", "돈을 아끼려면 커피값부터 줄여야 할까요?", "모아둔 돈, 전부 투자해도 괜찮을까요?"]
+                
+                ForEach(Array(guestQuestionTitles.enumerated()), id: \.offset) { index, title in
+                    let opacityValue: Double = switch index {
+                    case 0: 0.5
+                    case 1: 0.4
+                    default: 0.1
+                    }
+                    
+                    guestQuestionRow(title: title)
+                        .opacity(opacityValue)
+                }
+            }
+            .padding(20)
+            .frame(width: 370, height: 276, alignment: .topLeading)
+            .accessibilityHidden(true)
+
+            VStack(spacing: 20) {
+                Text("로그인하고\n관심 질문을 받아보세요")
+                    .font(AppDesign.Fonts.largeTitleSemiBold24)
+                    .foregroundStyle(Color.brandBlack)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity)
+
+                Button {
+                    HapticManager.selection()
+                    store.send(.guestLoginButtonTapped)
+                } label: {
+                    Text("3초만에 로그인 하기")
+                }
+                .buttonStyle(.customDefault)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 52)
+            .padding(.bottom, 20)
+            .background {
+                LinearGradient(colors: [Color.brandWhite.opacity(0), Color.brandWhite, Color.brandWhite], startPoint: .top, endPoint: .bottom)
+            }
+        }
+        .frame(width: 370, height: 276)
+        .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func guestQuestionRow(title: String) -> some View {
+        HStack(spacing: 16) {
+            Image("SALIcon")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+
+            Text(title)
+                .font(AppDesign.Fonts.body)
+                .foregroundStyle(AppDesign.Colors.buttonTitleDarkGray)
+                .lineSpacing(5)
+                .lineLimit(2)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(.chevronRight)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 8, height: 14)
+                .foregroundStyle(Color.brandGray300)
+        }
     }
 
     @ViewBuilder

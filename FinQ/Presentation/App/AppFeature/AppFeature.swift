@@ -120,6 +120,16 @@ struct AppFeature {
                 state.tabBar = TabBarFeature.State(selectedTab: .home)
                 state.route = .tabBar
                 return .none
+
+            case .tabBar(.delegate(.loginRequested)):
+                guard state.route == .tabBar else { return .none }
+
+                state.isWaitingForInitialHome = false
+                state.route = .auth
+                state.auth = AuthMainFeature.State()
+                state.onboarding = OnboardingFeature.State()
+                state.tabBar = TabBarFeature.State()
+                return .none
                 
             case .tabBar(.delegate(.logout)):
                 loginUseCase.clearSession()
