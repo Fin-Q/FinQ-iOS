@@ -54,9 +54,15 @@ struct HomeFeature {
             switch action {
             case .onAppear:
                 guard !state.isLoading, state.path.isEmpty else { return .none }
+                
+                let isGuestMode = state.isGuestMode
+                
+                if isGuestMode, state.home != nil {
+                    return .none
+                }
+                
                 state.isLoading = true
                 state.errorMessage = nil
-                let isGuestMode = state.isGuestMode
                 
                 if isGuestMode {
                     guard state.home == nil else { return .none }
