@@ -112,7 +112,7 @@ struct KnowledgeMapFeature {
                 
             case .categoryTapped(let category):
                 state.pendingContentDestination = nil
-                state.path.append(.mapDetail(MapDetailFeature.State(category: category)))
+                state.path.append(.mapDetail(MapDetailFeature.State(isGuestMode: state.isGuestMode, category: category)))
                 return .none
 
             case let .openContent(categoryCode, contentID):
@@ -132,6 +132,9 @@ struct KnowledgeMapFeature {
                 let learningStartAfterCompleteType = learningStartAfterCompleteType(contentID: contentID, state: state)
                 state.path.append(.contentLearning(ContentLearningFeature.State(contentID: contentID, categoryCode: categoryCode, isFirstLearning: !state.hasCompletedAnyContent, isHomeQuestionTarget: isHomeQuestionTarget, learningStartAfterCompleteType: learningStartAfterCompleteType)))
                 return .none
+                
+            case .path(.element(_, action: .mapDetail(.delegate(.loginRequested)))):
+                return .send(.delegate(.loginRequested))
 
             case let .path(.element(id: id, action: .contentLearning(.delegate(.homeTapTargetLearningStartLogged(contentID))))):
                 let pathElements = Array(zip(state.path.ids, state.path))
@@ -229,7 +232,7 @@ struct KnowledgeMapFeature {
     private func navigate(to destination: ContentDestination, state: inout State) -> Bool {
         guard let category = state.categories.first(where: { $0.topic.rawValue == destination.categoryCode }) else { return false }
         state.path.removeAll()
-        state.path.append(.mapDetail(MapDetailFeature.State(category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
+        state.path.append(.mapDetail(MapDetailFeature.State(isGuestMode: state.isGuestMode, category: category, targetContentID: destination.contentID, homeQuestionTargetContentID: destination.contentID)))
         return true
     }
 

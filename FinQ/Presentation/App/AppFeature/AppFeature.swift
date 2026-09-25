@@ -128,7 +128,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
                 
             case .tabBar(.delegate(.logout)):
@@ -137,7 +136,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
 
             case .tabBar(.delegate(.withdrawalCompleted)):
@@ -145,7 +143,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
 
             case .tokenRefreshFailed:
@@ -153,7 +150,6 @@ struct AppFeature {
                 state.route = .auth
                 state.auth = AuthMainFeature.State()
                 state.onboarding = OnboardingFeature.State()
-                state.tabBar = TabBarFeature.State()
                 return .none
                 
             case .tabBar(.home(.fetchHomeSucceeded)), .tabBar(.home(.fetchHomeFailed)):
@@ -169,6 +165,7 @@ struct AppFeature {
                 // 페이드가 끝나기 전에는 사라지는 화면의 스택을 유지합니다.
                 if route != .auth { state.auth = AuthMainFeature.State() }
                 if route != .onboarding { state.onboarding = OnboardingFeature.State() }
+                if route != .tabBar { state.tabBar = TabBarFeature.State() }
                 return .none
             }
         }

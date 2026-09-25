@@ -37,7 +37,6 @@ private struct CustomGuestLoginAlertModifier: ViewModifier {
                 .ignoresSafeArea()
 
             CustomGuestLoginAlert(title: title, primaryButtonTitle: primaryButtonTitle, cancelButtonTitle: cancelButtonTitle) {
-                isPresented = false
                 onPrimary()
             } onCancel: {
                 isPresented = false

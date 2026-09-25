@@ -80,7 +80,6 @@ struct TabBarFeature {
 
             case .guestLoginButtonTapped:
                 guard state.isGuestMode else { return .none }
-                state.isGuestMyPageAlertPresented = false
                 return .send(.delegate(.loginRequested))
                 
             case .myPage(.delegate(.logoutSucceeded)):
