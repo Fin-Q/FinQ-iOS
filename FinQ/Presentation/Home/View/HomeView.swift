@@ -84,6 +84,12 @@ struct HomeView: View {
         .customOneButtonAlert(isPresented: Binding(get: { store.errorMessage != nil }, set: { _ in }), title: "알림", message: store.errorMessage ?? "", onConfirm: {
             store.send(.alertOKButtonTapped)
         })
+        .customGuestLoginAlert(isPresented: Binding(get: { store.isGuestCalendarAlertPresented }, set: { store.send(.guestCalendarAlertPresentedChanged($0)) }), title: "로그인하고 연속 학습 기록을\n확인해보세요", onPrimary: {
+            HapticManager.selection()
+            store.send(.guestLoginButtonTapped)
+        }, onCancel: {
+            HapticManager.selection()
+        })
     }
 
     private var calendarButton: some View {

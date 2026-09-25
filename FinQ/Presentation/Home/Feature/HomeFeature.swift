@@ -27,6 +27,7 @@ struct HomeFeature {
         var isLoading: Bool = false
         var errorMessage: String?
         var isGuestMode: Bool = false
+        var isGuestCalendarAlertPresented: Bool = false
     }
     
     enum Action {
@@ -35,6 +36,7 @@ struct HomeFeature {
         case fetchHomeSucceeded(HomeSummary)
         case fetchHomeFailed(String)
         case calendarButtonTapped
+        case guestCalendarAlertPresentedChanged(Bool)
         case guestLoginButtonTapped
         case questionTapped(HomeQuestion)
         case alertOKButtonTapped
@@ -100,8 +102,17 @@ struct HomeFeature {
                 return .none
 
             case .calendarButtonTapped:
+                guard !state.isGuestMode else {
+                    state.isGuestCalendarAlertPresented = true
+                    return .none
+                }
+
                 guard state.path.isEmpty else { return .none }
                 state.path.append(.streakCalendar(StreakCalendarFeature.State()))
+                return .none
+
+            case let .guestCalendarAlertPresentedChanged(isPresented):
+                state.isGuestCalendarAlertPresented = isPresented
                 return .none
 
             case .guestLoginButtonTapped:
