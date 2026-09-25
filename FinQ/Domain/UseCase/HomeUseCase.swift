@@ -8,7 +8,7 @@
 import Foundation
 
 protocol HomeUseCaseProtocol: Sendable {
-    func fetchHome(isGuestMode: Bool) async throws -> HomeSummary
+    func fetchHome() async throws -> HomeSummary
     func logHomeQuestionTapped(contentID: Int, categoryCode: String) async
 }
 
@@ -19,8 +19,8 @@ struct HomeUseCase: HomeUseCaseProtocol {
         self.repository = repository
     }
 
-    func fetchHome(isGuestMode: Bool) async throws -> HomeSummary {
-        return try await repository.fetchHome(isGuestMode: isGuestMode)
+    func fetchHome() async throws -> HomeSummary {
+        return try await repository.fetchHome()
     }
 
     func logHomeQuestionTapped(contentID: Int, categoryCode: String) async {

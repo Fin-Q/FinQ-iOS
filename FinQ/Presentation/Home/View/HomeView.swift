@@ -34,15 +34,25 @@ struct HomeView: View {
                 profileHeader(home)
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
-
-                characterImage(urlString: home.characterImageURL)
-                    .padding(.top, 24)
-                    .zIndex(0)
+                
+                if store.isGuestMode {
+                    Image(.guestCharacter)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 402, height: 250)
+                        .accessibilityHidden(true)
+                        .padding(.top, 24)
+                        .zIndex(0)
+                } else {
+                    characterImage(urlString: home.characterImageURL)
+                        .padding(.top, 24)
+                        .zIndex(0)
+                }
 
                 Spacer(minLength: 0)
 
                 if store.isGuestMode {
-                    guestRecommendedQuestions
+                    guestRecommendedQuestions(home.questions)
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 24)
                         .zIndex(1)
@@ -208,19 +218,17 @@ struct HomeView: View {
         .background(Color.brandWhite, in: RoundedRectangle(cornerRadius: 16))
     }
 
-    private var guestRecommendedQuestions: some View {
+    private func guestRecommendedQuestions(_ questions: [HomeQuestion]) -> some View {
         ZStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 28) {
-                let guestQuestionTitles = ["월급은 들어왔는데 왜 매달 남는 돈이 없을까요?", "돈을 아끼려면 커피값부터 줄여야 할까요?", "모아둔 돈, 전부 투자해도 괜찮을까요?"]
-                
-                ForEach(Array(guestQuestionTitles.enumerated()), id: \.offset) { index, title in
+                ForEach(Array(questions.enumerated()), id: \.offset) { index, item in
                     let opacityValue: Double = switch index {
                     case 0: 0.5
                     case 1: 0.4
                     default: 0.1
                     }
                     
-                    guestQuestionRow(title: title)
+                    guestQuestionRow(title: item.title)
                         .opacity(opacityValue)
                 }
             }

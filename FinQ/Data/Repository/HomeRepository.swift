@@ -16,8 +16,8 @@ struct HomeRepository: HomeRepositoryProtocol {
         self.firebaseAnalyticsManager = firebaseAnalyticsManager
     }
 
-    func fetchHome(isGuestMode: Bool) async throws -> HomeSummary {
-        let response = try await networkManager.perform(api: .home(isGuestMode: isGuestMode), responseType: APIResponse<HomeResponse>.self)
+    func fetchHome() async throws -> HomeSummary {
+        let response = try await networkManager.perform(api: .home, responseType: APIResponse<HomeResponse>.self)
         return response.data.toDomain()
     }
 

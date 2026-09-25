@@ -57,10 +57,15 @@ struct HomeFeature {
                 state.isLoading = true
                 state.errorMessage = nil
                 let isGuestMode = state.isGuestMode
+                
+                if isGuestMode {
+                    guard state.home == nil else { return .none }
+                    return .send(.fetchHomeSucceeded(.guest))
+                }
 
                 let fetchHomeEffect: Effect<Action> = .run { send in
                     do {
-                        let home = try await homeUseCase.fetchHome(isGuestMode: isGuestMode)
+                        let home = try await homeUseCase.fetchHome()
                         guard !Task.isCancelled else { return }
                         await send(.fetchHomeSucceeded(home))
                     } catch {
@@ -69,10 +74,6 @@ struct HomeFeature {
                     }
                 }
                     .cancellable(id: CancelID.fetchHome, cancelInFlight: true)
-
-                if isGuestMode {
-                    return fetchHomeEffect
-                }
 
                 let notificationSyncEffect: Effect<Action> = .run { _ in
                     let status = await permissionManager.notificationPermissionStatus()
